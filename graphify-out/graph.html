@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>180 nós · 356 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>183 nós · 358 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/API.md"["docs/API.md"]
@@ -125,6 +125,7 @@
   "file:src/test/setup.ts"["src/test/setup.ts"]
   "file:src/vite-env.d.ts"["src/vite-env.d.ts"]
   "file:supabase/README.md"["supabase/README.md"]
+  "file:supabase/functions/get-signature-attachment/index.ts"["supabase/functions/get-signature-attachment/index.ts"]
   "file:supabase/migrations/20261021000000_init_schema.sql"["supabase/migrations/20261021000000_init_schema.sql"]
   "file:supabase/migrations/20261021010000_assinaturas.sql"["supabase/migrations/20261021010000_assinaturas.sql"]
   "file:supabase/migrations/20261021130000_security_hardening.sql"["supabase/migrations/20261021130000_security_hardening.sql"]
@@ -135,6 +136,7 @@
   "file:supabase/migrations/20261021171000_admin_console_and_audit.sql"["supabase/migrations/20261021171000_admin_console_and_audit.sql"]
   "file:supabase/migrations/20261021185600_restore_platform_admin_check.sql"["supabase/migrations/20261021185600_restore_platform_admin_check.sql"]
   "file:supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"["supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"]
+  "file:supabase/migrations/20261021193000_signature_public_access.sql"["supabase/migrations/20261021193000_signature_public_access.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -169,6 +171,7 @@
   "table:vendedor_desempenho"["vendedor_desempenho"]
   "table:comissoes"["comissoes"]
   "table:gm_files"["gm_files"]
+  "rpc:get_signature_attachment_by_token"["get_signature_attachment_by_token"]
   "table:contratos"["contratos"]
   "table:assinaturas"["assinaturas"]
   "table:contrato_historico"["contrato_historico"]
@@ -507,6 +510,8 @@
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/servico-types.ts"
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/permissions.ts"
   "file:src/test/InstallPwaButton.test.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
+  "file:supabase/functions/get-signature-attachment/index.ts" -->|reads-or-writes| "table:gm_files"
+  "file:supabase/functions/get-signature-attachment/index.ts" -->|calls-rpc| "rpc:get_signature_attachment_by_token"
   "file:supabase/migrations/20261021000000_init_schema.sql" -->|defines-table| "table:profiles"
   "file:supabase/migrations/20261021000000_init_schema.sql" -->|defines-table| "table:empresas"
   "file:supabase/migrations/20261021000000_init_schema.sql" -->|defines-table| "table:empresa_members"

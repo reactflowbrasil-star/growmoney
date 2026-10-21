@@ -44,7 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center font-semibold transition-all duration-200',
+          'inline-flex items-center justify-center font-semibold tracking-[-0.01em] transition-all duration-200',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary',
           'disabled:opacity-50 disabled:pointer-events-none',
           variants[variant],

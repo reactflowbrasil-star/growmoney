@@ -20,7 +20,7 @@ export function Card({ children, className, header, footer, padding = 'md' }: Ca
   return (
     <div
       className={cn(
-        'bg-bg-primary border border-border-color rounded-lg shadow-sm',
+        'bg-bg-primary border border-border-color rounded-2xl shadow-sm transition-[box-shadow,border-color] duration-200',
         paddings[padding],
         className
       )}

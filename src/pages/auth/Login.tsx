@@ -17,6 +17,11 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.body.classList.add('auth-layout-active');
+    return () => document.body.classList.remove('auth-layout-active');
+  }, []);
+
+  useEffect(() => {
     if (!isLoading && isAuthenticated) {
       navigate('/dashboard', { replace: true });
     }
@@ -37,20 +42,20 @@ export default function Login() {
   };
 
   return (
-    <main className="min-h-[100svh] w-full flex items-start sm:items-center justify-center bg-transparent overflow-x-clip px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
-      <Card className="w-full max-w-md !border-transparent !bg-transparent !shadow-none p-4 sm:p-6 md:p-8">
-        <div className="text-center mb-6 sm:mb-8 space-y-3 sm:space-y-4">
+    <main className="auth-screen w-full flex items-center justify-center bg-transparent overflow-x-clip px-3 py-[max(.5rem,env(safe-area-inset-top))] pb-[max(.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-3">
+      <Card className="auth-card w-full max-w-md !border-border-color !bg-bg-primary/90 !shadow-lg backdrop-blur-xl p-4 sm:p-6 md:p-7">
+        <div className="auth-brand text-center mb-4 sm:mb-5 space-y-2">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="mx-auto h-auto max-h-[min(17svh,112px)] w-full max-w-[min(100%,280px)] object-contain"
+            className="auth-logo mx-auto h-auto max-h-[min(14svh,88px)] w-full max-w-[min(100%,260px)] object-contain"
           />
-          <p className="text-text-secondary text-sm leading-5">{BRAND.tagline}</p>
+          <p className="auth-tagline text-text-secondary text-xs leading-4">{BRAND.tagline}</p>
         </div>
 
-        <GoogleButton label="Entrar com Google" />
+        <GoogleButton label="Entrar com Google" className="auth-google" />
 
-        <div className="relative my-4 sm:my-5">
+        <div className="auth-divider relative my-3">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-border-color" />
           </div>
@@ -59,7 +64,7 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="auth-form space-y-3">
           <Input
             type="email"
             label="E-mail"
@@ -100,18 +105,18 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="mt-4 text-center text-sm">
+        <div className="auth-footer mt-3 text-center text-sm">
           <Link to="/recuperar-senha" className="text-verde-discreto hover:underline">
             Esqueci minha senha
           </Link>
         </div>
-        <div className="mt-2 text-center text-sm text-text-secondary">
+        <div className="auth-footer mt-1 text-center text-sm text-text-secondary">
           Não tem conta?{' '}
           <Link to="/cadastro" className="text-verde-discreto hover:underline">
             Cadastre-se
           </Link>
         </div>
-        <InstallPwaButton className="mt-5 w-full" />
+        <InstallPwaButton className="auth-pwa mt-3 w-full" />
       </Card>
     </main>
   );

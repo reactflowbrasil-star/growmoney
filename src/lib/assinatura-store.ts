@@ -34,7 +34,12 @@ function read<T>(key: string, fallback: T): T {
 }
 
 function write<T>(key: string, value: T) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function pushEvent(type: string, message: string, actor?: string): EnvelopeEvent {
@@ -121,6 +126,22 @@ export async function createEnvelope(input: {
   arquivoStoragePath?: string;
   signers: Array<{ nome: string; email: string; role?: 'sign' | 'cc' }>;
 }): Promise<Envelope> {
+  const signers = input.signers
+    .map((signer) => ({ ...signer, nome: signer.nome.trim(), email: signer.email.trim().toLowerCase() }))
+    .filter((signer) => signer.nome && signer.email);
+  if (!input.titulo.trim() || !input.documentoTexto.trim()) {
+    throw new Error('Informe o título e o conteúdo do documento.');
+  }
+  if (!signers.some((signer) => (signer.role || 'sign') === 'sign')) {
+    throw new Error('Adicione ao menos um signatário com permissão para assinar.');
+  }
+  const emails = signers.map((signer) => signer.email);
+  if (emails.some((email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+    throw new Error('Confira o e-mail de cada participante.');
+  }
+  if (new Set(emails).size !== emails.length) {
+    throw new Error('Cada participante precisa ter um e-mail diferente.');
+  }
   const now = new Date().toISOString();
   const envelope: Envelope = {
     id: uid(),
@@ -134,7 +155,7 @@ export async function createEnvelope(input: {
     updatedAt: now,
     createdBy: input.createdBy,
     messageToSigners: input.messageToSigners,
-    signers: input.signers.map((signer, index) => ({
+    signers: signers.map((signer, index) => ({
       id: uid(),
       nome: signer.nome,
       email: signer.email,
@@ -151,29 +172,28 @@ export async function createEnvelope(input: {
 export async function sendEnvelope(id: string, actor: string): Promise<Envelope | null> {
   const envelope = await getEnvelope(id);
   if (!envelope) return null;
+  if (envelope.status === 'cancelado' || envelope.status === 'expirado') {
+    throw new Error('Este envelope não pode mais ser enviado.');
+  }
+  if (!envelope.signers.some((signer) => signer.role === 'sign')) {
+    throw new Error('Adicione ao menos um signatário antes de ativar os links.');
+  }
+  if (envelope.status !== 'rascunho') return envelope;
+
   const now = new Date().toISOString();
   envelope.status = 'enviado';
   envelope.sentAt = now;
   envelope.updatedAt = now;
-  envelope.events.push(pushEvent('sent', 'Documento enviado para assinatura', actor));
+  envelope.events.push(pushEvent('sent', 'Links de assinatura ativados para compartilhamento', actor));
   await saveEnvelope(envelope);
-  envelope.signers.filter((signer) => signer.role === 'sign').forEach((signer) => {
-    addAlert({
-      envelopeId: envelope.id,
-      title: `Assinatura pendente: ${envelope.titulo}`,
-      body: `Olá ${signer.nome}, você foi convidado a assinar "${envelope.titulo}".`,
-      email: signer.email,
-    });
-  });
   addAlert({
     envelopeId: envelope.id,
-    title: `Enviado: ${envelope.titulo}`,
-    body: `Documento enviado para ${envelope.signers.filter((signer) => signer.role === 'sign').length} signatário(s).`,
+    title: `Links ativos: ${envelope.titulo}`,
+    body: `Os links para ${envelope.signers.filter((signer) => signer.role === 'sign').length} signatário(s) estão prontos. Compartilhe cada convite por e-mail ou mensagem.`,
     email: actor,
   });
   return envelope;
 }
-
 export async function markViewed(tokenStr: string): Promise<Envelope | null> {
   const { data, error } = await supabase.rpc('mark_signature_envelope_viewed', { p_token: tokenStr });
   throwIfError(error, 'Não foi possível registrar a visualização');
@@ -239,7 +259,9 @@ export function saveSignature(label: string, dataUrl: string, mode: SavedSignatu
   const signatures = listSavedSignatures();
   const item: SavedSignature = { id: uid(), label, dataUrl, mode, createdAt: new Date().toISOString() };
   signatures.unshift(item);
-  write(SIGNATURES_KEY, signatures.slice(0, 20));
+  if (!write(SIGNATURES_KEY, signatures.slice(0, 20))) {
+    throw new Error('Não foi possível salvar a assinatura neste dispositivo.');
+  }
   return item;
 }
 
@@ -271,4 +293,41 @@ export function signingUrl(tokenStr: string) {
   if (typeof window === 'undefined') return `/assinar/${tokenStr}`;
   const base = import.meta.env.BASE_URL || '/';
   return `${window.location.origin}${base.replace(/\/$/, '')}/assinar/${tokenStr}`;
+}
+
+export function signingEmailHref(envelope: Envelope, signer: Signer) {
+  const subject = `Assinatura: ${envelope.titulo}`;
+  const body = [
+    `Olá ${signer.nome},`,
+    '',
+    'Você recebeu um documento para revisar e assinar eletronicamente.',
+    envelope.messageToSigners || '',
+    '',
+    `Acesse seu link pessoal: ${signingUrl(signer.token)}`,
+    '',
+    'Esta mensagem só será enviada quando você confirmar o envio no seu aplicativo de e-mail.',
+  ].filter(Boolean).join('\n');
+  return `mailto:${encodeURIComponent(signer.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+export async function copySigningLink(tokenStr: string) {
+  const value = signingUrl(tokenStr);
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+  } catch {
+    // Try the browser fallback below for embedded or restricted contexts.
+  }
+  const input = document.createElement('textarea');
+  input.value = value;
+  input.setAttribute('readonly', '');
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  document.body.append(input);
+  input.select();
+  const copied = document.execCommand('copy');
+  input.remove();
+  if (!copied) throw new Error('Não foi possível copiar o link neste navegador.');
 }

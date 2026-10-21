@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-21T18:58:27.515Z",
+  "generated_at": "2026-10-21T19:47:41.104Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -635,6 +635,11 @@
       "label": "supabase/README.md"
     },
     {
+      "id": "file:supabase/functions/get-signature-attachment/index.ts",
+      "type": "file",
+      "label": "supabase/functions/get-signature-attachment/index.ts"
+    },
+    {
       "id": "file:supabase/migrations/20261021000000_init_schema.sql",
       "type": "migration",
       "label": "supabase/migrations/20261021000000_init_schema.sql"
@@ -683,6 +688,11 @@
       "id": "file:supabase/migrations/20261021185725_restrict_helper_rpc_access.sql",
       "type": "migration",
       "label": "supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261021193000_signature_public_access.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261021193000_signature_public_access.sql"
     },
     {
       "id": "file:tailwind.config.ts",
@@ -853,6 +863,11 @@
       "id": "table:gm_files",
       "type": "database-table",
       "label": "gm_files"
+    },
+    {
+      "id": "rpc:get_signature_attachment_by_token",
+      "type": "database-rpc",
+      "label": "get_signature_attachment_by_token"
     },
     {
       "id": "table:contratos",
@@ -2872,6 +2887,18 @@
       "from": "file:src/test/InstallPwaButton.test.tsx",
       "to": "file:src/components/pwa/InstallPwaButton.tsx",
       "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/get-signature-attachment/index.ts",
+      "to": "table:gm_files",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/get-signature-attachment/index.ts",
+      "to": "rpc:get_signature_attachment_by_token",
+      "type": "calls-rpc",
       "confidence": "EXTRACTED"
     },
     {

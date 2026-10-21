@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
 import { Eraser, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,80 +9,98 @@ type Props = {
   height?: number;
 };
 
+const MAX_DPR = 2;
+
 export function SignaturePad({ onChange, className, height = 180 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
+  const hasInk = useRef(false);
   const [empty, setEmpty] = useState(true);
 
-  const getCtx = () => {
-    const c = canvasRef.current;
-    if (!c) return null;
-    const ctx = c.getContext('2d');
-    if (!ctx) return null;
-    return { c, ctx };
-  };
-
   const resize = useCallback(() => {
-    const pair = getCtx();
-    if (!pair) return;
-    const { c, ctx } = pair;
-    const dpr = window.devicePixelRatio || 1;
-    const rect = c.getBoundingClientRect();
-    c.width = rect.width * dpr;
-    c.height = height * dpr;
-    ctx.scale(dpr, dpr);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const snapshot = hasInk.current ? document.createElement('canvas') : null;
+    if (snapshot) {
+      snapshot.width = canvas.width;
+      snapshot.height = canvas.height;
+      snapshot.getContext('2d')?.drawImage(canvas, 0, 0);
+    }
+
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.lineWidth = 2.2;
     ctx.strokeStyle = '#0f172a';
-  }, [height]);
+
+    if (snapshot) ctx.drawImage(snapshot, 0, 0, snapshot.width, snapshot.height, 0, 0, rect.width, rect.height);
+  }, []);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
-  }, [resize]);
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [resize, height]);
 
-  const pos = (e: React.PointerEvent) => {
-    const c = canvasRef.current!;
-    const r = c.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  const pos = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
 
-  const start = (e: React.PointerEvent) => {
-    const pair = getCtx();
-    if (!pair) return;
+  const start = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    const ctx = e.currentTarget.getContext('2d');
+    if (!ctx) return;
+    e.preventDefault();
     drawing.current = true;
-    const p = pos(e);
-    pair.ctx.beginPath();
-    pair.ctx.moveTo(p.x, p.y);
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const move = (e: React.PointerEvent) => {
-    if (!drawing.current) return;
-    const pair = getCtx();
-    if (!pair) return;
-    const p = pos(e);
-    pair.ctx.lineTo(p.x, p.y);
-    pair.ctx.stroke();
+    const point = pos(e);
+    // A tap is a valid mark too; users should not need to drag to capture ink.
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 1.1, 0, Math.PI * 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y);
+    hasInk.current = true;
     setEmpty(false);
+    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
-  const end = () => {
+  const move = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawing.current) return;
+    const ctx = e.currentTarget.getContext('2d');
+    if (!ctx) return;
+    const point = pos(e);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+  };
+
+  const end = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawing.current) return;
     drawing.current = false;
-    const c = canvasRef.current;
-    if (c && !empty) onChange(c.toDataURL('image/png'));
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    if (hasInk.current) onChange(e.currentTarget.toDataURL('image/png'));
   };
 
   const clear = () => {
-    const pair = getCtx();
-    if (!pair) return;
-    pair.ctx.clearRect(0, 0, pair.c.width, pair.c.height);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasInk.current = false;
     setEmpty(true);
     onChange(null);
-    resize();
   };
 
   return (
@@ -95,7 +113,8 @@ export function SignaturePad({ onChange, className, height = 180 }: Props) {
           onPointerDown={start}
           onPointerMove={move}
           onPointerUp={end}
-          onPointerLeave={end}
+          onPointerCancel={end}
+          aria-label="Área para desenhar a assinatura"
         />
         {empty && (
           <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-slate-400">
@@ -116,4 +135,3 @@ export function SignaturePad({ onChange, className, height = 180 }: Props) {
     </div>
   );
 }
-

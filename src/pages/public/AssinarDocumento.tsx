@@ -26,6 +26,7 @@ export default function AssinarDocumento() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
   const [saveForLater, setSaveForLater] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -78,7 +79,7 @@ export default function AssinarDocumento() {
 
   const confirmar = async () => {
     setError('');
-    if (!token || !signer || !envelope) return;
+    if (!token || !signer || !envelope || submitting) return;
     if (signer.status === 'signed') {
       setDone(true);
       return;
@@ -92,18 +93,24 @@ export default function AssinarDocumento() {
       setError('Adicione sua assinatura antes de confirmar.');
       return;
     }
-    if (saveForLater && mode !== 'saved') {
-      saveSignature(signer.nome, data, mode);
-    }
+    setSubmitting(true);
     try {
-    const updated = await applySignature(token, data, mode);
-    if (updated) {
+      const updated = await applySignature(token, data, mode);
+      if (!updated) throw new Error('Este link não está mais ativo. Peça um novo convite ao remetente.');
       setEnvelope(updated);
       setSigner(updated.signers.find((s) => s.token === token) || signer);
       setDone(true);
-    }
+      if (saveForLater && mode !== 'saved') {
+        try {
+          saveSignature(signer.nome, data, mode);
+        } catch {
+          // The remote signature is already confirmed; saving it locally is optional.
+        }
+      }
     } catch (signatureError) {
       setError(signatureError instanceof Error ? signatureError.message : 'Não foi possível salvar a assinatura.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -155,11 +162,17 @@ export default function AssinarDocumento() {
           </pre>
         </Card>
 
+        {envelope.arquivoNome && (
+          <Card className="border-amber-300 bg-amber-50/80 p-4 text-sm text-amber-900">
+            Este envelope também inclui o anexo “{envelope.arquivoNome}”, que não está disponível neste link público. Se o anexo fizer parte do acordo, peça ao remetente uma cópia acessível e confirme o conteúdo antes de assinar. Esta página registra a assinatura do texto exibido acima.
+          </Card>
+        )}
+
         {done || signer.status === 'signed' ? (
           <Card className="p-6 text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-brand mx-auto" />
             <h2 className="text-xl font-bold">Assinatura registrada</h2>
-            <p className="text-sm text-text-secondary">Obrigado. As partes envolvidas foram notificadas.</p>
+            <p className="text-sm text-text-secondary">Sua assinatura foi registrada com sucesso. O remetente poderá acompanhar o status e compartilhar os próximos links.</p>
             {signer.signatureDataUrl && (
               <img
                 src={signer.signatureDataUrl}
@@ -244,7 +257,7 @@ export default function AssinarDocumento() {
 
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 accent-brand" />
-              Li o documento e concordo em assinar eletronicamente com validade entre as partes.
+              Li o documento exibido nesta página e concordo em registrar minha assinatura eletrônica.
             </label>
 
             {error && (
@@ -253,8 +266,8 @@ export default function AssinarDocumento() {
               </p>
             )}
 
-            <Button className="w-full" size="lg" onClick={confirmar}>
-              Confirmar assinatura
+            <Button className="w-full" size="lg" onClick={confirmar} disabled={submitting}>
+              {submitting ? 'Registrando assinatura…' : 'Confirmar assinatura'}
             </Button>
           </Card>
         )}

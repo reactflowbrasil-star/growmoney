@@ -44,6 +44,85 @@
   }
 }
 
+/* Auth screens occupy the device viewport; compact at short heights and only
+   enable an inner fallback scroll when the physical screen cannot fit the form. */
+body.auth-layout-active {
+  padding-bottom: 0;
+  overflow: hidden;
+}
+body.auth-layout-active #root {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.auth-screen {
+  box-sizing: border-box;
+  height: calc(100dvh - 56px - env(safe-area-inset-bottom, 0px));
+  min-height: 0;
+  overflow: hidden;
+}
+.auth-screen > .auth-card {
+  min-width: 0;
+  max-height: 100%;
+}
+body.auth-layout-active footer {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 30;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  min-height: 56px;
+}
+body.auth-layout-active [role='group'][aria-label='Seletor de tema'] { display: none; }
+.auth-screen {
+  min-height: 0;
+}
+.auth-card {
+  flex: 0 1 auto;
+  margin-block: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+@media (max-height: 700px) {
+  .auth-card { padding-block: 0.75rem !important; }
+  .auth-brand { margin-bottom: 0.5rem !important; }
+  .auth-divider { margin-block: 0.5rem !important; }
+  .auth-google button { min-height: 38px; padding-block: 0.375rem; }
+  .auth-form label { margin-bottom: 0.125rem; }
+  .auth-footer { margin-top: 0.375rem !important; }
+  .auth-pwa { display: none; }
+}
+
+@media (min-height: 701px) {
+  .auth-screen { padding-block: 1rem !important; }
+}
+
+@media (max-height: 600px) {
+  .auth-brand > p { display: none; }
+  .auth-logo { max-height: 44px !important; }
+  .auth-form { row-gap: 0.3rem !important; }
+  .auth-form input { padding-block: 0.375rem; font-size: 16px; }
+  .auth-card { padding: 0.625rem 0.875rem !important; }
+}
+
+@media (max-height: 500px) {
+  .auth-logo, .auth-google, .auth-divider { display: none !important; }
+  .auth-brand { margin: 0 0 0.375rem !important; }
+  .auth-card { padding-block: 0.5rem !important; }
+}
+
+@media (max-height: 460px) {
+  .auth-card { zoom: 0.84; }
+}
+@media (max-height: 380px) {
+  .auth-card { zoom: 0.72; }
+}
+
+@media (max-width: 520px) {
+  .auth-screen > .auth-card { border-radius: 1rem; }
+}
+
 @layer components {
   .glass {
     background: rgba(255, 255, 255, 0.72);
@@ -56,7 +135,7 @@
   .card-premium {
     @apply bg-bg-primary border border-border-color rounded-2xl;
     box-shadow: var(--shadow-sm);
-    transition: box-shadow var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast);
+    transition: box-shadow var(--transition-normal), transform var(--transition-normal), border-color var(--transition-fast), background-color var(--transition-fast);
   }
   .card-premium:hover {
     box-shadow: var(--shadow-md);
@@ -123,6 +202,53 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
     animation: shimmer 1.4s infinite;
   }
+  .surface-elevated {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+  .field-control {
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  }
+  .field-control:focus-visible {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 20%, transparent);
+    outline: none;
+  }
+  .table-shell {
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Shared polish across existing pages without changing their data workflows. */
+button, [role='button'], a {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled), [role='button'], a[href] {
+  touch-action: manipulation;
+}
+input, select, textarea {
+  accent-color: var(--brand);
+}
+input:not([type='checkbox']):not([type='radio']), select, textarea {
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+input:not([type='checkbox']):not([type='radio']):focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none;
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+::placeholder { opacity: 0.72; }
+@media (max-width: 767px) { body { overflow-x: clip; } }
+@media (prefers-reduced-motion: reduce) {
+  .card-premium, .pressable, .interactive-row { transform: none !important; }
 }
 
 @keyframes fadeSlideIn {

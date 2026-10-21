@@ -26,6 +26,11 @@ export default function Cadastro() {
   const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
+    document.body.classList.add('auth-layout-active');
+    return () => document.body.classList.remove('auth-layout-active');
+  }, []);
+
+  useEffect(() => {
     if (!isLoading && isAuthenticated) {
       navigate('/dashboard', { replace: true });
     }
@@ -83,21 +88,21 @@ export default function Cadastro() {
   };
 
   return (
-    <main className="min-h-[100svh] w-full flex items-start sm:items-center justify-center bg-transparent overflow-x-clip px-3 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-8">
-      <div className="w-full max-w-lg bg-bg-primary/90 backdrop-blur-xl border border-border-color rounded-2xl p-4 sm:p-6 md:p-8 shadow-md">
-        <div className="text-center mb-5 sm:mb-6 space-y-3 sm:space-y-4">
+    <main className="auth-screen w-full flex items-center justify-center bg-transparent overflow-x-clip px-3 py-[max(.5rem,env(safe-area-inset-top))] pb-[max(.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-3">
+      <div className="auth-card w-full max-w-xl bg-bg-primary/90 backdrop-blur-xl border border-border-color rounded-2xl p-3 sm:p-5 shadow-lg">
+        <div className="auth-brand text-center mb-3 space-y-1.5">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="mx-auto h-auto max-h-[min(15svh,104px)] w-full max-w-[min(100%,280px)] object-contain"
+            className="auth-logo mx-auto h-auto max-h-[min(11svh,68px)] w-full max-w-[min(100%,250px)] object-contain"
           />
-          <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
+          <h1 className="text-xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
         </div>
 
-        <GoogleButton label="Cadastrar com Google" />
+        <GoogleButton label="Cadastrar com Google" className="auth-google" />
 
-        <div className="relative my-5">
+        <div className="auth-divider relative my-2.5">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-border-color" />
           </div>
@@ -106,36 +111,36 @@ export default function Cadastro() {
           </div>
         </div>
 
-        <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
-          <Input label="Nome da empresa" value={form.empresa} onChange={(e) => set('empresa', e.target.value)} leftIcon={<Building2 className="w-4 h-4" />} required autoComplete="organization" />
+        <form className="auth-form grid grid-cols-2 gap-x-3 gap-y-2" onSubmit={handleSubmit}>
+          <div className="col-span-2"><Input label="Nome da empresa" value={form.empresa} onChange={(e) => set('empresa', e.target.value)} leftIcon={<Building2 className="w-4 h-4" />} required autoComplete="organization" /></div>
           <Input label="CNPJ (opcional)" value={form.cnpj} onChange={(e) => set('cnpj', e.target.value)} leftIcon={<FileText className="w-4 h-4" />} />
           <Input label="Nome do administrador" value={form.admin} onChange={(e) => set('admin', e.target.value)} leftIcon={<User className="w-4 h-4" />} required autoComplete="name" />
-          <Input label="Email" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} leftIcon={<Mail className="w-4 h-4" />} required autoComplete="email" />
+          <div className="col-span-2"><Input label="E-mail" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} leftIcon={<Mail className="w-4 h-4" />} required autoComplete="email" /></div>
           <Input label="Senha" type="password" value={form.senha} onChange={(e) => set('senha', e.target.value)} leftIcon={<Lock className="w-4 h-4" />} required autoComplete="new-password" />
           <Input label="Confirmar senha" type="password" value={form.confirmar} onChange={(e) => set('confirmar', e.target.value)} leftIcon={<Lock className="w-4 h-4" />} required autoComplete="new-password" />
 
-          <label className="flex items-start gap-2 text-sm text-text-secondary">
+          <label className="col-span-2 flex items-start gap-2 text-xs text-text-secondary">
             <input type="checkbox" checked={termos} onChange={(e) => setTermos(e.target.checked)} className="accent-brand mt-1" />
             Aceito os termos de uso e política de privacidade
           </label>
 
           {error && (
-            <p className="text-sm text-erro bg-erro/10 rounded-lg px-3 py-2" role="alert">
+            <p className="col-span-2 text-sm text-erro bg-erro/10 rounded-lg px-3 py-2" role="alert">
               {error}
             </p>
           )}
           {success && (
-            <p className="text-sm text-brand bg-brand/10 rounded-lg px-3 py-2" role="status">
+            <p className="col-span-2 text-sm text-brand bg-brand/10 rounded-lg px-3 py-2" role="status">
               {success}
             </p>
           )}
 
-          <Button type="submit" className="w-full" loading={loading} disabled={loading}>
+          <Button type="submit" className="col-span-2 w-full" loading={loading} disabled={loading}>
             Criar conta
           </Button>
         </form>
 
-        <p className="text-center text-sm text-text-secondary mt-6">
+        <p className="auth-footer text-center text-sm text-text-secondary mt-3">
           Já tem conta?{' '}
           <Link to="/auth" className="text-brand hover:underline font-medium">
             Entrar

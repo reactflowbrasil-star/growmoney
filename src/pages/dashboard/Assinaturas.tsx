@@ -1,6 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, FileSignature, Send, Eye, Trash2, Bell, Copy, CheckCircle2 } from 'lucide-react';
+import { Plus, FileSignature, Send, Eye, Trash2, Bell, Copy, CheckCircle2, Clock3, CircleDashed } from 'lucide-react';
 import { Button, Input, Card, EmptyState, Modal, Badge, PageHeader, FileUpload } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -11,7 +11,7 @@ import {
   listAlerts,
   markAlertRead,
   markAllAlertsRead,
-  signingUrl,
+  copySigningLink,
   type SignatureAlert,
 } from '@/lib/assinatura-store';
 import type { Envelope, EnvelopeStatus } from '@/lib/assinatura-types';
@@ -21,7 +21,7 @@ const statusMap: Record<
   { label: string; variant: 'neutral' | 'info' | 'success' | 'danger' | 'warning' }
 > = {
   rascunho: { label: 'Rascunho', variant: 'neutral' },
-  enviado: { label: 'Enviado', variant: 'info' },
+  enviado: { label: 'Links ativos', variant: 'info' },
   parcial: { label: 'Parcial', variant: 'warning' },
   concluido: { label: 'Concluído', variant: 'success' },
   cancelado: { label: 'Cancelado', variant: 'danger' },
@@ -49,19 +49,26 @@ export default function Assinaturas() {
   ]);
   const [arquivoNome, setArquivoNome] = useState<string>();
   const [arquivoStoragePath, setArquivoStoragePath] = useState<string>();
+  const [formError, setFormError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  const reload = async () => {
+  const reload = useCallback(async () => {
     setAlerts(listAlerts());
+    setLoading(true);
+    setLoadError('');
     try {
       setRows(await listEnvelopes());
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Não foi possível carregar os envelopes.');
+      setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar os envelopes.');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    reload();
-  }, []);
+    void reload();
+  }, [reload]);
 
   const filtered = useMemo(
     () =>
@@ -74,31 +81,44 @@ export default function Assinaturas() {
   );
 
   const unread = alerts.filter((a) => !a.read).length;
+  const totals = useMemo(() => ({
+    all: rows.length,
+    waiting: rows.filter((row) => row.status === 'enviado').length,
+    partial: rows.filter((row) => row.status === 'parcial').length,
+    completed: rows.filter((row) => row.status === 'concluido').length,
+  }), [rows]);
 
   const criar = async () => {
-    if (!titulo.trim() || !documento.trim()) return;
+    setFormError('');
+    if (!titulo.trim() || !documento.trim()) {
+      setFormError('Preencha o título e o texto que os signatários irão revisar.');
+      return;
+    }
     const validSigners = signers.filter((s) => s.nome.trim() && s.email.trim());
-    if (validSigners.length === 0) return;
+    if (validSigners.length === 0) {
+      setFormError('Adicione ao menos um signatário com nome e e-mail.');
+      return;
+    }
     try {
-    const env = await createEnvelope({
-      titulo: titulo.trim(),
-      descricao,
-      documentoTexto: documento,
-      createdBy: user?.email || user?.nome || 'sistema',
-      messageToSigners: msg,
-      arquivoNome,
-      arquivoStoragePath,
-      signers: validSigners,
-    });
-    setOpen(false);
-    setTitulo('');
-    await reload();
-    navigate(`/assinaturas/${env.id}`);
+      const env = await createEnvelope({
+        titulo: titulo.trim(),
+        descricao,
+        documentoTexto: documento,
+        createdBy: user?.email || user?.nome || 'sistema',
+        messageToSigners: msg,
+        arquivoNome,
+        arquivoStoragePath,
+        signers: validSigners,
+      });
+      setOpen(false);
+      setTitulo('');
+      setFormError('');
+      await reload();
+      navigate(`/assinaturas/${env.id}`);
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Não foi possível salvar o envelope.');
+      setFormError(error instanceof Error ? error.message : 'Não foi possível salvar o envelope.');
     }
   };
-
   const enviar = async (id: string) => {
     try {
       await sendEnvelope(id, user?.email || 'sistema');
@@ -109,16 +129,20 @@ export default function Assinaturas() {
   };
 
   const copyLink = async (token: string) => {
-    await navigator.clipboard.writeText(signingUrl(token));
-    setCopied(token);
-    setTimeout(() => setCopied(''), 2000);
+    try {
+      await copySigningLink(token);
+      setCopied(token);
+      setTimeout(() => setCopied(''), 2000);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Não foi possível copiar o link.');
+    }
   };
 
   return (
     <div className="max-w-7xl space-y-4">
       <PageHeader
         title="Assinatura digital"
-        description="Envie documentos, colete assinaturas e acompanhe alertas — fluxo tipo DocuSign"
+        description="Crie envelopes, acompanhe cada etapa e compartilhe links pessoais de assinatura."
         actions={
           <>
             <Button variant="outline" size="sm" leftIcon={<Bell className="w-4 h-4" />} onClick={() => setAlertsOpen(true)}>
@@ -131,11 +155,33 @@ export default function Assinaturas() {
         }
       />
 
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        {[
+          { label: 'Envelopes', count: totals.all, icon: FileSignature },
+          { label: 'Aguardando', count: totals.waiting, icon: Clock3 },
+          { label: 'Parciais', count: totals.partial, icon: CircleDashed },
+          { label: 'Concluídos', count: totals.completed, icon: CheckCircle2 },
+        ].map((item) => (
+          <Card key={item.label} className="p-4 card-premium">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-xs text-text-secondary">{item.label}</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums">{item.count}</p>
+              </div>
+              <item.icon className="w-5 h-5 text-brand" aria-hidden="true" />
+            </div>
+          </Card>
+        ))}
+      </div>
+      {loadError && <p className="rounded-xl border border-erro/20 bg-erro/5 px-4 py-3 text-sm text-erro" role="alert">{loadError}</p>}
+
       <Card className="p-3">
         <Input placeholder="Buscar por título ou e-mail…" value={busca} onChange={(e) => setBusca(e.target.value)} />
       </Card>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <Card className="p-10 text-center text-sm text-text-secondary">Carregando envelopes…</Card>
+      ) : filtered.length === 0 ? (
         <EmptyState
           title="Nenhum envelope"
           description="Crie um documento, adicione signatários e envie para assinatura."
@@ -175,7 +221,7 @@ export default function Assinaturas() {
                   <div className="flex flex-wrap gap-2 shrink-0">
                     {e.status === 'rascunho' && (
                       <Button size="sm" leftIcon={<Send className="w-3.5 h-3.5" />} onClick={() => enviar(e.id)}>
-                        Enviar
+                        Ativar links
                       </Button>
                     )}
                     {pending[0] && e.status !== 'rascunho' && e.status !== 'cancelado' && (
@@ -217,6 +263,9 @@ export default function Assinaturas() {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Novo envelope de assinatura" size="lg">
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+          <p className="text-xs text-text-secondary rounded-xl bg-bg-secondary border border-border-color p-3">
+            Os links são pessoais e ficam prontos ao ativar o envelope. O sistema não envia e-mails automaticamente; você poderá abrir um convite pré-preenchido no seu e-mail.
+          </p>
           <Input label="Título do documento" value={titulo} onChange={(e) => setTitulo(e.target.value)} required />
           <Input label="Descrição (opcional)" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
           <div>
@@ -268,12 +317,14 @@ export default function Assinaturas() {
               + Signatário
             </Button>
           </div>
+          {arquivoNome && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">O anexo ficará arquivado no envelope. Para a assinatura, o signatário revisará o texto acima; inclua nele todo o conteúdo vinculante.</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button onClick={criar}>Criar envelope</Button>
           </div>
+          {formError && <p className="text-sm text-erro" role="alert">{formError}</p>}
         </div>
       </Modal>
 

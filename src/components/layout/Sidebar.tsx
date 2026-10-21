@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 
@@ -76,7 +77,7 @@ export function Sidebar({
             className="ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary pressable"
             aria-label="Recolher menu"
           >
-            <span className="text-sm font-bold">«</span>
+            <ChevronLeft className="w-4 h-4" />
           </button>
         )}
       </div>
@@ -88,7 +89,7 @@ export function Sidebar({
           className="mx-auto mt-2 p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary"
           aria-label="Expandir menu"
         >
-          <span className="text-sm font-bold">»</span>
+          <ChevronRight className="w-4 h-4" />
         </button>
       )}
 

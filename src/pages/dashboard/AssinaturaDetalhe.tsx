@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Copy, CheckCircle2, Ban, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Send, Copy, CheckCircle2, Ban, ExternalLink, Mail } from 'lucide-react';
 import { Button, Card, Badge, PageHeader } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { getEnvelope, sendEnvelope, cancelEnvelope, signingUrl } from '@/lib/assinatura-store';
+import { getEnvelope, sendEnvelope, cancelEnvelope, signingUrl, signingEmailHref, copySigningLink } from '@/lib/assinatura-store';
 import { criarLinkArquivo } from '@/services/file-storage';
 import type { Envelope, EnvelopeStatus } from '@/lib/assinatura-types';
 
@@ -12,7 +12,7 @@ const statusMap: Record<
   { label: string; variant: 'neutral' | 'info' | 'success' | 'danger' | 'warning' }
 > = {
   rascunho: { label: 'Rascunho', variant: 'neutral' },
-  enviado: { label: 'Enviado', variant: 'info' },
+  enviado: { label: 'Links ativos', variant: 'info' },
   parcial: { label: 'Parcial', variant: 'warning' },
   concluido: { label: 'Concluído', variant: 'success' },
   cancelado: { label: 'Cancelado', variant: 'danger' },
@@ -26,9 +26,20 @@ export default function AssinaturaDetalhe() {
   const [env, setEnv] = useState<Envelope | null>(null);
   const [arquivoUrl, setArquivoUrl] = useState('');
   const [copied, setCopied] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
-    if (id) setEnv(await getEnvelope(id));
+    if (!id) return;
+    setLoading(true);
+    setLoadError('');
+    try {
+      setEnv(await getEnvelope(id));
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar o envelope.');
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -43,7 +54,7 @@ export default function AssinaturaDetalhe() {
   if (!env) {
     return (
       <div className="max-w-3xl space-y-4">
-        <p className="text-text-secondary">Envelope não encontrado.</p>
+        <p className="text-text-secondary">{loading ? 'Carregando envelope…' : loadError || 'Envelope não encontrado.'}</p>
         <Link to="/assinaturas" className="text-brand text-sm">
           ← Voltar
         </Link>
@@ -54,9 +65,13 @@ export default function AssinaturaDetalhe() {
   const st = statusMap[env.status];
 
   const copy = async (token: string) => {
-    await navigator.clipboard.writeText(signingUrl(token));
-    setCopied(token);
-    setTimeout(() => setCopied(''), 2000);
+    try {
+      await copySigningLink(token);
+      setCopied(token);
+      setTimeout(() => setCopied(''), 2000);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Não foi possível copiar o link.');
+    }
   };
 
   return (
@@ -79,7 +94,7 @@ export default function AssinaturaDetalhe() {
                   void sendEnvelope(env.id, user?.email || 'sistema').then(reload).catch((error) => window.alert(error.message));
                 }}
               >
-                Enviar para assinatura
+                Ativar links de assinatura
               </Button>
             )}
             {env.status !== 'concluido' && env.status !== 'cancelado' && (
@@ -97,6 +112,12 @@ export default function AssinaturaDetalhe() {
           </>
         }
       />
+
+      {(env.status === 'enviado' || env.status === 'parcial') && (
+        <p className="rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-text-secondary">
+          Links pessoais ativos. Compartilhe cada convite abaixo. O e-mail só será enviado quando você confirmar o envio no seu aplicativo de e-mail.
+        </p>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-5 space-y-3">
@@ -120,6 +141,9 @@ export default function AssinaturaDetalhe() {
                     <Button size="sm" variant="outline" leftIcon={<Copy className="w-3.5 h-3.5" />} onClick={() => copy(s.token)}>
                       {copied === s.token ? 'Copiado' : 'Link'}
                     </Button>
+                    <a href={signingEmailHref(env, s)} className="text-[10px] text-brand inline-flex items-center gap-0.5 justify-center">
+                      <Mail className="w-3 h-3" /> E-mail
+                    </a>
                     <a href={signingUrl(s.token)} target="_blank" rel="noreferrer" className="text-[10px] text-brand inline-flex items-center gap-0.5 justify-center">
                       Abrir <ExternalLink className="w-3 h-3" />
                     </a>
