@@ -45,6 +45,14 @@ export function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Inicia aberta e recolhe automaticamente após 4 segundos (desktop)
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSidebarCollapsed(true);
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   // Fecha drawer mobile ao mudar de rota
   useEffect(() => {
     setMobileOpen(false);
