@@ -7,6 +7,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          DEFAULT: '#10b981',
+          light: '#34d399',
+          dark: '#059669',
+        },
         grafite: {
           DEFAULT: '#2d2d2d',
           light: '#4a4a4a',

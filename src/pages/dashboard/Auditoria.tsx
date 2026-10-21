@@ -30,3 +30,4 @@ export default function Auditoria() {
     </div>
   );
 }
+

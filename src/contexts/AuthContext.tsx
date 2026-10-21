@@ -46,6 +46,11 @@ function displayNameFromUser(user: {
   );
 }
 
+function getAuthCallbackUrl() {
+  const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin);
+  return new URL('auth/callback', appBaseUrl).toString();
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserSession | null>(null);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -78,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const active =
           loadedEmpresas.find((e) => e.id === savedId) || loadedEmpresas[0];
         setEmpresaAtiva(active);
+        setUser((current) => current ? { ...current, role: (active.role || current.role) as UserSession['role'] } : current);
       }
     } catch (err) {
       console.warn('Erro ao carregar empresas', err);
@@ -91,14 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user_metadata?: Record<string, unknown>;
     }) => {
       const nome = displayNameFromUser(authUser);
-      const email = authUser.email || '';
-
-      await supabase.from('profiles').upsert({
-        id: authUser.id,
-        email,
-        nome,
-        role: 'admin',
-      });
 
       const { data: memberships } = await supabase
         .from('empresa_members')
@@ -113,29 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (authUser.user_metadata?.empresa as string) ||
         `${nome.split(' ')[0]} · Empresa`;
 
-      const { data: novaEmpresa, error: empresaError } = await supabase
-        .from('empresas')
-        .insert({
-          nome: empresaNome,
-          responsavel_id: authUser.id,
-          configuracoes: {},
-        })
-        .select('*')
-        .single();
-
+      const { error: empresaError } = await supabase.rpc('ensure_default_empresa', {
+        p_nome: empresaNome,
+      });
       if (empresaError) {
         console.warn('empresa OAuth:', empresaError.message);
-        return;
-      }
-
-      if (novaEmpresa) {
-        await supabase.from('empresa_members').insert({
-          empresa_id: novaEmpresa.id,
-          usuario_id: authUser.id,
-          role: 'admin',
-          status: 'aceito',
-          aceito_em: new Date().toISOString(),
-        });
       }
     },
     []
@@ -236,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const loginWithGoogle = useCallback(async () => {
-    const redirectTo = `${window.location.origin}/auth/callback`;
+    const redirectTo = getAuthCallbackUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -255,7 +235,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: senha,
-        options: { data: { nome, empresa: empresaNome } },
+        options: {
+          data: { nome, empresa: empresaNome },
+          emailRedirectTo: getAuthCallbackUrl(),
+        },
       });
       if (error) throw new Error(error.message || 'Falha ao registrar');
       if (!data.user) throw new Error('Usuário não retornado após cadastro');
@@ -266,42 +249,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
       }
 
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: data.user.id,
-        email,
-        nome,
-        role: 'admin',
+      const { data: empresaId, error: empresaError } = await supabase.rpc('ensure_default_empresa', {
+        p_nome: empresaNome,
       });
-      if (profileError) {
-        console.warn('profiles upsert:', profileError.message);
-      }
-
-      const { data: novaEmpresa, error: empresaError } = await supabase
-        .from('empresas')
-        .insert({
-          nome: empresaNome,
-          responsavel_id: data.user.id,
-          configuracoes: {},
-        })
-        .select('*')
-        .single();
-
       if (empresaError) {
         throw new Error(`Conta criada, mas falha ao criar empresa: ${empresaError.message}`);
       }
-
-      if (novaEmpresa) {
-        const { error: memberError } = await supabase.from('empresa_members').insert({
-          empresa_id: novaEmpresa.id,
-          usuario_id: data.user.id,
-          role: 'admin',
-          status: 'aceito',
-          aceito_em: new Date().toISOString(),
-        });
-        if (memberError) {
-          console.warn('empresa_members:', memberError.message);
-        }
-      }
+      if (!empresaId) throw new Error('A conta foi criada, mas a empresa inicial nao foi criada.');
+      const novaEmpresa = { id: empresaId, nome: empresaNome };
 
       const session: UserSession = {
         id: data.user.id,
@@ -345,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const empresa = empresas.find((e) => e.id === empresaId);
       if (empresa) {
         setEmpresaAtiva(empresa);
+        setUser((current) => current ? { ...current, role: (empresa.role || current.role) as UserSession['role'] } : current);
         localStorage.setItem('empresaAtiva', empresaId);
       }
     },
@@ -357,10 +313,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasPermissionCb = useCallback(
     (permission: string) => {
-      if (!user || !user.role) return false;
-      return checkPermission(user.role as any, permission as any);
+      const role = empresaAtiva?.role || user?.role;
+      if (!role) return false;
+      return checkPermission(role as any, permission as any);
     },
-    [user]
+    [user, empresaAtiva]
   );
 
   const value: AuthContextValue = {
@@ -380,3 +337,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+

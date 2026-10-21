@@ -19,7 +19,7 @@ export class VendedorService {
     return VendedorRepository.update(id, empresaId, data, userId);
   }
 
-  static async delete(id: string, empresaId: string, userId: string, userRole: string): Promise<void> {
+  static async delete(id: string, empresaId: string, _userId: string, userRole: string): Promise<void> {
     if (!hasPermission(userRole as any, 'vendedores:delete')) {
       throw new Error('Permissao insuficiente para excluir vendedor');
     }
@@ -59,3 +59,4 @@ export class VendedorService {
     return VendedorRepository.getComissoes(vendedorId, empresaId, periodo);
   }
 }
+

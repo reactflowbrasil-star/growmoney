@@ -58,7 +58,7 @@ export function Sidebar({
       <div
         className={cn(
           'flex items-center border-b border-border-color gap-2 shrink-0',
-          isCollapsed ? 'h-16 px-2 justify-center' : 'h-16 px-4'
+          isCollapsed ? 'h-16 px-2 justify-center' : 'h-20 px-4'
         )}
       >
         <img
@@ -66,7 +66,7 @@ export function Sidebar({
           alt={BRAND.name}
           className={cn(
             'object-contain transition-all',
-            isCollapsed ? 'h-10 w-10' : 'h-11 w-auto max-w-[160px] object-left'
+            isCollapsed ? 'h-10 w-10' : 'h-[75px] w-auto max-w-[272px] object-left'
           )}
         />
         {!isCollapsed && !embedded && (
@@ -139,3 +139,4 @@ export function Sidebar({
     </aside>
   );
 }
+

@@ -3,10 +3,10 @@ import { Card, PageHeader, Badge } from '@/components/ui';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 const kpis = [
-  { label: 'Empresas', value: '—', icon: Building2, hint: 'Tenants ativos' },
-  { label: 'Usuários', value: '—', icon: Users, hint: 'Contas na plataforma' },
-  { label: 'Contratos', value: '—', icon: FileText, hint: 'Volume global' },
-  { label: 'Saúde', value: 'OK', icon: Activity, hint: 'Sistema operacional' },
+  { label: 'Empresas', value: '-', icon: Building2, hint: 'Tenants ativos' },
+  { label: 'Usuarios', value: '-', icon: Users, hint: 'Contas na plataforma' },
+  { label: 'Contratos', value: '-', icon: FileText, hint: 'Volume global' },
+  { label: 'Saude', value: 'OK', icon: Activity, hint: 'Sistema operacional' },
 ];
 
 export default function AdminDashboard() {
@@ -15,8 +15,8 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-6xl space-y-6">
       <PageHeader
-        title="Visão geral"
-        description={`Bem-vindo, ${session?.username}. Controle total da plataforma.`}
+        title="Visao geral"
+        description={`Bem-vindo, ${session?.username}. Acesso administrativo autorizado.`}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -38,26 +38,25 @@ export default function AdminDashboard() {
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-5 space-y-3">
-          <h2 className="font-semibold">Ações rápidas</h2>
+          <h2 className="font-semibold">Acoes rapidas</h2>
           <ul className="text-sm text-text-secondary space-y-2">
-            <li>• Gerencie empresas em <strong className="text-text-primary">Empresas</strong></li>
-            <li>• Veja contas em <strong className="text-text-primary">Usuários</strong></li>
-            <li>• Altere senha em <strong className="text-text-primary">Segurança</strong></li>
-            <li>• Monitore eventos em <strong className="text-text-primary">Auditoria</strong></li>
+            <li>Gerencie empresas em <strong className="text-text-primary">Empresas</strong></li>
+            <li>Veja contas em <strong className="text-text-primary">Usuarios</strong></li>
+            <li>Altere senha em <strong className="text-text-primary">Seguranca</strong></li>
+            <li>Monitore eventos em <strong className="text-text-primary">Auditoria</strong></li>
           </ul>
         </Card>
         <Card className="p-5 space-y-3">
-          <h2 className="font-semibold">Status da sessão</h2>
+          <h2 className="font-semibold">Status da sessao</h2>
           <div className="flex items-center gap-2">
             <Badge variant="success">Admin autenticado</Badge>
           </div>
           <p className="text-sm text-text-secondary">
             Login em{' '}
-            {session?.loggedAt ? new Date(session.loggedAt).toLocaleString('pt-BR') : '—'}
+            {session?.loggedAt ? new Date(session.loggedAt).toLocaleString('pt-BR') : '-'}
           </p>
           <p className="text-xs text-text-secondary">
-            Padrão inicial: usuário <code className="text-brand">admin</code> · senha{' '}
-            <code className="text-brand">123</code> (altere em Segurança).
+            A conta administrativa e autenticada pelo Supabase e autorizada pela lista de administradores da plataforma.
           </p>
         </Card>
       </div>

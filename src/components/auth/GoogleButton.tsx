@@ -65,3 +65,4 @@ export function GoogleButton({ label = 'Continuar com Google', className }: Prop
     </div>
   );
 }
+

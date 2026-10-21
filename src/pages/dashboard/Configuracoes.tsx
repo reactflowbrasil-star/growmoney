@@ -15,7 +15,7 @@ export default function Configuracoes() {
         <Input label="Nome da empresa" value={nomeEmpresa} onChange={(e) => setNomeEmpresa(e.target.value)} />
         <div>
           <p className="text-sm font-medium mb-2">Logo</p>
-          <FileUpload accept="image/*" label="Enviar logo (PNG, SVG, JPG)" />
+          <FileUpload accept="image/*" categoria="fotos" label="Enviar logo (PNG, SVG, JPG)" />
         </div>
         <Button onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}>Salvar alterações</Button>
         {saved && <p className="text-sm text-brand">Preferências salvas.</p>}
@@ -28,3 +28,4 @@ export default function Configuracoes() {
     </div>
   );
 }
+

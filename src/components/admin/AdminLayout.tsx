@@ -25,20 +25,20 @@ export function AdminLayout() {
   const { session, logout } = useAdminAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/admin/login');
   };
 
   return (
     <div className="min-h-screen bg-bg-secondary flex">
       <aside className="w-72 shrink-0 border-r border-border-color bg-bg-primary flex flex-col">
-        <div className="h-28 px-4 flex items-center border-b border-border-color">
+        <div className="h-32 px-4 flex items-center border-b border-border-color">
           <Link to="/admin" className="flex flex-col gap-0.5">
             <img
               src={BRAND.logo}
               alt={BRAND.name}
-              className="h-[60px] w-auto max-w-[240px] object-contain"
+              className="h-[102px] w-auto max-w-[408px] object-contain"
             />
             <span className="text-[10px] uppercase tracking-widest text-brand font-semibold">
               Painel Admin
@@ -96,3 +96,4 @@ export function AdminLayout() {
     </div>
   );
 }
+

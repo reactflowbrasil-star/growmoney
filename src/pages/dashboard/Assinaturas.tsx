@@ -48,7 +48,7 @@ export default function Assinaturas() {
     { nome: '', email: '' },
   ]);
   const [arquivoNome, setArquivoNome] = useState<string>();
-  const [arquivoDataUrl, setArquivoDataUrl] = useState<string>();
+  const [arquivoStoragePath, setArquivoStoragePath] = useState<string>();
 
   const reload = () => {
     setRows(listEnvelopes());
@@ -82,7 +82,7 @@ export default function Assinaturas() {
       createdBy: user?.email || user?.nome || 'sistema',
       messageToSigners: msg,
       arquivoNome,
-      arquivoDataUrl,
+      arquivoStoragePath,
       signers: validSigners,
     });
     setOpen(false);
@@ -219,13 +219,12 @@ export default function Assinaturas() {
           <FileUpload
             label="Anexo (PDF/imagem opcional)"
             accept="application/pdf,image/*"
-            onChange={(files) => {
-              const f = files[0];
-              if (!f) return;
-              setArquivoNome(f.name);
-              const reader = new FileReader();
-              reader.onload = () => setArquivoDataUrl(String(reader.result));
-              reader.readAsDataURL(f);
+            categoria="contratos"
+            onUploaded={(files) => {
+              const file = files[0];
+              if (!file) return;
+              setArquivoNome(file.nome);
+              setArquivoStoragePath(file.caminho);
             }}
           />
           <Input label="Mensagem aos signatários" value={msg} onChange={(e) => setMsg(e.target.value)} />
@@ -312,3 +311,4 @@ export default function Assinaturas() {
     </div>
   );
 }
+

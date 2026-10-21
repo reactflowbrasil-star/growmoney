@@ -8,10 +8,10 @@ export class ClientService {
       throw new Error('Permissao insuficiente para criar cliente');
     }
 
-    if (!data.empresaId) throw new Error('Empresa e obrigatoria');
+    if (!data.empresa_id) throw new Error('Empresa e obrigatoria');
 
     const cliente = await ClientRepository.create(data, userId);
-    await ClientRepository.addHistorico(cliente.id, data.empresaId, 'criacao', 'Cliente criado', userId);
+    await ClientRepository.addHistorico(cliente.id, data.empresa_id, 'criacao', 'Cliente criado', userId);
     return cliente;
   }
 

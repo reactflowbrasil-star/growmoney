@@ -359,3 +359,4 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
 
 NOTIFY pgrst, 'reload schema';
+

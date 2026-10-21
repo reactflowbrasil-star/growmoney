@@ -4,6 +4,7 @@ import { ArrowLeft, Send, Copy, CheckCircle2, Ban, ExternalLink } from 'lucide-r
 import { Button, Card, Badge, PageHeader } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { getEnvelope, sendEnvelope, cancelEnvelope, signingUrl } from '@/lib/assinatura-store';
+import { criarLinkArquivo } from '@/services/file-storage';
 import type { Envelope, EnvelopeStatus } from '@/lib/assinatura-types';
 
 const statusMap: Record<
@@ -23,6 +24,7 @@ export default function AssinaturaDetalhe() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [env, setEnv] = useState<Envelope | null>(null);
+  const [arquivoUrl, setArquivoUrl] = useState('');
   const [copied, setCopied] = useState('');
 
   const reload = () => {
@@ -32,6 +34,11 @@ export default function AssinaturaDetalhe() {
   useEffect(() => {
     reload();
   }, [id]);
+
+  useEffect(() => {
+    if (!env?.arquivoStoragePath) return;
+    void criarLinkArquivo(env.arquivoStoragePath).then(setArquivoUrl).catch((error) => console.warn(error));
+  }, [env?.arquivoStoragePath]);
 
   if (!env) {
     return (
@@ -149,7 +156,11 @@ export default function AssinaturaDetalhe() {
         <pre className="whitespace-pre-wrap text-sm bg-bg-secondary rounded-xl p-4 border border-border-color font-sans leading-relaxed max-h-96 overflow-y-auto">
           {env.documentoTexto}
         </pre>
-        {env.arquivoNome && <p className="text-xs text-text-secondary">Anexo: {env.arquivoNome}</p>}
+        {env.arquivoNome && (
+              <p className="text-xs text-text-secondary">
+                Anexo: {arquivoUrl ? <a href={arquivoUrl} target="_blank" rel="noreferrer" className="text-brand underline">{env.arquivoNome}</a> : env.arquivoNome}
+              </p>
+            )}
         {env.status === 'concluido' && (
           <div className="flex items-center gap-2 text-brand text-sm">
             <CheckCircle2 className="w-4 h-4" /> Documento totalmente assinado
@@ -159,3 +170,4 @@ export default function AssinaturaDetalhe() {
     </div>
   );
 }
+

@@ -39,3 +39,4 @@ export function exportPdf(title: string, htmlBody: string) {
     </body></html>`);
   w.document.close();
 }
+

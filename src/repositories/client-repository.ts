@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { CreateClienteData, UpdateClienteData, FiltrosCliente, Cliente, PaginatedResult, ClientType, ClientStatus } from '@/lib/client-types';
+import type { CreateClienteData, UpdateClienteData, Cliente, PaginatedResult, ClientType, ClientStatus } from '@/lib/client-types';
 
 interface FiltrosEmpresa {
   empresaId: string;

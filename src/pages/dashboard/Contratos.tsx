@@ -1,10 +1,11 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Search, Download, FileText, Trash2, Send, Eye } from 'lucide-react';
 import { Button, Input, Card, EmptyState, Badge, PageHeader } from '@/components/ui';
 import { exportCsv, exportPdf } from '@/lib/export';
+import { gerarContratoHtml } from '@/lib/contrato-template';
 import {
-  listContratos,
+  listContratosRemotos,
   updateContratoStatus,
   deleteContrato,
   formatBRL,
@@ -19,14 +20,24 @@ const statusVariant: Record<ContratoLocal['status'], 'neutral' | 'info' | 'succe
 };
 
 export default function Contratos() {
-  const [rows, setRows] = useState<ContratoLocal[]>(() => listContratos());
+  const [rows, setRows] = useState<ContratoLocal[]>([]);
+  const [loadError, setLoadError] = useState('');
   const [busca, setBusca] = useState('');
   const [params] = useSearchParams();
   const criado = params.get('criado');
 
+  const reload = useCallback(async () => {
+    try {
+      setRows(await listContratosRemotos());
+      setLoadError('');
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar os contratos.');
+    }
+  }, []);
+
   useEffect(() => {
-    setRows(listContratos());
-  }, [criado]);
+    void reload();
+  }, [reload, criado]);
 
   const filtered = useMemo(
     () =>
@@ -39,7 +50,14 @@ export default function Contratos() {
     [rows, busca]
   );
 
-  const reload = () => setRows(listContratos());
+  const executarAcao = async (acao: () => Promise<void>) => {
+    try {
+      await acao();
+      await reload();
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Não foi possível salvar as alterações do contrato.');
+    }
+  };
 
   return (
     <div className="max-w-7xl space-y-4">
@@ -101,6 +119,7 @@ export default function Contratos() {
           Contrato criado com sucesso. Você pode enviá-lo para assinatura quando estiver pronto.
         </div>
       )}
+      {loadError && <div className="rounded-xl border border-erro/40 bg-erro/10 px-4 py-3 text-sm text-erro">{loadError}</div>}
 
       <Card padding="none" className="overflow-hidden">
         <div className="p-4 border-b border-border-color">
@@ -154,31 +173,30 @@ export default function Contratos() {
                     <td className="px-4 py-3 text-right whitespace-nowrap">
                       <button
                         className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
+                        title="Imprimir contrato completo"
+                        aria-label={`Imprimir contrato CT-${String(r.numero).padStart(4, '0')}`}
+                        onClick={() => exportPdf(`Contrato CT-${String(r.numero).padStart(4, '0')}`, gerarContratoHtml(r))}
+                      >
+                        <FileText className="w-4 h-4 text-brand" />
+                      </button>
+                      <button
+                        className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
                         title="Enviar"
-                        onClick={() => {
-                          updateContratoStatus(r.id, 'enviado');
-                          reload();
-                        }}
+                        onClick={() => executarAcao(() => updateContratoStatus(r.id, 'enviado'))}
                       >
                         <Send className="w-4 h-4 text-brand" />
                       </button>
                       <button
                         className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
                         title="Marcar assinado"
-                        onClick={() => {
-                          updateContratoStatus(r.id, 'assinado');
-                          reload();
-                        }}
+                        onClick={() => executarAcao(() => updateContratoStatus(r.id, 'assinado'))}
                       >
                         <Eye className="w-4 h-4 text-text-secondary" />
                       </button>
                       <button
                         className="p-2 rounded-lg hover:bg-erro/10 inline-flex"
                         title="Excluir"
-                        onClick={() => {
-                          deleteContrato(r.id);
-                          reload();
-                        }}
+                        onClick={() => executarAcao(() => deleteContrato(r.id))}
                       >
                         <Trash2 className="w-4 h-4 text-erro" />
                       </button>
@@ -193,3 +211,4 @@ export default function Contratos() {
     </div>
   );
 }
+

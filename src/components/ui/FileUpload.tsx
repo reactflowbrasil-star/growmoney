@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Upload, File, X, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { uploadArquivo, type ArquivoCategoria, type ArquivoEnviado } from '@/services/file-storage';
 
 interface FileUploadProps {
   accept?: string;
@@ -8,8 +9,10 @@ interface FileUploadProps {
   maxSizeMb?: number;
   label?: string;
   onChange?: (files: File[]) => void;
+  onUploaded?: (files: ArquivoEnviado[]) => void;
   value?: File[];
   className?: string;
+  categoria?: ArquivoCategoria;
 }
 
 export function FileUpload({
@@ -19,13 +22,17 @@ export function FileUpload({
   label = 'Arraste arquivos ou clique para enviar',
   onChange,
   className,
+  categoria = 'arquivos',
+  onUploaded,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [savedFiles, setSavedFiles] = useState<ArquivoEnviado[]>([]);
 
-  const handleFiles = (list: FileList | null) => {
+  const handleFiles = async (list: FileList | null) => {
     if (!list?.length) return;
     setError('');
     const arr = Array.from(list);
@@ -39,12 +46,28 @@ export function FileUpload({
     onChange?.(next);
     const urls = next.filter((f) => f.type.startsWith('image/')).map((f) => URL.createObjectURL(f));
     setPreviews(urls);
+    setUploading(true);
+    try {
+      const results = await Promise.allSettled(arr.map((file) => uploadArquivo(file, categoria)));
+      const uploaded = results.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+      if (uploaded.length) {
+        setSavedFiles((current) => (multiple ? [...current, ...uploaded] : uploaded));
+        onUploaded?.(uploaded);
+      }
+      const failed = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+      if (failed) throw failed.reason;
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Falha ao salvar arquivo no servidor.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const remove = (i: number) => {
     const next = files.filter((_, idx) => idx !== i);
     setFiles(next);
     onChange?.(next);
+    if (!multiple) setSavedFiles([]);
   };
 
   return (
@@ -62,7 +85,7 @@ export function FileUpload({
         )}
       >
         <Upload className="w-8 h-8 mx-auto text-text-secondary mb-2" />
-        <p className="text-sm text-text-primary font-medium">{label}</p>
+          <p className="text-sm text-text-primary font-medium">{uploading ? 'Salvando no servidor...' : label}</p>
         <p className="text-xs text-text-secondary mt-1">PDF, imagens, Word, Excel · máx. {maxSizeMb}MB</p>
         <input
           ref={inputRef}
@@ -70,7 +93,10 @@ export function FileUpload({
           accept={accept}
           multiple={multiple}
           className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
+          onChange={(e) => {
+            void handleFiles(e.target.files);
+            e.target.value = '';
+          }}
         />
       </div>
       {error && <p className="text-sm text-erro">{error}</p>}
@@ -87,7 +113,10 @@ export function FileUpload({
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate">{f.name}</p>
-                <p className="text-xs text-text-secondary">{(f.size / 1024).toFixed(1)} KB</p>
+                <p className="text-xs text-text-secondary">
+                  {(f.size / 1024).toFixed(1)} KB
+                  {savedFiles[i] && <> · <a className="text-brand hover:underline" href={savedFiles[i].url} target="_blank" rel="noreferrer">Salvo no servidor</a></>}
+                </p>
               </div>
               <button type="button" onClick={() => remove(i)} className="p-1.5 rounded-lg hover:bg-bg-tertiary">
                 <X className="w-4 h-4" />
@@ -99,3 +128,4 @@ export function FileUpload({
     </div>
   );
 }
+

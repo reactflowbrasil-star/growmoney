@@ -23,7 +23,7 @@ export default function Perfil() {
         <Input label="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
         <div>
           <p className="text-sm font-medium mb-2">Foto de perfil</p>
-          <FileUpload accept="image/*" />
+          <FileUpload accept="image/*" categoria="fotos" />
         </div>
         <Button onClick={() => { setMsg('Perfil atualizado.'); setTimeout(() => setMsg(''), 2000); }}>Salvar</Button>
         {msg && <p className="text-sm text-brand">{msg}</p>}
@@ -31,3 +31,4 @@ export default function Perfil() {
     </div>
   );
 }
+

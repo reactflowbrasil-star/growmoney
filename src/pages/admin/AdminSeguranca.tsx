@@ -3,12 +3,12 @@ import { Button, Input, Card, PageHeader } from '@/components/ui';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 export default function AdminSeguranca() {
-  const { updatePassword, updateUsername, credentialsUsername } = useAdminAuth();
+  const { updatePassword, updateEmail, accountEmail } = useAdminAuth();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [newUser, setNewUser] = useState(credentialsUsername);
-  const [userPass, setUserPass] = useState('');
+  const [newEmail, setNewEmail] = useState(accountEmail);
+  const [emailPassword, setEmailPassword] = useState('');
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function AdminSeguranca() {
     setMsg('');
     setErr('');
     if (next !== confirm) {
-      setErr('A confirmação não confere com a nova senha.');
+      setErr('A confirmacao nao confere com a nova senha.');
       return;
     }
     setLoading(true);
@@ -35,17 +35,17 @@ export default function AdminSeguranca() {
     }
   };
 
-  const onChangeUser = async (e: React.FormEvent) => {
+  const onChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg('');
     setErr('');
     setLoading(true);
     try {
-      await updateUsername(newUser, userPass);
-      setMsg('Usuário admin atualizado.');
-      setUserPass('');
+      await updateEmail(newEmail, emailPassword);
+      setMsg('Solicitacao enviada. Confirme o novo e-mail pelo link recebido.');
+      setEmailPassword('');
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : 'Erro ao alterar usuário.');
+      setErr(e instanceof Error ? e.message : 'Erro ao atualizar e-mail.');
     } finally {
       setLoading(false);
     }
@@ -53,7 +53,7 @@ export default function AdminSeguranca() {
 
   return (
     <div className="max-w-xl space-y-6">
-      <PageHeader title="Segurança" description="Altere o usuário e a senha do painel admin" />
+      <PageHeader title="Seguranca" description="Gerencie a conta administrativa do Supabase" />
 
       {(msg || err) && (
         <p
@@ -68,27 +68,22 @@ export default function AdminSeguranca() {
 
       <Card className="p-5 space-y-4">
         <h2 className="font-semibold">Alterar senha</h2>
-        <p className="text-xs text-text-secondary">
-          Padrão inicial: usuário <strong>admin</strong> · senha <strong>123</strong>
-        </p>
+        <p className="text-xs text-text-secondary">Use uma senha com pelo menos 12 caracteres.</p>
         <form onSubmit={onChangePassword} className="space-y-3">
           <Input label="Senha atual" type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required autoComplete="current-password" />
-          <Input label="Nova senha" type="password" value={next} onChange={(e) => setNext(e.target.value)} required autoComplete="new-password" />
-          <Input label="Confirmar nova senha" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required autoComplete="new-password" />
-          <Button type="submit" loading={loading}>
-            Salvar nova senha
-          </Button>
+          <Input label="Nova senha" type="password" value={next} onChange={(e) => setNext(e.target.value)} required minLength={12} autoComplete="new-password" />
+          <Input label="Confirmar nova senha" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={12} autoComplete="new-password" />
+          <Button type="submit" loading={loading}>Salvar nova senha</Button>
         </form>
       </Card>
 
       <Card className="p-5 space-y-4">
-        <h2 className="font-semibold">Alterar usuário admin</h2>
-        <form onSubmit={onChangeUser} className="space-y-3">
-          <Input label="Novo usuário" value={newUser} onChange={(e) => setNewUser(e.target.value)} required />
-          <Input label="Confirme com a senha atual" type="password" value={userPass} onChange={(e) => setUserPass(e.target.value)} required />
-          <Button type="submit" variant="outline" loading={loading}>
-            Atualizar usuário
-          </Button>
+        <h2 className="font-semibold">Alterar e-mail administrativo</h2>
+        <p className="text-xs text-text-secondary">Conta atual: {accountEmail || '-'}</p>
+        <form onSubmit={onChangeEmail} className="space-y-3">
+          <Input label="Novo e-mail" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required autoComplete="email" />
+          <Input label="Confirme com a senha atual" type="password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} required autoComplete="current-password" />
+          <Button type="submit" variant="outline" loading={loading}>Atualizar e-mail</Button>
         </form>
       </Card>
     </div>

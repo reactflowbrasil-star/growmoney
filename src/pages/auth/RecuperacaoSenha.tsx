@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
 
 export default function RecuperacaoSenha() {
   const [email, setEmail] = useState('');
@@ -28,3 +27,4 @@ export default function RecuperacaoSenha() {
     </div>
   );
 }
+

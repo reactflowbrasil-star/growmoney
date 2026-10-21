@@ -111,7 +111,7 @@ export interface PaginatedResult<T> {
   total_pages: number;
 }
 
-export interface ContratoCompleto extends Contrato {
+export interface ContratoCompleto extends Omit<Contrato, 'parcelas'> {
   cliente?: { nome: string; documento: string; email?: string };
   servico?: { nome: string; valor_base: number };
   vendedor?: { nome: string };

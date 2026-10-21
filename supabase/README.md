@@ -49,3 +49,4 @@ VITE_SUPABASE_ANON_KEY=<sua-anon-key>
 
 RLS: isolamento por `empresa_id` via `is_empresa_member()`.
 No signup, trigger cria linha em `profiles` automaticamente.
+

@@ -56,7 +56,7 @@ export function getEnvelopeBySignerToken(t: string): { envelope: Envelope; signe
   return null;
 }
 
-function pushEvent(e: Envelope, type: string, message: string, actor?: string): EnvelopeEvent {
+function pushEvent(_e: Envelope, type: string, message: string, actor?: string): EnvelopeEvent {
   return {
     id: uid(),
     at: new Date().toISOString(),
@@ -82,7 +82,7 @@ export function createEnvelope(input: {
   createdBy: string;
   messageToSigners?: string;
   arquivoNome?: string;
-  arquivoDataUrl?: string;
+  arquivoStoragePath?: string;
   signers: Array<{ nome: string; email: string; role?: 'sign' | 'cc' }>;
 }): Envelope {
   const now = new Date().toISOString();
@@ -92,7 +92,7 @@ export function createEnvelope(input: {
     descricao: input.descricao || '',
     documentoTexto: input.documentoTexto,
     arquivoNome: input.arquivoNome,
-    arquivoDataUrl: input.arquivoDataUrl,
+    arquivoStoragePath: input.arquivoStoragePath,
     status: 'rascunho',
     createdAt: now,
     updatedAt: now,
@@ -294,3 +294,4 @@ export function signingUrl(tokenStr: string) {
   if (typeof window === 'undefined') return `/assinar/${tokenStr}`;
   return `${window.location.origin}/assinar/${tokenStr}`;
 }
+

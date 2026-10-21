@@ -1,4 +1,4 @@
-import { Card, Button } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { Shield } from 'lucide-react';
 

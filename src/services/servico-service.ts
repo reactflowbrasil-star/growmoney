@@ -11,15 +11,15 @@ export class ServicoService {
     return ServicoRepository.create(data, userId);
   }
 
-  static async update(id: string, empresaId: string, data: UpdateServicoData, userId: string, userRole: string): Promise<Servico> {
+  static async update(id: string, empresaId: string, data: UpdateServicoData, _userId: string, userRole: string): Promise<Servico> {
     if (!hasPermission(userRole as any, 'servicos:write')) {
       throw new Error('Permissao insuficiente para atualizar servico');
     }
 
-    return ServicoRepository.update(id, empresaId, data, userId);
+    return ServicoRepository.update(id, empresaId, data);
   }
 
-  static async delete(id: string, empresaId: string, userId: string, userRole: string): Promise<void> {
+  static async delete(id: string, empresaId: string, _userId: string, userRole: string): Promise<void> {
     if (!hasPermission(userRole as any, 'servicos:delete')) {
       throw new Error('Permissao insuficiente para excluir servico');
     }
@@ -51,3 +51,4 @@ export class ServicoService {
     return ServicoRepository.getCategoriaStats(empresaId);
   }
 }
+

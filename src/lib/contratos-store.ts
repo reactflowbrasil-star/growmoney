@@ -1,4 +1,5 @@
-/** Persistência local de clientes, serviços e contratos (espelha o fluxo Automattize). */
+/** Catálogo local e persistência remota de contratos do GrowMoney. */
+import { supabase } from '@/lib/supabase/client';
 
 export type ClienteLocal = {
   id: string;
@@ -8,6 +9,12 @@ export type ClienteLocal = {
   telefone: string;
   whatsapp?: string;
   cidade?: string;
+  endereco?: string;
+  numero_endereco?: string;
+  bairro?: string;
+  complemento?: string;
+  cep?: string;
+  estado?: string;
   tipo: 'PF' | 'PJ';
 };
 
@@ -36,6 +43,9 @@ export type ContratoItem = {
   tipo: 'unico' | 'mensal';
   isBonus: boolean;
   quantidade: number;
+  valor_total?: number;
+  valor_comercial_total?: number;
+  prazo_meses?: number;
 };
 
 export type ContratoLocal = {
@@ -44,6 +54,16 @@ export type ContratoLocal = {
   client_id: string;
   cliente_nome: string;
   cliente_documento?: string;
+  cliente_email?: string;
+  cliente_telefone?: string;
+  cliente_endereco?: string;
+  cliente_numero_endereco?: string;
+  cliente_bairro?: string;
+  cliente_complemento?: string;
+  cliente_cep?: string;
+  cliente_cidade?: string;
+  cliente_estado?: string;
+  vendedor?: string;
   itens: ContratoItem[];
   unidades: number;
   valor_bruto: number;
@@ -51,6 +71,10 @@ export type ContratoLocal = {
   desconto_valor: number;
   desconto_percentual: number;
   bonus_total: number;
+  economia_total?: number;
+  prazo_meses?: number;
+  modalidade?: string;
+  data_primeira_parcela?: string;
   forma_pagamento: string;
   parcelas: number;
   valor_parcela: number;
@@ -70,15 +94,24 @@ const K_CONTRATOS = 'gm_contratos_v1';
 const K_SERVICOS = 'gm_servicos_catalogo_v1';
 
 const DEFAULT_SERVICOS: ServicoCatalogo[] = [
-  { id: 'svc-site', nome: 'Site institucional', categoria: 'Digital', descricao: 'Site completo com páginas institucionais', texto_contrato: 'Desenvolvimento de site institucional', valor: 2500, tipo: 'unico', tipo_cobranca: 'unico', ordem: 1, ativo: true, exclusaoGrupo: 'web' },
-  { id: 'svc-landing', nome: 'Landing Page', categoria: 'Digital', descricao: 'Página de captura focada em conversão', texto_contrato: 'Desenvolvimento de landing page', valor: 1200, tipo: 'unico', tipo_cobranca: 'unico', ordem: 2, ativo: true, exclusaoGrupo: 'web' },
-  { id: 'svc-seo', nome: 'SEO mensal', categoria: 'Marketing', descricao: 'Otimização orgânica contínua', valor: 890, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 3, ativo: true },
-  { id: 'svc-trafego', nome: 'Tráfego pago (gestão)', categoria: 'Marketing', descricao: 'Anúncios no Google Ads, Anúncio no Meta Ads', texto_contrato: 'Gestão de mídia paga', valor: 1200, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 4, ativo: true },
-  { id: 'svc-social', nome: 'Social media', categoria: 'Marketing', valor: 1500, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 5, ativo: true },
-  { id: 'svc-crm', nome: 'Implantação CRM', categoria: 'Sistemas', valor: 3500, tipo: 'unico', tipo_cobranca: 'unico', ordem: 6, ativo: true },
-  { id: 'svc-suporte', nome: 'Suporte premium', categoria: 'Suporte', valor: 499, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 7, ativo: true, bonus_permitido: true },
-  { id: 'svc-hospedagem', nome: 'Hospedagem anual', categoria: 'Infra', valor: 600, tipo: 'unico', tipo_cobranca: 'unico', ordem: 8, ativo: true, bonus_permitido: true },
-  { id: 'svc-consultoria', nome: 'Consultoria estratégica', categoria: 'Consultoria', valor: 2000, tipo: 'unico', tipo_cobranca: 'unico', ordem: 9, ativo: true },
+  { id: 'svc-trafego', nome: 'Gestor de tráfego pago', categoria: 'GESTÃO DE TRÁFEGO', valor: 597, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 1, ativo: true, bonus_permitido: false },
+  { id: 'svc-google-perfil', nome: 'Criação/Otimização do perfil do Google Meu Negócio', categoria: 'GOOGLE', valor: 297, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 2, ativo: true, bonus_permitido: false },
+  { id: 'svc-landing', nome: 'Landing Page', categoria: 'GOOGLE', valor: 997, tipo: 'unico', tipo_cobranca: 'unico', ordem: 3, ativo: true, bonus_permitido: false, exclusaoGrupo: 'web' },
+  { id: 'svc-site-catalogo', nome: 'Site catálogo', categoria: 'GOOGLE', valor: 2497, tipo: 'unico', tipo_cobranca: 'unico', ordem: 4, ativo: true, bonus_permitido: false },
+  { id: 'svc-meta-gestao', nome: 'Gestão de Tráfego Meta Ads', categoria: 'META ADS', valor: 597, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 5, ativo: true, bonus_permitido: false },
+  { id: 'svc-google-ads-gestao', nome: 'Gestão de Tráfego Google Ads', categoria: 'GOOGLE ADS', valor: 697, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 6, ativo: true, bonus_permitido: false },
+  { id: 'svc-loja-virtual', nome: 'Loja Virtual', categoria: 'DIGITAL', valor: 3997, tipo: 'unico', tipo_cobranca: 'unico', ordem: 7, ativo: true, bonus_permitido: false },
+  { id: 'svc-site', nome: 'Site institucional', categoria: 'DIGITAL', valor: 1497, tipo: 'unico', tipo_cobranca: 'unico', ordem: 8, ativo: true, bonus_permitido: false, exclusaoGrupo: 'web' },
+  { id: 'svc-instagram-reform', nome: 'Reformulação do Instagram', categoria: 'INSTAGRAM', valor: 597, tipo: 'unico', tipo_cobranca: 'unico', ordem: 9, ativo: true, bonus_permitido: false },
+  { id: 'bonus-google-cartao', nome: 'Cartão digital Google', categoria: 'GOOGLE', valor: 97, tipo: 'unico', tipo_cobranca: 'unico', ordem: 20, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-google-ads-config', nome: 'Configuração de Conta Google Ads', categoria: 'GOOGLE', valor: 297, tipo: 'unico', tipo_cobranca: 'unico', ordem: 21, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-keywords', nome: 'Inserção/otimização de palavras-chave', categoria: 'GOOGLE', valor: 297, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 22, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-rastreamento', nome: 'Rastreamento e Tag do Google', categoria: 'GOOGLE', valor: 297, tipo: 'unico', tipo_cobranca: 'unico', ordem: 23, ativo: true, contratacao_permitida: false, bonus_gatilhos: ['svc-site', 'svc-landing', 'svc-site-catalogo', 'svc-loja-virtual'] },
+  { id: 'bonus-seo', nome: 'SEO', categoria: 'SEO', valor: 597, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 24, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-meta-posts', nome: '3 posts no Instagram', categoria: 'META ADS', valor: 97, tipo: 'unico', tipo_cobranca: 'unico', ordem: 25, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-link-bio', nome: 'Árvore de links (link da bio)', categoria: 'META ADS', valor: 97, tipo: 'unico', tipo_cobranca: 'unico', ordem: 26, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-meta-config', nome: 'Configuração de Conta Meta Ads', categoria: 'META ADS', valor: 197, tipo: 'unico', tipo_cobranca: 'unico', ordem: 27, ativo: true, contratacao_permitida: false },
+  { id: 'bonus-instagram-bio', nome: 'Configuração e Otimização de Bio do Instagram', categoria: 'INSTAGRAM', valor: 97, tipo: 'unico', tipo_cobranca: 'unico', ordem: 28, ativo: true, contratacao_permitida: false },
 ];
 
 function read<T>(key: string, fallback: T): T {
@@ -109,6 +142,12 @@ export function saveCliente(c: Omit<ClienteLocal, 'id'> & { id?: string }): Clie
     telefone: c.telefone,
     whatsapp: c.whatsapp,
     cidade: c.cidade,
+    endereco: c.endereco,
+    numero_endereco: c.numero_endereco,
+    bairro: c.bairro,
+    complemento: c.complemento,
+    cep: c.cep,
+    estado: c.estado,
     tipo: c.tipo,
   };
   const idx = list.findIndex((x) => x.id === item.id);
@@ -142,9 +181,31 @@ function normalizeServico(s: Partial<ServicoCatalogo> & { id: string; nome: stri
 export function listServicosCatalogo(): ServicoCatalogo[] {
   const existing = read<ServicoCatalogo[] | null>(K_SERVICOS, null);
   if (existing && existing.length) {
-    return existing
-      .map((s) => normalizeServico(s))
-      .sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome));
+    const obsoleteDefaults: Record<string, { nome: string; valor: number }> = {
+      'svc-seo': { nome: 'SEO mensal', valor: 890 },
+      'svc-social': { nome: 'Social media', valor: 1500 },
+      'svc-crm': { nome: 'Implantação CRM', valor: 3500 },
+      'svc-suporte': { nome: 'Suporte premium', valor: 499 },
+      'svc-hospedagem': { nome: 'Hospedagem anual', valor: 600 },
+      'svc-consultoria': { nome: 'Consultoria estratégica', valor: 2000 },
+    };
+    const retained = existing.map((s) => normalizeServico(s)).filter((s) => {
+      const obsolete = obsoleteDefaults[s.id];
+      return !obsolete || s.nome !== obsolete.nome || s.valor !== obsolete.valor;
+    });
+    const byId = new Map(retained.map((s) => [s.id, s]));
+    DEFAULT_SERVICOS.forEach((seed) => {
+      const current = byId.get(seed.id);
+      if (!current) {
+        byId.set(seed.id, seed);
+        return;
+      }
+      const legacyDefaults: Record<string, number> = { 'svc-site': 2500, 'svc-landing': 1200, 'svc-trafego': 1200 };
+      if (legacyDefaults[seed.id] === current.valor) byId.set(seed.id, { ...current, ...seed });
+    });
+    const merged = [...byId.values()].sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome));
+    if (merged.length !== existing.length || merged.some((s) => existing.find((item) => item.id === s.id)?.valor !== s.valor)) write(K_SERVICOS, merged);
+    return merged;
   }
   write(K_SERVICOS, DEFAULT_SERVICOS);
   return [...DEFAULT_SERVICOS];
@@ -172,40 +233,74 @@ export function deleteServico(id: string) {
   );
 }
 
-export function listContratos(): ContratoLocal[] {
-  return read<ContratoLocal[]>(K_CONTRATOS, []);
+type ContratoRemoto = { id: string; numero: number; status: ContratoLocal['status']; payload: ContratoLocal; created_at: string };
+
+async function currentUserId() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) throw new Error('Entre na sua conta para acessar os contratos.');
+  return user.id;
 }
 
-export function nextNumeroContrato(): number {
-  const list = listContratos();
-  return list.reduce((m, c) => Math.max(m, c.numero), 0) + 1;
+function fromRemote(row: ContratoRemoto): ContratoLocal {
+  return { ...row.payload, id: row.id, numero: row.numero, status: row.status, created_at: row.created_at };
 }
 
-export function saveContrato(
+export async function listContratosRemotos(): Promise<ContratoLocal[]> {
+  const userId = await currentUserId();
+  const legacy = read<ContratoLocal[]>(K_CONTRATOS, []);
+  if (legacy.length) {
+    const rows = legacy.map((contrato) => ({
+      id: /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(contrato.id) ? contrato.id : crypto.randomUUID(),
+      user_id: userId,
+      status: contrato.status,
+      payload: contrato,
+      created_at: contrato.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }));
+    const { error } = await supabase.from('gm_contracts').upsert(rows, { onConflict: 'id', ignoreDuplicates: true });
+    if (error) throw new Error(`Não foi possível migrar os contratos locais para o servidor: ${error.message}`);
+    localStorage.removeItem(K_CONTRATOS);
+  }
+
+  const { data, error } = await supabase
+    .from('gm_contracts')
+    .select('id, numero, status, payload, created_at')
+    .eq('user_id', userId)
+    .order('numero', { ascending: false });
+  if (error) throw new Error(`Não foi possível carregar os contratos: ${error.message}`);
+  return ((data || []) as ContratoRemoto[]).map(fromRemote);
+}
+
+export async function saveContrato(
   c: Omit<ContratoLocal, 'id' | 'numero' | 'created_at'> & { id?: string; numero?: number }
-): ContratoLocal {
-  const list = listContratos();
+): Promise<ContratoLocal> {
+  const userId = await currentUserId();
+  const id = c.id || crypto.randomUUID();
   const item: ContratoLocal = {
     ...c,
-    id: c.id || crypto.randomUUID(),
-    numero: c.numero || nextNumeroContrato(),
+    id,
+    numero: c.numero || 0,
     created_at: new Date().toISOString(),
   };
-  list.unshift(item);
-  write(K_CONTRATOS, list);
-  return item;
+  const { data, error } = await supabase
+    .from('gm_contracts')
+    .insert({ id, user_id: userId, status: item.status, payload: item })
+    .select('id, numero, status, payload, created_at')
+    .single();
+  if (error) throw new Error(`Não foi possível salvar o contrato no servidor: ${error.message}`);
+  return fromRemote(data as ContratoRemoto);
 }
 
-export function updateContratoStatus(id: string, status: ContratoLocal['status']) {
-  const list = listContratos().map((c) => (c.id === id ? { ...c, status } : c));
-  write(K_CONTRATOS, list);
+export async function updateContratoStatus(id: string, status: ContratoLocal['status']) {
+  const userId = await currentUserId();
+  const { error } = await supabase.from('gm_contracts').update({ status, updated_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
+  if (error) throw new Error(`Não foi possível atualizar o contrato: ${error.message}`);
 }
 
-export function deleteContrato(id: string) {
-  write(
-    K_CONTRATOS,
-    listContratos().filter((c) => c.id !== id)
-  );
+export async function deleteContrato(id: string) {
+  const userId = await currentUserId();
+  const { error } = await supabase.from('gm_contracts').delete().eq('id', id).eq('user_id', userId);
+  if (error) throw new Error(`Não foi possível excluir o contrato: ${error.message}`);
 }
 
 export function formatBRL(n: number) {
@@ -219,6 +314,11 @@ export function formatValorCobranca(n: number, tipo: 'unico' | 'mensal') {
 
 export function addMonths(isoDate: string, months: number): string {
   const d = new Date(isoDate + 'T12:00:00');
+  const day = d.getDate();
+  d.setDate(1);
   d.setMonth(d.getMonth() + months);
+  const finalDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, finalDay));
   return d.toISOString().slice(0, 10);
 }
+

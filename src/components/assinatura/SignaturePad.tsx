@@ -116,3 +116,4 @@ export function SignaturePad({ onChange, className, height = 180 }: Props) {
     </div>
   );
 }
+

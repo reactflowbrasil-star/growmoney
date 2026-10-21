@@ -38,7 +38,7 @@ export interface Envelope {
   descricao: string;
   documentoTexto: string;
   arquivoNome?: string;
-  arquivoDataUrl?: string;
+  arquivoStoragePath?: string;
   status: EnvelopeStatus;
   createdAt: string;
   updatedAt: string;
@@ -57,3 +57,4 @@ export interface SavedSignature {
   mode: SignatureMode;
   createdAt: string;
 }
+

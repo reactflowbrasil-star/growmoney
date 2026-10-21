@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Mail, Phone, MessageCircle, Id, Target, Percent, Save } from 'lucide-react';
+import { User, Mail, Phone, MessageCircle, Fingerprint, Target, Percent, Save } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -97,7 +97,7 @@ export function VendedorForm({ initialData, onSubmit, empresaId, isEdit = false,
         </div>
         <div>
           <label htmlFor="identificador_interno" className="block text-sm font-medium text-text-secondary mb-1">Identificador Interno</label>
-          <Input id="identificador_interno" leftIcon={<Id className="w-4 h-4" />} value={formData.identificador_interno} onChange={(event) => setFormData({ ...formData, identificador_interno: event.target.value })} required />
+          <Input id="identificador_interno" leftIcon={<Fingerprint className="w-4 h-4" />} value={formData.identificador_interno} onChange={(event) => setFormData({ ...formData, identificador_interno: event.target.value })} required />
         </div>
         <div>
           <label htmlFor="role" className="block text-sm font-medium text-text-secondary mb-1">Funcao</label>
@@ -137,3 +137,4 @@ export function VendedorForm({ initialData, onSubmit, empresaId, isEdit = false,
     </form>
   );
 }
+

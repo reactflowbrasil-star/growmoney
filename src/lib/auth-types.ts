@@ -39,3 +39,4 @@ export interface UserSession {
   token: string;
   expira_em: string;
 }
+

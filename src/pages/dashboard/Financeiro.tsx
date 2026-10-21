@@ -74,9 +74,10 @@ export default function Financeiro() {
           <Input label="Cliente" value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} required />
           <Input label="Valor (R$)" type="number" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} />
           <Input label="Vencimento" type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} />
-          <div><p className="text-sm font-medium mb-2">Comprovante</p><FileUpload accept="image/*,.pdf" /></div>
+          <div><p className="text-sm font-medium mb-2">Comprovante</p><FileUpload accept="image/*,.pdf" categoria="arquivos" /></div>
         </div>
       </Modal>
     </div>
   );
 }
+

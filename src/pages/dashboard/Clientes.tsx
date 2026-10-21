@@ -78,9 +78,10 @@ export default function Clientes() {
               <option value="PF">Pessoa física</option>
             </select>
           </div>
-          <div className="sm:col-span-2"><p className="text-sm font-medium mb-2">Documentos</p><FileUpload multiple /></div>
+          <div className="sm:col-span-2"><p className="text-sm font-medium mb-2">Documentos</p><FileUpload multiple categoria="arquivos" /></div>
         </div>
       </Modal>
     </div>
   );
 }
+

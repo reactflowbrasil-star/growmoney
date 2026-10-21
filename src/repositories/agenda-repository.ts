@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { CreateCompromissoData, UpdateCompromissoData, FiltrosAgenda, AgendaCompromisso, PaginatedResult, AgendaHistorico, AgendaTipo, AgendaStatus, ConflitoVerificado } from '@/lib/agenda-types';
+import type { CreateCompromissoData, UpdateCompromissoData, AgendaCompromisso, PaginatedResult, AgendaHistorico, AgendaTipo, AgendaStatus, ConflitoVerificado } from '@/lib/agenda-types';
 
 interface Filtros {
   empresaId: string;
@@ -72,7 +72,7 @@ export class AgendaRepository {
     };
   }
 
-  static async update(id: string, empresaId: string, data: UpdateCompromissoData, userId: string): Promise<AgendaCompromisso> {
+  static async update(id: string, empresaId: string, data: UpdateCompromissoData): Promise<AgendaCompromisso> {
     const { data: comp, error } = await supabase
       .from('agenda')
       .update({ ...data, atualizado_em: new Date().toISOString() })

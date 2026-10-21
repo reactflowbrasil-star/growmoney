@@ -61,6 +61,14 @@ export interface ConflitoVerificado {
   compromisso?: AgendaCompromisso;
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
 export interface AgendaHistorico {
   id: string;
   compromisso_id: string;

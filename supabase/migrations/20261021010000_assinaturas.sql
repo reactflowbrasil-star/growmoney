@@ -42,3 +42,4 @@ create table if not exists public.signature_events (
 
 create index if not exists idx_signers_token on public.signature_signers(token);
 create index if not exists idx_envelopes_empresa on public.signature_envelopes(empresa_id);
+

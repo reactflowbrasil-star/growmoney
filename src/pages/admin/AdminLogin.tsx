@@ -6,7 +6,7 @@ import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { BRAND } from '@/lib/brand';
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState('admin');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
     try {
-      await login(username, password);
+      await login(email, password);
       navigate('/admin', { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Falha no login.');
@@ -50,12 +50,13 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Usuário"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            label="E-mail administrativo"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             leftIcon={<User className="w-4 h-4" />}
             required
-            autoComplete="username"
+            autoComplete="email"
           />
           <Input
             label="Senha"
@@ -85,3 +86,4 @@ export default function AdminLogin() {
     </div>
   );
 }
+

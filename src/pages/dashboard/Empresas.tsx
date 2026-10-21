@@ -94,9 +94,10 @@ export default function Empresas() {
         <div className="space-y-4">
           <Input label="Nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
           <Input label="CNPJ" value={cnpj} onChange={(e) => setCnpj(e.target.value)} />
-          <div><p className="text-sm font-medium mb-2">Logo / documentos</p><FileUpload accept="image/*,.pdf" /></div>
+          <div><p className="text-sm font-medium mb-2">Logo / documentos</p><FileUpload accept="image/*,.pdf" categoria="auto" /></div>
         </div>
       </Modal>
     </div>
   );
 }
+

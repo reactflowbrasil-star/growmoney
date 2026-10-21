@@ -44,6 +44,7 @@ export interface ClienteHistorico {
 export interface CreateClienteData {
   empresa_id: string;
   nome: string;
+  razao_social?: string;
   tipo: ClientType;
   documento: string;
   email?: string;
@@ -60,6 +61,7 @@ export interface UpdateClienteData extends Partial<CreateClienteData> {
 }
 
 export interface FiltrosCliente {
+  empresaId: string;
   busca?: string;
   status?: ClientStatus;
   tipo?: ClientType;

@@ -6,26 +6,18 @@ import {
   useCallback,
   ReactNode,
 } from 'react';
-import {
-  getAdminSession,
-  createAdminSession,
-  setAdminSession,
-  validateAdminLogin,
-  changeAdminPassword,
-  changeAdminUsername,
-  getAdminCredentials,
-  type AdminSession,
-} from '@/lib/admin-auth';
+import { supabase } from '@/lib/supabase/client';
+import type { AdminSession } from '@/lib/admin-auth';
 
 interface AdminAuthValue {
   session: AdminSession | null;
   isAdmin: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   updatePassword: (current: string, next: string) => Promise<void>;
-  updateUsername: (username: string, password: string) => Promise<void>;
-  credentialsUsername: string;
+  updateEmail: (email: string, currentPassword: string) => Promise<void>;
+  accountEmail: string;
 }
 
 const AdminAuthContext = createContext<AdminAuthValue | null>(null);
@@ -36,59 +28,132 @@ export function useAdminAuth() {
   return ctx;
 }
 
+async function hasPlatformAdminAccess(userId: string) {
+  const { data, error } = await supabase
+    .from('platform_admins')
+    .select('user_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw new Error(`Falha ao verificar acesso administrativo: ${error.message}`);
+  return Boolean(data);
+}
+
+function toAdminSession(user: { id: string; email?: string | null }): AdminSession {
+  return {
+    userId: user.id,
+    username: user.email || user.id,
+    loggedAt: new Date().toISOString(),
+  };
+}
+
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [credentialsUsername, setCredentialsUsername] = useState('admin');
 
   useEffect(() => {
-    setSession(getAdminSession());
-    setCredentialsUsername(getAdminCredentials().username);
-    setIsLoading(false);
-  }, []);
+    let mounted = true;
 
-  const login = useCallback(async (username: string, password: string) => {
-    if (!validateAdminLogin(username, password)) {
-      throw new Error('Usuário ou senha inválidos.');
+    async function restoreAdminSession() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (data.session?.user && await hasPlatformAdminAccess(data.session.user.id) && mounted) {
+          setSession(toAdminSession(data.session.user));
+        }
+      } catch (error) {
+        console.error('Falha ao restaurar acesso administrativo', error);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
     }
-    const s = createAdminSession(username.trim());
-    setSession(s);
+
+    void restoreAdminSession();
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') setSession(null);
+    });
+
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const logout = useCallback(() => {
-    setAdminSession(null);
+  const login = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    if (error) throw new Error(`Falha no login: ${error.message}`);
+    if (!data.user) throw new Error('A autenticação não retornou um usuário.');
+
+    let authorized = false;
+    try {
+      authorized = await hasPlatformAdminAccess(data.user.id);
+    } catch (error) {
+      await supabase.auth.signOut();
+      throw error;
+    }
+
+    if (!authorized) {
+      await supabase.auth.signOut();
+      throw new Error('Esta conta não possui autorização para administrar a plataforma.');
+    }
+    setSession(toAdminSession(data.user));
+  }, []);
+
+  const logout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
     setSession(null);
+    if (error) throw new Error(`Falha ao sair: ${error.message}`);
   }, []);
 
   const updatePassword = useCallback(async (current: string, next: string) => {
-    const result = changeAdminPassword(current, next);
-    if (!result.ok) throw new Error(result.error);
+    if (next.length < 12) throw new Error('A nova senha deve ter pelo menos 12 caracteres.');
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user?.email) {
+      throw new Error('Não foi possível identificar a conta autenticada.');
+    }
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: userData.user.email,
+      password: current,
+    });
+    if (reauthError) throw new Error('A senha atual está incorreta.');
+
+    const { error } = await supabase.auth.updateUser({ password: next });
+    if (error) throw new Error(`Falha ao alterar senha: ${error.message}`);
   }, []);
 
-  const updateUsername = useCallback(
-    async (username: string, password: string) => {
-      const result = changeAdminUsername(username, password);
-      if (!result.ok) throw new Error(result.error);
-      setCredentialsUsername(getAdminCredentials().username);
-      if (session) {
-        const s = createAdminSession(username.trim());
-        setSession(s);
-      }
-    },
-    [session]
-  );
+  const updateEmail = useCallback(async (email: string, currentPassword: string) => {
+    const nextEmail = email.trim().toLowerCase();
+    if (!nextEmail) throw new Error('Informe um e-mail válido.');
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user?.email) {
+      throw new Error('Não foi possível identificar a conta autenticada.');
+    }
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email: userData.user.email,
+      password: currentPassword,
+    });
+    if (reauthError) throw new Error('A senha atual está incorreta.');
+
+    const { error } = await supabase.auth.updateUser({ email: nextEmail });
+    if (error) throw new Error(`Falha ao atualizar e-mail: ${error.message}`);
+  }, []);
 
   return (
     <AdminAuthContext.Provider
       value={{
         session,
-        isAdmin: !!session,
+        isAdmin: Boolean(session),
         isLoading,
         login,
         logout,
         updatePassword,
-        updateUsername,
-        credentialsUsername,
+        updateEmail,
+        accountEmail: session?.username || '',
       }}
     >
       {children}

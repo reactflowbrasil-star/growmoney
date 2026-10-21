@@ -6,7 +6,7 @@ vi.mock('@/lib/supabase/client', () => ({
     auth: {
       getUser: vi.fn(),
       getSession: vi.fn(),
-     /signUp: vi.fn(),
+      signUp: vi.fn(),
       signOut: vi.fn(),
     },
     from: vi.fn(() => ({
@@ -29,7 +29,7 @@ vi.mock('@/lib/supabase/client', () => ({
   },
 }));
 
-global.matchMedia = global.matchMedia || vi.fn(() => ({
+window.matchMedia = window.matchMedia || vi.fn(() => ({
   matches: false,
   media: '',
   addListener: vi.fn(),

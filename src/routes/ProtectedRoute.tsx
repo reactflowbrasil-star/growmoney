@@ -1,27 +1,25 @@
-import { Route, Redirect } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
-  path: string;
-  component: React.ComponentType;
   requiredPermission?: string;
   requiredRole?: string;
 }
 
-export function ProtectedRoute({ component: Component, requiredPermission, requiredRole, ...rest }: ProtectedRouteProps) {
+export function ProtectedRoute({ requiredPermission, requiredRole }: ProtectedRouteProps) {
   const { isAuthenticated, user, hasPermission } = useAuth();
 
   if (!isAuthenticated) {
-    return <Redirect to="/auth" />;
+    return <Navigate to="/auth" replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole && user?.role !== 'admin') {
-    return <Redirect to="/dashboard" />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (requiredPermission && user?.role !== 'admin' && !hasPermission(requiredPermission)) {
-    return <Redirect to="/dashboard" />;
+    return <Navigate to="/dashboard" replace />;
   }
 
-  return <Route {...rest} component={Component} />;
+  return <Outlet />;
 }

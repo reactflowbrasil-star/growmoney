@@ -65,3 +65,4 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
     </div>
   );
 }
+

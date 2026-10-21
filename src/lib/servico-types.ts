@@ -27,7 +27,7 @@ export interface CreateServicoData {
   valor_base: number;
   custo?: number;
   duracao_minutos?: number;
-  unidade?: 'hora' | 'dia' | 'semana' | 'mes' | 'ao' | 'unidade';
+  unidade?: 'hora' | 'dia' | 'semana' | 'mes' | 'ano' | 'unidade';
   condicoes_comerciais?: string;
 }
 
@@ -36,11 +36,20 @@ export interface UpdateServicoData extends Partial<CreateServicoData> {
 }
 
 export interface FiltrosServico {
+  empresaId: string;
   busca?: string;
   categoria?: string;
   status?: ServicoStatus;
   page?: number;
   limit?: number;
+}
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
 }
 
 export interface ComissaoRule {

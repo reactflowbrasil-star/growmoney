@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tag, User, Folder, DollarSign, Clock, Layout, Shield, FileText, Save } from 'lucide-react';
+import { Tag, User, Folder, DollarSign, Clock, Save } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -58,7 +58,7 @@ export function ServicoForm({ initialData, onSubmit, empresaId, isEdit = false, 
           categoria: formData.categoria,
           valor_base: Number(formData.valor_base) || 0,
           duracao_minutos: formData.duracao_minutos ? Number(formData.duracao_minutos) : undefined,
-          unidade: unidade as 'hora' | 'dia' | 'semana' | 'mes' | 'ano' | 'unidade',
+          unidade: unidade as NonNullable<CreateServicoData['unidade']>,
           condicoes_comerciais: formData.condicoes_comerciais || undefined,
           status: status as ServicoStatus,
         },
@@ -133,3 +133,4 @@ export function ServicoForm({ initialData, onSubmit, empresaId, isEdit = false, 
     </form>
   );
 }
+
