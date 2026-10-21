@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-21T17:35:06.267Z",
+  "generated_at": "2026-10-21T18:26:45.698Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -440,9 +440,9 @@
       "label": "src/pages/auth/RecuperacaoSenha.tsx"
     },
     {
-      "id": "file:src/pages/auth/RecuperaçãoSenha.tsx",
+      "id": "file:src/pages/auth/Recupera��oSenha.tsx",
       "type": "file",
-      "label": "src/pages/auth/RecuperaçãoSenha.tsx"
+      "label": "src/pages/auth/Recupera��oSenha.tsx"
     },
     {
       "id": "file:src/pages/auth/TermosUso.tsx",
@@ -2123,7 +2123,7 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:src/pages/auth/RecuperaçãoSenha.tsx",
+      "from": "file:src/pages/auth/Recupera��oSenha.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -3012,3 +3012,4 @@
     }
   ]
 }
+
