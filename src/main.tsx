@@ -22,6 +22,7 @@ import Dashboard from '@/pages/dashboard/Dashboard';
 import DashboardExecutivo from '@/pages/dashboard/DashboardExecutivo';
 import Clientes from '@/pages/dashboard/Clientes';
 import Contratos from '@/pages/dashboard/Contratos';
+import ContratoNovo from '@/pages/dashboard/ContratoNovo';
 import Servicos from '@/pages/dashboard/Servicos';
 import Vendedores from '@/pages/dashboard/Vendedores';
 import Agenda from '@/pages/dashboard/Agenda';
@@ -91,6 +92,7 @@ function App() {
                       <Route path="/clientes" element={<Clientes />} />
                       <Route path="/clients" element={<Clientes />} />
                       <Route path="/contratos" element={<Contratos />} />
+                      <Route path="/contratos/novo" element={<ContratoNovo />} />
                       <Route path="/assinaturas" element={<Assinaturas />} />
                       <Route path="/assinaturas/:id" element={<AssinaturaDetalhe />} />
                       <Route path="/servicos" element={<Servicos />} />
