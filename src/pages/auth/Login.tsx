@@ -4,6 +4,7 @@ import { Button, Input, Card } from '@/components/ui';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { BRAND } from '@/lib/brand';
+import { GoogleButton } from '@/components/auth/GoogleButton';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -44,6 +45,17 @@ export default function Login() {
             className="h-[168px] md:h-[200px] w-auto max-w-[520px] mx-auto object-contain"
           />
           <p className="text-text-secondary text-sm">{BRAND.tagline}</p>
+        </div>
+
+        <GoogleButton label="Entrar com Google" />
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border-color" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-bg-primary px-2 text-text-secondary">ou e-mail</span>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

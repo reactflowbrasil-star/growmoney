@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { BRAND } from '@/lib/brand';
+import { GoogleButton } from '@/components/auth/GoogleButton';
 
 export default function Cadastro() {
   const [form, setForm] = useState({
@@ -92,6 +93,17 @@ export default function Cadastro() {
           />
           <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
+        </div>
+
+        <GoogleButton label="Cadastrar com Google" />
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border-color" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-bg-primary px-2 text-text-secondary">ou preencha o formulário</span>
+          </div>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
