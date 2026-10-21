@@ -14,12 +14,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-bg-secondary text-text-primary">
       <header className="sticky top-0 z-50 border-b border-border-color/80 glass">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <img
               src={BRAND.logo}
               alt={BRAND.name}
-              className="h-10 w-auto max-w-[160px] object-contain"
+              className="h-12 md:h-14 w-auto max-w-[220px] object-contain"
             />
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -39,6 +39,11 @@ export default function LandingPage() {
 
       <section className="gradient-hero relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32 text-center">
+          <img
+            src={BRAND.logo}
+            alt={BRAND.name}
+            className="h-16 md:h-20 w-auto max-w-[320px] mx-auto object-contain mb-8"
+          />
           <p className="text-sm font-medium text-brand mb-4">SaaS de gestão financeira</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
             Sua gestão mais inteligente.
@@ -96,6 +101,11 @@ export default function LandingPage() {
 
       <section className="border-t border-border-color">
         <div className="max-w-6xl mx-auto px-4 py-16 text-center">
+          <img
+            src={BRAND.logo}
+            alt=""
+            className="h-14 w-auto max-w-[240px] mx-auto object-contain mb-6 opacity-95"
+          />
           <h2 className="text-2xl md:text-3xl font-bold">Pronto para crescer com o GROW?</h2>
           <p className="text-text-secondary mt-2 mb-6">{BRAND.tagline}</p>
           <Link to="/cadastro">
@@ -109,7 +119,11 @@ export default function LandingPage() {
       <footer className="border-t border-border-color py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-text-secondary">
           <div className="flex items-center gap-3">
-            <img src={BRAND.logo} alt="" className="h-7 w-auto max-w-[120px] object-contain opacity-90" />
+            <img
+              src={BRAND.logo}
+              alt=""
+              className="h-10 w-auto max-w-[160px] object-contain opacity-90"
+            />
             <span>
               © {new Date().getFullYear()} {BRAND.name}
             </span>

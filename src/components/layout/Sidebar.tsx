@@ -33,31 +33,48 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
         'fixed left-0 top-0 z-40 h-screen flex flex-col',
         'bg-bg-primary border-r border-border-color',
         'transition-[width] duration-300 ease-in-out',
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? 'w-20' : 'w-64'
       )}
       aria-label="Navegação principal"
     >
-      <div className="flex items-center h-16 px-3 border-b border-border-color gap-2">
+      <div
+        className={cn(
+          'flex items-center border-b border-border-color gap-2 shrink-0',
+          collapsed ? 'h-20 px-2 justify-center' : 'h-20 px-4'
+        )}
+      >
         <img
           src={logo}
           alt={BRAND.name}
           className={cn(
-            'object-contain object-left transition-all',
-            collapsed ? 'h-8 w-8 mx-auto' : 'h-9 w-auto max-w-[148px]'
+            'object-contain transition-all',
+            collapsed
+              ? 'h-12 w-12'
+              : 'h-14 w-auto max-w-[210px] object-left'
           )}
         />
+        {!collapsed && (
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary"
+            aria-label="Recolher menu"
+          >
+            <span className="text-sm font-bold">«</span>
+          </button>
+        )}
+      </div>
+
+      {collapsed && (
         <button
           type="button"
           onClick={toggleCollapse}
-          className={cn(
-            'ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary',
-            collapsed && 'mx-auto mt-2'
-          )}
-          aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          className="mx-auto mt-2 p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary"
+          aria-label="Expandir menu"
         >
-          <span className="text-xs font-bold">{collapsed ? '»' : '«'}</span>
+          <span className="text-sm font-bold">»</span>
         </button>
-      </div>
+      )}
 
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
         {items.map((item) => {
@@ -72,7 +89,8 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
                   ? 'bg-brand/15 text-brand'
-                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
+                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary',
+                collapsed && 'justify-center px-2'
               )}
               title={item.label}
             >
@@ -91,7 +109,7 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
       {user && !collapsed && (
         <div className="border-t border-border-color p-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-brand/20 text-brand flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-9 h-9 rounded-full bg-brand/20 text-brand flex items-center justify-center text-sm font-bold shrink-0">
               {(user.name || user.email || 'U').charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">

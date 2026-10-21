@@ -36,12 +36,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-secondary p-4">
-      <Card className="w-full max-w-md p-6">
-        <div className="text-center mb-6 space-y-3">
+      <Card className="w-full max-w-md p-6 md:p-8">
+        <div className="text-center mb-8 space-y-4">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-12 w-auto max-w-[200px] mx-auto object-contain"
+            className="h-20 md:h-24 w-auto max-w-[280px] mx-auto object-contain"
           />
           <p className="text-text-secondary text-sm">{BRAND.tagline}</p>
         </div>

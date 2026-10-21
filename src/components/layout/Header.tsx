@@ -2,17 +2,25 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Search, Menu, LogOut, Settings, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BRAND } from '@/lib/brand';
 
 interface HeaderProps {
   onMenuToggle: () => void;
-  onSearch: (query: string) => void;
+  onSearch?: (query: string) => void;
   user?: { name: string; email: string; avatar?: string };
   notifications?: Array<{ id: string; title: string; time: string; read: boolean }>;
   onNotificationRead?: (id: string) => void;
   onLogout?: () => void;
 }
 
-export function Header({ onMenuToggle, onSearch, user, notifications = [], onNotificationRead, onLogout }: HeaderProps) {
+export function Header({
+  onMenuToggle,
+  onSearch,
+  user,
+  notifications = [],
+  onNotificationRead,
+  onLogout,
+}: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -22,7 +30,7 @@ export function Header({ onMenuToggle, onSearch, user, notifications = [], onNot
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 h-16 flex items-center gap-4 px-4',
+        'sticky top-0 z-30 h-20 flex items-center gap-4 px-4',
         'bg-bg-primary border-b border-border-color',
         'shadow-sm'
       )}
@@ -39,33 +47,34 @@ export function Header({ onMenuToggle, onSearch, user, notifications = [], onNot
         <Menu className="w-6 h-6 text-text-primary" />
       </button>
 
-      <div className="flex items-center gap-2">
-        <span className="font-bold text-lg text-verde-discreto">GrowMoney</span>
-      </div>
+      <Link to="/dashboard" className="flex items-center shrink-0" aria-label={BRAND.name}>
+        <img
+          src={BRAND.logo}
+          alt={BRAND.name}
+          className="h-12 md:h-14 w-auto max-w-[200px] md:max-w-[240px] object-contain"
+        />
+      </Link>
 
-      <div className="flex-1 max-w-md mx-auto">
+      <div className="flex-1 max-w-md mx-auto hidden sm:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
           <input
             type="text"
-            placeholder="Search..."
-            value={searchOpen ? '' : ''}
-            onChange={(e) => onSearch(e.target.value)}
+            placeholder="Buscar..."
+            onChange={(e) => onSearch?.(e.target.value)}
             onFocus={() => setSearchOpen(true)}
             onBlur={() => setSearchOpen(false)}
             className={cn(
-              'w-full pl-10 pr-4 py-2 text-sm rounded-md',
+              'w-full pl-10 pr-4 py-2.5 text-sm rounded-xl',
               'bg-bg-secondary border border-border-color',
               'text-text-primary placeholder:text-text-secondary',
-              'focus:outline-none focus:ring-2 focus:ring-verde-discreto',
-              'transition-all',
-              !searchOpen && 'md:w-40 md:hover:w-64'
+              'focus:outline-none focus:ring-2 focus:ring-verde-discreto'
             )}
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 ml-auto">
         <div className="relative">
           <button
             onClick={() => setNotifOpen(!notifOpen)}
@@ -122,9 +131,9 @@ export function Header({ onMenuToggle, onSearch, user, notifications = [], onNot
             aria-label="Perfil"
           >
             {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+              <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-verde-discreto flex items-center justify-center text-branco text-sm font-bold">
+              <div className="w-9 h-9 rounded-full bg-verde-discreto flex items-center justify-center text-branco text-sm font-bold">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
             )}
@@ -137,10 +146,16 @@ export function Header({ onMenuToggle, onSearch, user, notifications = [], onNot
                 <p className="text-sm font-medium text-text-primary">{user?.name || 'Usuário'}</p>
                 <p className="text-xs text-text-secondary truncate">{user?.email || ''}</p>
               </div>
-              <Link to="/perfil" className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary">
+              <Link
+                to="/perfil"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary"
+              >
                 <User className="w-4 h-4" /> Meu Perfil
               </Link>
-              <Link to="/configuracoes" className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary">
+              <Link
+                to="/configuracoes"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary"
+              >
                 <Settings className="w-4 h-4" /> Configurações
               </Link>
               <button

@@ -4,6 +4,7 @@ import { Building2, User, Mail, Lock, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
+import { BRAND } from '@/lib/brand';
 
 export default function Cadastro() {
   const [form, setForm] = useState({
@@ -21,8 +22,7 @@ export default function Cadastro() {
   const { register, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const set = (k: keyof typeof form, v: string) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -84,9 +84,14 @@ export default function Cadastro() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-secondary px-4 py-8">
       <div className="w-full max-w-lg bg-bg-primary border border-border-color rounded-xl p-8 shadow-md">
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 space-y-4">
+          <img
+            src={BRAND.logo}
+            alt={BRAND.name}
+            className="h-16 md:h-20 w-auto max-w-[260px] mx-auto object-contain"
+          />
           <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
-          <p className="text-sm text-text-secondary mt-1">Cadastro empresarial Grow Money</p>
+          <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
