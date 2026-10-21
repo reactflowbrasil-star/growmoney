@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { BRAND } from '@/lib/brand';
 
 interface NavItem {
   label: string;
@@ -16,7 +17,7 @@ interface SidebarProps {
   onCollapse?: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ items, logo, user, onCollapse }: SidebarProps) {
+export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
@@ -36,76 +37,65 @@ export function Sidebar({ items, logo, user, onCollapse }: SidebarProps) {
       )}
       aria-label="Navegação principal"
     >
-      <div className="flex items-center h-16 px-4 border-b border-border-color">
-        {logo ? (
-          <img src={logo} alt="GrowMoney" className={cn('transition-all', collapsed ? 'w-8 h-8 mx-auto' : 'w-32 h-auto')} />
-        ) : (
-          <span className={cn('font-bold text-xl text-verde-discreto', collapsed && 'sr-only')}>GrowMoney</span>
-        )}
+      <div className="flex items-center h-16 px-3 border-b border-border-color gap-2">
+        <img
+          src={logo}
+          alt={BRAND.name}
+          className={cn(
+            'object-contain object-left transition-all',
+            collapsed ? 'h-8 w-8 mx-auto' : 'h-9 w-auto max-w-[148px]'
+          )}
+        />
         <button
+          type="button"
           onClick={toggleCollapse}
           className={cn(
-            'ml-auto p-1.5 rounded-md hover:bg-bg-tertiary',
-            'focus:outline-none focus:ring-2 focus:ring-verde-discreto',
-            'transition-colors'
+            'ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary',
+            collapsed && 'mx-auto mt-2'
           )}
           aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
         >
-          <svg
-            className={cn('w-5 h-5 transition-transform', collapsed && 'rotate-180')}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-          </svg>
+          <span className="text-xs font-bold">{collapsed ? '»' : '«'}</span>
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-2">
-        <ul className="space-y-1">
-          {items.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <li key={item.href}>
-                <Link
-                  to={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-3 py-2 rounded-md',
-                    'text-sm font-medium transition-colors',
-                    'focus:outline-none focus:ring-2 focus:ring-verde-discreto',
-                    isActive
-                      ? 'bg-verde-discreto/10 text-verde-discreto'
-                      : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
-                  )}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  <span className="flex-shrink-0 w-5 h-5">{item.icon}</span>
-                  <span className={cn('transition-opacity', collapsed && 'opacity-0 w-0')}>{item.label}</span>
-                  {item.badge && !collapsed && (
-                    <span className="ml-auto text-xs bg-verde-discreto text-branco px-2 py-0.5 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+        {items.map((item) => {
+          const active =
+            location.pathname === item.href ||
+            (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                active
+                  ? 'bg-brand/15 text-brand'
+                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary'
+              )}
+              title={item.label}
+            >
+              <span className="shrink-0">{item.icon}</span>
+              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && item.badge && (
+                <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-brand/20 text-brand">
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {user && (
+      {user && !collapsed && (
         <div className="border-t border-border-color p-3">
-          <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
-            {user.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-verde-discreto flex items-center justify-center text-branco text-sm font-bold">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className={cn('min-w-0', collapsed && 'hidden')}>
-              <p className="text-sm font-medium text-text-primary truncate">{user.name}</p>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-brand/20 text-brand flex items-center justify-center text-xs font-bold shrink-0">
+              {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{user.name}</p>
               <p className="text-xs text-text-secondary truncate">{user.email}</p>
             </div>
           </div>

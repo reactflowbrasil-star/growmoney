@@ -16,6 +16,7 @@ import {
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { BRAND } from '@/lib/brand';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -51,7 +52,7 @@ export function AppLayout() {
     <div className="min-h-screen bg-bg-secondary">
       <Sidebar
         items={navItems}
-        logo="/logo-grow.svg"
+        logo={BRAND.logo}
         user={layoutUser}
         onCollapse={setSidebarCollapsed}
       />
