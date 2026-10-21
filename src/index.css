@@ -1,3 +1,21 @@
+@import './design-system/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border-color;
+  }
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply bg-bg-primary text-text-primary font-sans min-h-screen;
+    margin: 0;
+  }
+  #root {
+    min-height: 100vh;
+  }
+}
