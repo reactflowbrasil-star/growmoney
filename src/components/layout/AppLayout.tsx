@@ -45,6 +45,7 @@ export function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Fecha drawer mobile ao mudar de rota
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
@@ -70,6 +71,7 @@ export function AppLayout() {
           items={navItems}
           logo={BRAND.logo}
           user={layoutUser}
+          collapsed={sidebarCollapsed}
           onCollapse={setSidebarCollapsed}
         />
       </div>
@@ -91,8 +93,8 @@ export function AppLayout() {
             items={navItems}
             logo={BRAND.logo}
             user={layoutUser}
-            onCollapse={() => setMobileOpen(false)}
             embedded
+            onCollapse={() => setMobileOpen(false)}
           />
         </div>
       </div>
