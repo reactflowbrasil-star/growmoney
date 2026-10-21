@@ -1,5 +1,4 @@
 import { useState, createContext, useContext, ReactNode, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 
 interface ThemeContextValue {
   theme: 'light' | 'dark';
@@ -31,9 +30,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className={cn('min-h-screen', theme === 'dark' ? 'bg-grafite-dark' : 'bg-branco')}>
+      <div className="min-h-screen bg-transparent">
         {children}
       </div>
     </ThemeContext.Provider>
   );
 }
+
