@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-21T18:26:45.698Z",
+  "generated_at": "2026-10-21T18:35:57.486Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -168,6 +168,11 @@
       "id": "file:src/components/layout/AppLayout.tsx",
       "type": "file",
       "label": "src/components/layout/AppLayout.tsx"
+    },
+    {
+      "id": "file:src/components/layout/GlobalFooter.tsx",
+      "type": "file",
+      "label": "src/components/layout/GlobalFooter.tsx"
     },
     {
       "id": "file:src/components/layout/Header.tsx",
@@ -683,6 +688,11 @@
       "id": "asset:public/.htaccess",
       "type": "static-asset",
       "label": "public/.htaccess"
+    },
+    {
+      "id": "asset:public/assets/canal360-logo.png",
+      "type": "static-asset",
+      "label": "public/assets/canal360-logo.png"
     },
     {
       "id": "asset:public/assets/logo.png",
@@ -1501,6 +1511,12 @@
     {
       "from": "file:src/main.tsx",
       "to": "file:src/components/ui/FloatingThemeSwitcher.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/components/layout/GlobalFooter.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
