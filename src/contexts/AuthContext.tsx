@@ -165,32 +165,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password: senha,
         options: { data: { nome } },
       });
-      if (error) throw new Error(`Falha ao registrar: ${error.message}`);
-      if (!data.user) throw new Error('Usuario nao retornado apos cadastro');
+      if (error) throw new Error(error.message || 'Falha ao registrar');
+      if (!data.user) throw new Error('Usuário não retornado após cadastro');
 
-      await supabase.from('profiles').upsert({
+      if (!data.session) {
+        throw new Error(
+          'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faça login.'
+        );
+      }
+
+      const { error: profileError } = await supabase.from('profiles').upsert({
         id: data.user.id,
         email,
         nome,
         role: 'admin',
       });
+      if (profileError) {
+        console.warn('profiles upsert:', profileError.message);
+      }
 
-      const { data: novaEmpresa } = await supabase
+      const { data: novaEmpresa, error: empresaError } = await supabase
         .from('empresas')
         .insert({
           nome: empresaNome,
           responsavel_id: data.user.id,
+          configuracoes: {},
         })
         .select('*')
         .single();
 
+      if (empresaError) {
+        throw new Error(`Conta criada, mas falha ao criar empresa: ${empresaError.message}`);
+      }
+
       if (novaEmpresa) {
-        await supabase.from('empresa_members').insert({
+        const { error: memberError } = await supabase.from('empresa_members').insert({
           empresa_id: novaEmpresa.id,
           usuario_id: data.user.id,
           role: 'admin',
           status: 'aceito',
+          aceito_em: new Date().toISOString(),
         });
+        if (memberError) {
+          console.warn('empresa_members:', memberError.message);
+        }
       }
 
       const session: UserSession = {
@@ -216,6 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setEmpresaAtiva(emp);
         setEmpresas([emp]);
+        localStorage.setItem('empresaAtiva', novaEmpresa.id);
       }
     },
     []
