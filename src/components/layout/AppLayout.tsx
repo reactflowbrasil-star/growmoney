@@ -12,6 +12,7 @@ import {
   Settings,
   Building2,
   TrendingUp,
+  FileSignature,
 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
@@ -26,6 +27,7 @@ const navItems = [
   { label: 'Empresas', href: '/empresas', icon: <Building2 className="w-5 h-5" /> },
   { label: 'Clientes', href: '/clientes', icon: <Users className="w-5 h-5" /> },
   { label: 'Contratos', href: '/contratos', icon: <FileText className="w-5 h-5" /> },
+  { label: 'Assinaturas', href: '/assinaturas', icon: <FileSignature className="w-5 h-5" /> },
   { label: 'Servicos', href: '/servicos', icon: <Briefcase className="w-5 h-5" /> },
   { label: 'Vendedores', href: '/vendedores', icon: <Users className="w-5 h-5" /> },
   { label: 'Agenda', href: '/agenda', icon: <Calendar className="w-5 h-5" /> },

@@ -30,6 +30,9 @@ import Auditoria from '@/pages/dashboard/Auditoria';
 import Configuracoes from '@/pages/dashboard/Configuracoes';
 import Perfil from '@/pages/dashboard/Perfil';
 import Empresas from '@/pages/dashboard/Empresas';
+import Assinaturas from '@/pages/dashboard/Assinaturas';
+import AssinaturaDetalhe from '@/pages/dashboard/AssinaturaDetalhe';
+import AssinarDocumento from '@/pages/public/AssinarDocumento';
 
 import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -65,6 +68,7 @@ function App() {
                   <Route path="/recuperar-senha" element={<RecuperacaoSenha />} />
                   <Route path="/termos" element={<TermosUso />} />
                   <Route path="/privacidade" element={<Privacidade />} />
+                  <Route path="/assinar/:token" element={<AssinarDocumento />} />
 
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route element={<AdminProtectedRoute />}>
@@ -85,6 +89,8 @@ function App() {
                       <Route path="/clientes" element={<Clientes />} />
                       <Route path="/clients" element={<Clientes />} />
                       <Route path="/contratos" element={<Contratos />} />
+                      <Route path="/assinaturas" element={<Assinaturas />} />
+                      <Route path="/assinaturas/:id" element={<AssinaturaDetalhe />} />
                       <Route path="/servicos" element={<Servicos />} />
                       <Route path="/vendedores" element={<Vendedores />} />
                       <Route path="/agenda" element={<Agenda />} />
