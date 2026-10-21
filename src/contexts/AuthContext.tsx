@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { hasPermission as checkPermission } from '@/lib/permissions';
 import type { UserSession, Empresa } from '@/lib/auth-types';
@@ -32,124 +39,225 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const loadUserCompanies = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('empresa_members')
-      .select(`
-        empresa_id,
-        role,
-        empresas (id, nome, cnpj)
-      `)
-      .eq('usuario_id', userId)
-      .eq('status', 'aceito');
+    try {
+      const { data, error } = await supabase
+        .from('empresa_members')
+        .select(`empresa_id, role, empresas (id, nome, cnpj)`)
+        .eq('usuario_id', userId)
+        .eq('status', 'aceito');
 
-    if (error) throw new Error(`Falha ao carregar empresas: ${error.message}`);
+      if (error) {
+        console.warn('Falha ao carregar empresas:', error.message);
+        return;
+      }
 
-    const loadedEmpresas = (data || []).map((m: any) => ({
-      id: m.empresas.id,
-      nome: m.empresas.nome,
-      cnpj: m.empresas.cnpj,
-      role: m.role,
-    }));
-    setEmpresas(loadedEmpresas);
+      const loadedEmpresas: Empresa[] = (data || []).map((m: any) => ({
+        id: m.empresas?.id ?? m.empresa_id,
+        nome: m.empresas?.nome ?? 'Empresa',
+        cnpj: m.empresas?.cnpj ?? null,
+        role: m.role,
+      }));
+      setEmpresas(loadedEmpresas);
 
-    if (loadedEmpresas.length > 0) {
-      const savedId = localStorage.getItem('empresaAtiva');
-      const active = loadedEmpresas.find((e) => e.id === savedId) || loadedEmpresas[0];
-      setEmpresaAtiva(active);
+      if (loadedEmpresas.length > 0) {
+        const savedId = localStorage.getItem('empresaAtiva');
+        const active =
+          loadedEmpresas.find((e) => e.id === savedId) || loadedEmpresas[0];
+        setEmpresaAtiva(active);
+      }
+    } catch (err) {
+      console.warn('Erro ao carregar empresas', err);
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw new Error(`Falha ao autenticar: ${error.message}`);
+  useEffect(() => {
+    let mounted = true;
 
-    const { data: usuario, error: usuarioError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user?.id)
-      .single();
+    async function init() {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-    if (usuarioError) throw new Error(`Falha ao buscar perfil: ${usuarioError.message}`);
+        if (!mounted) return;
 
-    const session: UserSession = {
-      id: usuario.id,
-      email: usuario.email,
-      nome: usuario.nome,
-      role: usuario.role,
-      empresa_id: null,
-      empresas: [],
-      token: data.session?.access_token || '',
-      expira_em: data.session?.expires_at || '',
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          const sessionUser: UserSession = {
+            id: session.user.id,
+            email: session.user.email || profile?.email || '',
+            nome: profile?.nome || session.user.user_metadata?.nome || 'Usuario',
+            role: (profile?.role as any) || 'vendedor',
+            empresa_id: null,
+            empresas: [],
+            token: session.access_token,
+            expira_em: String(session.expires_at || ''),
+          };
+          setUser(sessionUser);
+          await loadUserCompanies(session.user.id);
+        }
+      } catch (err) {
+        console.warn('Erro ao restaurar sessao', err);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    init();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+      if (!session) {
+        setUser(null);
+        setEmpresas([]);
+        setEmpresaAtiva(null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
     };
-
-    setUser(session);
-    await loadUserCompanies(session.id);
   }, [loadUserCompanies]);
 
-  const register = useCallback(async (nome: string, email: string, senha: string, empresaNome: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password: senha });
-    if (error) throw new Error(`Falha ao registrar: ${error.message}`);
-
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user?.id,
-      email,
-      nome,
-      role: 'admin',
-    });
-
-    if (profileError) throw new Error(`Falha ao criar perfil: ${profileError.message}`);
-
-    const { error: empresaError } = await supabase.from('empresas').insert({
-      nome: empresaNome,
-      responsavel_id: data.user?.id,
-    });
-
-    if (empresaError) throw new Error(`Falha ao criar empresa: ${empresaError.message}`);
-
-    const { data: novaEmpresa } = await supabase
-      .from('empresas')
-      .select('*')
-      .eq('responsavel_id', data.user?.id)
-      .single();
-
-    if (novaEmpresa) {
-      await supabase.from('empresa_members').insert({
-        empresa_id: novaEmpresa.id,
-        usuario_id: data.user?.id,
-        role: 'admin',
-        status: 'aceito',
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-    }
+      if (error) throw new Error(`Falha ao autenticar: ${error.message}`);
 
-    const session: UserSession = {
-      id: data.user?.id,
-      email,
-      nome,
-      role: 'admin',
-      empresa_id: novaEmpresa?.id || null,
-      empresas: [{ id: novaEmpresa?.id || '', nome: empresaNome, role: 'admin' }],
-      token: data.session?.access_token || '',
-      expira_em: data.session?.expires_at || '',
-    };
+      const { data: usuario } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user?.id)
+        .maybeSingle();
 
-    setUser(session);
-    if (novaEmpresa) setEmpresaAtiva(novaEmpresa as unknown as Empresa);
-  }, []);
+      const session: UserSession = {
+        id: data.user!.id,
+        email: data.user!.email || email,
+        nome: usuario?.nome || data.user!.user_metadata?.nome || 'Usuario',
+        role: (usuario?.role as any) || 'admin',
+        empresa_id: null,
+        empresas: [],
+        token: data.session?.access_token || '',
+        expira_em: String(data.session?.expires_at || ''),
+      };
+
+      setUser(session);
+      await loadUserCompanies(session.id);
+    },
+    [loadUserCompanies]
+  );
+
+  const register = useCallback(
+    async (nome: string, email: string, senha: string, empresaNome: string) => {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: { data: { nome } },
+      });
+      if (error) throw new Error(error.message || 'Falha ao registrar');
+      if (!data.user) throw new Error('Usuário não retornado após cadastro');
+
+      if (!data.session) {
+        throw new Error(
+          'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faça login.'
+        );
+      }
+
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email,
+        nome,
+        role: 'admin',
+      });
+      if (profileError) {
+        console.warn('profiles upsert:', profileError.message);
+      }
+
+      const { data: novaEmpresa, error: empresaError } = await supabase
+        .from('empresas')
+        .insert({
+          nome: empresaNome,
+          responsavel_id: data.user.id,
+          configuracoes: {},
+        })
+        .select('*')
+        .single();
+
+      if (empresaError) {
+        throw new Error(`Conta criada, mas falha ao criar empresa: ${empresaError.message}`);
+      }
+
+      if (novaEmpresa) {
+        const { error: memberError } = await supabase.from('empresa_members').insert({
+          empresa_id: novaEmpresa.id,
+          usuario_id: data.user.id,
+          role: 'admin',
+          status: 'aceito',
+          aceito_em: new Date().toISOString(),
+        });
+        if (memberError) {
+          console.warn('empresa_members:', memberError.message);
+        }
+      }
+
+      const session: UserSession = {
+        id: data.user.id,
+        email,
+        nome,
+        role: 'admin',
+        empresa_id: novaEmpresa?.id || null,
+        empresas: novaEmpresa
+          ? [{ id: novaEmpresa.id, nome: empresaNome, role: 'admin' }]
+          : [],
+        token: data.session?.access_token || '',
+        expira_em: String(data.session?.expires_at || ''),
+      };
+
+      setUser(session);
+      if (novaEmpresa) {
+        const emp: Empresa = {
+          id: novaEmpresa.id,
+          nome: empresaNome,
+          cnpj: null,
+          role: 'admin',
+        };
+        setEmpresaAtiva(emp);
+        setEmpresas([emp]);
+        localStorage.setItem('empresaAtiva', novaEmpresa.id);
+      }
+    },
+    []
+  );
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
     setEmpresas([]);
     setEmpresaAtiva(null);
+    localStorage.removeItem('empresaAtiva');
   }, []);
 
-  const switchEmpresa = useCallback((empresaId: string) => {
-    const empresa = empresas.find((e) => e.id === empresaId);
-    if (empresa) {
-      setEmpresaAtiva(empresa);
-      localStorage.setItem('empresaAtiva', empresaId);
-    }
-  }, [empresas]);
+  const switchEmpresa = useCallback(
+    (empresaId: string) => {
+      const empresa = empresas.find((e) => e.id === empresaId);
+      if (empresa) {
+        setEmpresaAtiva(empresa);
+        localStorage.setItem('empresaAtiva', empresaId);
+      }
+    },
+    [empresas]
+  );
 
   const refreshEmpresas = useCallback(async () => {
     if (user) await loadUserCompanies(user.id);
