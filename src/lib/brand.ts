@@ -4,8 +4,8 @@ export const BRAND = {
   shortName: 'GROW',
   product: 'Grow Software',
   tagline: 'Gestão financeira inteligente para empresas que crescem',
-  logo: 'https://growmoneydigital.com.br/growsoftware/logogrow.png',
-  logoUrl: 'https://growmoneydigital.com.br/growsoftware/logogrow.png',
+  logo: 'https://canal360.run.place/grow/assets/logo.png',
+  logoUrl: 'https://canal360.run.place/grow/assets/logo.png',
   site: 'https://growmoneydigital.com.br',
   colors: {
     primary: '#10b981',
