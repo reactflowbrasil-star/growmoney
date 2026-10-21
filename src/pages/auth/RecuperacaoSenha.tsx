@@ -8,7 +8,7 @@ export default function RecuperacaoSenha() {
   const [email, setEmail] = useState('');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-primary px-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
       <div className="w-full max-w-md bg-bg-secondary border border-border-color rounded-lg p-8 shadow-sm">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-text-primary">Recuperar senha</h1>

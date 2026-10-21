@@ -116,7 +116,7 @@ export default function AssinarDocumento() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-secondary">
+    <div className="min-h-screen bg-transparent">
       <header className="border-b border-border-color bg-bg-primary/90 backdrop-blur sticky top-0 z-20">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <img src={BRAND.logo} alt={BRAND.name} className="h-10 w-auto max-w-[140px] object-contain" />

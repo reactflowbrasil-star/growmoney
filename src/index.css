@@ -67,7 +67,7 @@
       radial-gradient(ellipse 90% 55% at 50% -25%, rgba(16, 185, 129, 0.22), transparent),
       radial-gradient(ellipse 50% 40% at 100% 0%, rgba(59, 130, 246, 0.1), transparent),
       radial-gradient(ellipse 40% 30% at 0% 50%, rgba(16, 185, 129, 0.06), transparent),
-      var(--bg-secondary);
+      transparent;
   }
   .text-gradient {
     background: linear-gradient(135deg, #10b981, #34d399);

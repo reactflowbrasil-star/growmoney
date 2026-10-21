@@ -31,7 +31,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-secondary flex">
+    <div className="min-h-screen bg-transparent flex">
       <aside className="w-72 shrink-0 border-r border-border-color bg-bg-primary flex flex-col">
         <div className="h-32 px-4 flex items-center border-b border-border-color">
           <Link to="/admin" className="flex flex-col gap-0.5">

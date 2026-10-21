@@ -9,6 +9,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AdminProtectedRoute } from '@/components/admin/AdminProtectedRoute';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { SonarGrid } from '@/components/ui/sonar-grid';
 import './index.css';
 
 import LandingPage from '@/pages/public/LandingPage';
@@ -59,13 +60,27 @@ const routerBasename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || '
 
 function App() {
   return (
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <AdminAuthProvider>
-              <BrowserRouter basename={routerBasename === '/' ? undefined : routerBasename}>
-                <Routes>
+    <div className="relative isolate min-h-dvh">
+      <SonarGrid
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0"
+        color="var(--brand)"
+        spacing={32}
+        baseOpacity={0.12}
+        pingEvery={4.5}
+        speed={220}
+        ringWidth={100}
+        amplitude={1.5}
+        interactive={false}
+      />
+      <div className="relative z-10 min-h-dvh">
+        <StrictMode>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <AuthProvider>
+                <AdminAuthProvider>
+                  <BrowserRouter basename={routerBasename === '/' ? undefined : routerBasename}>
+                    <Routes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/auth" element={<Login />} />
                   <Route path="/login" element={<Login />} />
@@ -111,13 +126,15 @@ function App() {
                   </Route>
 
                   <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </BrowserRouter>
-            </AdminAuthProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </StrictMode>
+                    </Routes>
+                  </BrowserRouter>
+                </AdminAuthProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </StrictMode>
+      </div>
+    </div>
   );
 }
 

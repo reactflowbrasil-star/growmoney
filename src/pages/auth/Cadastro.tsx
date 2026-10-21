@@ -83,7 +83,7 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-secondary px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4 py-8">
       <div className="w-full max-w-xl bg-bg-primary border border-border-color rounded-xl p-8 shadow-md">
         <div className="text-center mb-6 space-y-4">
           <img

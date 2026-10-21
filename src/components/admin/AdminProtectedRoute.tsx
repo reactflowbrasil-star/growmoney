@@ -7,7 +7,7 @@ export function AdminProtectedRoute() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-secondary">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <LoadingSpinner />
       </div>
     );

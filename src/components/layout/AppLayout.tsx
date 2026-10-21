@@ -73,7 +73,7 @@ export function AppLayout() {
   const layoutUser = user ? { name: user.nome, email: user.email } : undefined;
 
   return (
-    <div className="min-h-dvh bg-bg-secondary">
+    <div className="min-h-dvh bg-transparent">
       <div className="hidden md:block">
         <Sidebar
           items={navItems}

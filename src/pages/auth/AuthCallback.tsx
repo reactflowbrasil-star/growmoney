@@ -54,7 +54,7 @@ export default function AuthCallback() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-bg-secondary p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-transparent p-4">
       <img src={BRAND.logo} alt="" className="h-16 w-auto object-contain opacity-90" />
       {error ? (
         <div className="text-center space-y-3">

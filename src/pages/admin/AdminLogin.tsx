@@ -32,7 +32,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-secondary p-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent p-4">
       <Card className="w-full max-w-md p-6 md:p-8">
         <div className="text-center mb-8 space-y-3">
           <img

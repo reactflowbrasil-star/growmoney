@@ -12,7 +12,7 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-bg-secondary text-text-primary">
+    <div className="min-h-screen bg-transparent text-text-primary">
       <header className="sticky top-0 z-50 border-b border-border-color/80 glass">
         <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
