@@ -38,7 +38,7 @@ export default function AdminLogin() {
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-16 md:h-20 w-auto max-w-[240px] mx-auto object-contain"
+            className="h-[96px] md:h-[120px] w-auto max-w-[360px] mx-auto object-contain"
           />
           <div>
             <p className="text-xs uppercase tracking-widest text-brand font-semibold">Painel Admin</p>

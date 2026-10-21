@@ -14,12 +14,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-bg-secondary text-text-primary">
       <header className="sticky top-0 z-50 border-b border-border-color/80 glass">
-        <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <img
               src={BRAND.logo}
               alt={BRAND.name}
-              className="h-12 md:h-14 w-auto max-w-[220px] object-contain"
+              className="h-[72px] md:h-[84px] w-auto max-w-[330px] object-contain"
             />
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -42,7 +42,7 @@ export default function LandingPage() {
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-16 md:h-20 w-auto max-w-[320px] mx-auto object-contain mb-8"
+            className="h-[96px] md:h-[120px] w-auto max-w-[480px] mx-auto object-contain mb-8"
           />
           <p className="text-sm font-medium text-brand mb-4">SaaS de gestão financeira</p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
@@ -104,7 +104,7 @@ export default function LandingPage() {
           <img
             src={BRAND.logo}
             alt=""
-            className="h-14 w-auto max-w-[240px] mx-auto object-contain mb-6 opacity-95"
+            className="h-[84px] w-auto max-w-[360px] mx-auto object-contain mb-6 opacity-95"
           />
           <h2 className="text-2xl md:text-3xl font-bold">Pronto para crescer com o GROW?</h2>
           <p className="text-text-secondary mt-2 mb-6">{BRAND.tagline}</p>
@@ -122,7 +122,7 @@ export default function LandingPage() {
             <img
               src={BRAND.logo}
               alt=""
-              className="h-10 w-auto max-w-[160px] object-contain opacity-90"
+              className="h-[60px] w-auto max-w-[240px] object-contain opacity-90"
             />
             <span>
               © {new Date().getFullYear()} {BRAND.name}
