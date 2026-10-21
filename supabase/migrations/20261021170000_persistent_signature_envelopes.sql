@@ -79,7 +79,7 @@ DECLARE v_id uuid; v_payload jsonb; v_signer jsonb; v_signers jsonb; v_events js
 BEGIN
   IF p_mode NOT IN ('canvas','typed','saved') OR length(p_signature_data_url) > 750000
      OR p_signature_data_url NOT LIKE 'data:image/%;base64,%' THEN
-    RAISE EXCEPTION 'Assinatura inv�lida';
+    RAISE EXCEPTION 'Assinatura inválida';
   END IF;
   SELECT id, payload INTO v_id, v_payload FROM public.signature_envelopes e
   WHERE e.payload->>'status' IN ('enviado','parcial','concluido')
@@ -87,7 +87,7 @@ BEGIN
   LIMIT 1;
   IF v_id IS NULL THEN RETURN NULL; END IF;
   SELECT signer INTO v_signer FROM jsonb_array_elements(v_payload->'signers') AS item(signer) WHERE signer->>'token'=p_token LIMIT 1;
-  IF v_signer->>'role' <> 'sign' THEN RAISE EXCEPTION 'Este destinat�rio n�o pode assinar'; END IF;
+  IF v_signer->>'role' <> 'sign' THEN RAISE EXCEPTION 'Este destinatário não pode assinar'; END IF;
   IF v_signer->>'status' = 'signed' THEN RETURN v_payload; END IF;
   v_name := v_signer->>'nome'; v_email := v_signer->>'email';
   SELECT jsonb_agg(CASE WHEN signer->>'token'=p_token THEN signer || jsonb_build_object(
@@ -116,4 +116,3 @@ REVOKE ALL ON FUNCTION public.apply_signature_to_envelope(text,text,text) FROM P
 GRANT EXECUTE ON FUNCTION public.get_signature_envelope_by_token(text) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.mark_signature_envelope_viewed(text) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.apply_signature_to_envelope(text,text,text) TO anon, authenticated;
-

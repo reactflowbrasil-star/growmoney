@@ -5,6 +5,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { BRAND } from '@/lib/brand';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { InstallPwaButton } from '@/components/pwa/InstallPwaButton';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -36,20 +37,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 overflow-x-hidden">
-      <Card className="w-full max-w-xl p-6 md:p-8">
-        <div className="text-center mb-8 space-y-4">
+    <main className="min-h-[100svh] w-full flex items-start sm:items-center justify-center bg-transparent overflow-x-clip px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+      <Card className="w-full max-w-md !border-transparent !bg-transparent !shadow-none p-4 sm:p-6 md:p-8">
+        <div className="text-center mb-6 sm:mb-8 space-y-3 sm:space-y-4">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="mx-auto h-auto max-h-[min(18svh,120px)] w-full max-w-[min(100%,320px)] object-contain"
+            className="mx-auto h-auto max-h-[min(17svh,112px)] w-full max-w-[min(100%,280px)] object-contain"
           />
-          <p className="text-text-secondary text-sm">{BRAND.tagline}</p>
+          <p className="text-text-secondary text-sm leading-5">{BRAND.tagline}</p>
         </div>
 
         <GoogleButton label="Entrar com Google" />
 
-        <div className="relative my-5">
+        <div className="relative my-4 sm:my-5">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-border-color" />
           </div>
@@ -58,7 +59,7 @@ export default function Login() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           <Input
             type="email"
             label="E-mail"
@@ -110,8 +111,9 @@ export default function Login() {
             Cadastre-se
           </Link>
         </div>
+        <InstallPwaButton className="mt-5 w-full" />
       </Card>
-    </div>
+    </main>
   );
 }
 

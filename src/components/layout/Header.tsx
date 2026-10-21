@@ -53,7 +53,7 @@ export function Header({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
           <input
             type="search"
-            placeholder="Buscar no sistema."
+            placeholder="Buscar no sistema…"
             onChange={(e) => onSearch?.(e.target.value)}
             className={cn(
               'w-full pl-10 pr-4 py-2 text-sm rounded-xl',
@@ -74,7 +74,7 @@ export function Header({
               setProfileOpen(false);
             }}
             className="p-2.5 rounded-xl hover:bg-bg-tertiary relative pressable"
-            aria-label="Notifica��es"
+            aria-label="Notificações"
           >
             <Bell className="w-5 h-5 text-text-primary" />
             {unreadCount > 0 && (
@@ -83,9 +83,9 @@ export function Header({
           </button>
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-bg-primary border border-border-color rounded-2xl shadow-lg py-2 z-50 animate-in">
-              <h3 className="px-4 py-2 text-sm font-semibold border-b border-border-color">Notifica��es</h3>
+              <h3 className="px-4 py-2 text-sm font-semibold border-b border-border-color">Notificações</h3>
               {notifications.length === 0 ? (
-                <p className="px-4 py-6 text-sm text-text-secondary text-center">Sem notifica��es</p>
+                <p className="px-4 py-6 text-sm text-text-secondary text-center">Sem notificações</p>
               ) : (
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((n) => (
@@ -121,20 +121,20 @@ export function Header({
               </div>
             )}
             <span className="hidden md:block text-sm font-medium text-text-primary max-w-[100px] truncate">
-              {user?.name || 'Usu�rio'}
+              {user?.name || 'Usuário'}
             </span>
           </button>
           {profileOpen && (
             <div className="absolute right-0 mt-2 w-52 bg-bg-primary border border-border-color rounded-2xl shadow-lg py-2 z-50 animate-in">
               <div className="px-4 py-2 border-b border-border-color">
-                <p className="text-sm font-medium truncate">{user?.name || 'Usu�rio'}</p>
+                <p className="text-sm font-medium truncate">{user?.name || 'Usuário'}</p>
                 <p className="text-xs text-text-secondary truncate">{user?.email || ''}</p>
               </div>
               <Link to="/perfil" className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-tertiary">
                 <User className="w-4 h-4" /> Meu perfil
               </Link>
               <Link to="/configuracoes" className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-tertiary">
-                <Settings className="w-4 h-4" /> Configura��es
+                <Settings className="w-4 h-4" /> Configurações
               </Link>
               <button
                 onClick={onLogout}
@@ -149,5 +149,4 @@ export function Header({
     </header>
   );
 }
-
 

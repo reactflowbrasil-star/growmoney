@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "graphify": "node scripts/graphify.mjs",
+    "verify:pwa": "node scripts/verify-pwa.mjs",
+    "prebuild": "npm run graphify",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx",
     "lint:fix": "eslint . --ext ts,tsx --fix",

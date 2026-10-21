@@ -23,7 +23,7 @@ const statusMap: Record<
   rascunho: { label: 'Rascunho', variant: 'neutral' },
   enviado: { label: 'Enviado', variant: 'info' },
   parcial: { label: 'Parcial', variant: 'warning' },
-  concluido: { label: 'Conclu�do', variant: 'success' },
+  concluido: { label: 'Concluído', variant: 'success' },
   cancelado: { label: 'Cancelado', variant: 'danger' },
   expirado: { label: 'Expirado', variant: 'danger' },
 };
@@ -40,7 +40,7 @@ export default function Assinaturas() {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [documento, setDocumento] = useState(
-    'CONTRATO DE PRESTA��O DE SERVI�OS\n\nPelo presente instrumento, as partes acordam os termos...\n\nCl�usula 1 - Objeto\nCl�usula 2 - Valor\nCl�usula 3 - Prazo\nCl�usula 4 - Foro'
+    'CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nPelo presente instrumento, as partes acordam os termos...\n\nCláusula 1 — Objeto\nCláusula 2 — Valor\nCláusula 3 — Prazo\nCláusula 4 — Foro'
   );
   const [msg, setMsg] = useState('Por favor, revise e assine o documento.');
   const [signers, setSigners] = useState([
@@ -55,7 +55,7 @@ export default function Assinaturas() {
     try {
       setRows(await listEnvelopes());
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'N�o foi poss�vel carregar os envelopes.');
+      window.alert(error instanceof Error ? error.message : 'Não foi possível carregar os envelopes.');
     }
   };
 
@@ -95,7 +95,7 @@ export default function Assinaturas() {
     await reload();
     navigate(`/assinaturas/${env.id}`);
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'N�o foi poss�vel salvar o envelope.');
+      window.alert(error instanceof Error ? error.message : 'Não foi possível salvar o envelope.');
     }
   };
 
@@ -104,7 +104,7 @@ export default function Assinaturas() {
       await sendEnvelope(id, user?.email || 'sistema');
       await reload();
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'N�o foi poss�vel enviar o envelope.');
+      window.alert(error instanceof Error ? error.message : 'Não foi possível enviar o envelope.');
     }
   };
 
@@ -118,7 +118,7 @@ export default function Assinaturas() {
     <div className="max-w-7xl space-y-4">
       <PageHeader
         title="Assinatura digital"
-        description="Envie documentos, colete assinaturas e acompanhe alertas - fluxo tipo DocuSign"
+        description="Envie documentos, colete assinaturas e acompanhe alertas — fluxo tipo DocuSign"
         actions={
           <>
             <Button variant="outline" size="sm" leftIcon={<Bell className="w-4 h-4" />} onClick={() => setAlertsOpen(true)}>
@@ -132,13 +132,13 @@ export default function Assinaturas() {
       />
 
       <Card className="p-3">
-        <Input placeholder="Buscar por t�tulo ou e-mail." value={busca} onChange={(e) => setBusca(e.target.value)} />
+        <Input placeholder="Buscar por título ou e-mail…" value={busca} onChange={(e) => setBusca(e.target.value)} />
       </Card>
 
       {filtered.length === 0 ? (
         <EmptyState
           title="Nenhum envelope"
-          description="Crie um documento, adicione signat�rios e envie para assinatura."
+          description="Crie um documento, adicione signatários e envie para assinatura."
           icon={<FileSignature className="w-6 h-6" />}
           action={
             <Button leftIcon={<Plus className="w-4 h-4" />} onClick={() => setOpen(true)}>
@@ -162,7 +162,7 @@ export default function Assinaturas() {
                       <Badge variant={st.variant}>{st.label}</Badge>
                     </div>
                     <p className="text-xs text-text-secondary">
-                      {e.signers.length} parte(s) � {new Date(e.updatedAt).toLocaleString('pt-BR')}
+                      {e.signers.length} parte(s) · {new Date(e.updatedAt).toLocaleString('pt-BR')}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {e.signers.map((s) => (
@@ -191,7 +191,7 @@ export default function Assinaturas() {
                         }
                         onClick={() => copyLink(pending[0].token)}
                       >
-                        {copied === pending[0].token ? 'Link copiado' : 'Link signat�rio'}
+                        {copied === pending[0].token ? 'Link copiado' : 'Link signatário'}
                       </Button>
                     )}
                     <Link to={`/assinaturas/${e.id}`}>
@@ -217,8 +217,8 @@ export default function Assinaturas() {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Novo envelope de assinatura" size="lg">
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-          <Input label="T�tulo do documento" value={titulo} onChange={(e) => setTitulo(e.target.value)} required />
-          <Input label="Descri��o (opcional)" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+          <Input label="Título do documento" value={titulo} onChange={(e) => setTitulo(e.target.value)} required />
+          <Input label="Descrição (opcional)" value={descricao} onChange={(e) => setDescricao(e.target.value)} />
           <div>
             <label className="text-sm font-medium mb-1 block">Texto do documento</label>
             <textarea
@@ -238,9 +238,9 @@ export default function Assinaturas() {
               setArquivoStoragePath(file.caminho);
             }}
           />
-          <Input label="Mensagem aos signat�rios" value={msg} onChange={(e) => setMsg(e.target.value)} />
+          <Input label="Mensagem aos signatários" value={msg} onChange={(e) => setMsg(e.target.value)} />
           <div className="space-y-2">
-            <p className="text-sm font-medium">Signat�rios</p>
+            <p className="text-sm font-medium">Signatários</p>
             {signers.map((s, i) => (
               <div key={i} className="grid sm:grid-cols-2 gap-2">
                 <Input
@@ -265,7 +265,7 @@ export default function Assinaturas() {
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={() => setSigners((p) => [...p, { nome: '', email: '' }])}>
-              + Signat�rio
+              + Signatário
             </Button>
           </div>
           <div className="flex justify-end gap-2 pt-2">
@@ -311,7 +311,7 @@ export default function Assinaturas() {
                   <p className="text-xs text-text-secondary mt-0.5">{a.body}</p>
                   <p className="text-[10px] text-text-secondary mt-1">
                     {new Date(a.at).toLocaleString('pt-BR')}
-                    {a.email ? ` � ${a.email}` : ''}
+                    {a.email ? ` · ${a.email}` : ''}
                   </p>
                 </button>
               ))}
@@ -322,5 +322,4 @@ export default function Assinaturas() {
     </div>
   );
 }
-
 

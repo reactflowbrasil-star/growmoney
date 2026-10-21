@@ -8,9 +8,9 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#10b981',
-          light: '#34d399',
-          dark: '#059669',
+          DEFAULT: '#87a913',
+          light: '#b5d64b',
+          dark: '#526b0b',
         },
         grafite: {
           DEFAULT: '#2d2d2d',
@@ -24,14 +24,14 @@ const config: Config = {
           DEFAULT: '#ffffff',
         },
         verde: {
-          DEFAULT: '#2e7d4f',
-          light: '#4caf6b',
-          dark: '#1b5e3a',
+          DEFAULT: '#87a913',
+          light: '#b5d64b',
+          dark: '#526b0b',
         },
         'verde-discreto': {
-          DEFAULT: '#2e7d4f',
-          light: '#4caf6b',
-          dark: '#1b5e3a',
+          DEFAULT: '#87a913',
+          light: '#b5d64b',
+          dark: '#526b0b',
         },
         bg: {
           primary: 'var(--bg-primary)',

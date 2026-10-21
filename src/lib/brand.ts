@@ -8,8 +8,8 @@ export const BRAND = {
   logoUrl: 'https://canal360.run.place/grow/assets/logo.png',
   site: 'https://growmoneydigital.com.br',
   colors: {
-    primary: '#10b981',
-    primaryDark: '#059669',
+    primary: '#87a913',
+    primaryDark: '#526b0b',
     ink: '#0b1220',
     surface: '#111827',
   },

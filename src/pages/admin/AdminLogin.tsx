@@ -6,7 +6,7 @@ import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { BRAND } from '@/lib/brand';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('sac.canal360@gmail.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,13 +32,13 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 overflow-x-hidden">
-      <Card className="w-full max-w-md p-6 md:p-8">
-        <div className="text-center mb-8 space-y-3">
+    <main className="min-h-[100svh] w-full flex items-start sm:items-center justify-center bg-transparent overflow-x-clip px-4 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+      <Card className="w-full max-w-md !border-transparent !bg-transparent !shadow-none p-4 sm:p-6 md:p-8">
+        <div className="text-center mb-6 sm:mb-8 space-y-3">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="mx-auto h-auto max-h-[min(16svh,112px)] w-full max-w-[min(100%,280px)] object-contain"
+            className="mx-auto h-auto max-h-[min(15svh,104px)] w-full max-w-[min(100%,280px)] object-contain"
           />
           <div>
             <p className="text-xs uppercase tracking-widest text-brand font-semibold">Painel Admin</p>
@@ -83,7 +83,7 @@ export default function AdminLogin() {
           </Link>
         </p>
       </Card>
-    </div>
+    </main>
   );
 }
 

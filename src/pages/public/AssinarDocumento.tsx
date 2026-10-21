@@ -34,7 +34,7 @@ export default function AssinarDocumento() {
       try {
         const found = await getEnvelopeBySignerToken(token);
         if (!found) {
-          if (active) setError('Link inv�lido ou expirado.');
+          if (active) setError('Link inválido ou expirado.');
           return;
         }
         const viewed = await markViewed(token);
@@ -103,7 +103,7 @@ export default function AssinarDocumento() {
       setDone(true);
     }
     } catch (signatureError) {
-      setError(signatureError instanceof Error ? signatureError.message : 'N�o foi poss�vel salvar a assinatura.');
+      setError(signatureError instanceof Error ? signatureError.message : 'Não foi possível salvar a assinatura.');
     }
   };
 
@@ -113,7 +113,7 @@ export default function AssinarDocumento() {
         <Card className="p-8 max-w-md text-center space-y-3">
           <p className="text-erro">{error}</p>
           <Link to="/" className="text-brand text-sm">
-            Ir ao in�cio
+            Ir ao início
           </Link>
         </Card>
       </div>
@@ -123,7 +123,7 @@ export default function AssinarDocumento() {
   if (!envelope || !signer) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-secondary">
-        <p className="text-text-secondary text-sm">Carregando documento.</p>
+        <p className="text-text-secondary text-sm">Carregando documento…</p>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export default function AssinarDocumento() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{envelope.titulo}</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Ol� <strong>{signer.nome}</strong> ({signer.email}) - revise e assine abaixo.
+            Olá <strong>{signer.nome}</strong> ({signer.email}) — revise e assine abaixo.
           </p>
           {envelope.messageToSigners && (
             <p className="text-sm mt-2 text-brand bg-brand/10 rounded-xl px-3 py-2">{envelope.messageToSigners}</p>
@@ -217,7 +217,7 @@ export default function AssinarDocumento() {
               <div className="grid sm:grid-cols-2 gap-2">
                 {savedList.length === 0 ? (
                   <p className="text-sm text-text-secondary col-span-2">
-                    Nenhuma assinatura salva neste dispositivo. Desenhe ou digite e marque "Salvar para pr�ximas".
+                    Nenhuma assinatura salva neste dispositivo. Desenhe ou digite e marque “Salvar para próximas”.
                   </p>
                 ) : (
                   savedList.map((s) => (
@@ -239,7 +239,7 @@ export default function AssinarDocumento() {
 
             <label className="flex items-start gap-2 text-sm text-text-secondary">
               <input type="checkbox" checked={saveForLater} onChange={(e) => setSaveForLater(e.target.checked)} className="mt-1 accent-brand" />
-              Salvar esta assinatura neste dispositivo para pr�ximos documentos
+              Salvar esta assinatura neste dispositivo para próximos documentos
             </label>
 
             <label className="flex items-start gap-2 text-sm">
@@ -262,5 +262,4 @@ export default function AssinarDocumento() {
     </div>
   );
 }
-
 

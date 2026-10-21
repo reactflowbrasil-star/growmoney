@@ -20,6 +20,7 @@ export type ClienteLocal = {
 
 export type ServicoCatalogo = {
   id: string;
+  codigo?: string;
   nome: string;
   categoria: string;
   descricao?: string;

@@ -1,18 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Plus } from 'lucide-react';
 import { Button, Input, Card, PageHeader, Modal } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
-  listClientes,
-  saveCliente,
-  listServicosCatalogo,
   saveContrato,
   formatBRL,
   addMonths,
   type ClienteLocal,
   type ContratoLocal,
 } from '@/lib/contratos-store';
+import { loadClientesEmpresa, loadServicosEmpresa, saveClienteEmpresa } from '@/services/contrato-wizard-data';
+import type { ServicoCatalogo } from '@/lib/contratos-store';
+import { useAuth } from '@/contexts/AuthContext';
 import { exportPdf } from '@/lib/export';
 import { gerarContratoHtml } from '@/lib/contrato-template';
 
@@ -39,9 +39,11 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function ContratoNovo() {
   const navigate = useNavigate();
+  const { user, empresaAtiva } = useAuth();
   const [step, setStep] = useState(1);
-  const [clientes, setClientes] = useState<ClienteLocal[]>(() => listClientes());
-  const [servicos] = useState(() => listServicosCatalogo().filter((s) => s.ativo));
+  const [clientes, setClientes] = useState<ClienteLocal[]>([]);
+  const [servicos, setServicos] = useState<ServicoCatalogo[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
   const [clientId, setClientId] = useState('');
   const [clienteDraft, setClienteDraft] = useState<Omit<ClienteLocal, 'id'>>(emptyClient);
   const [novoClienteOpen, setNovoClienteOpen] = useState(false);
@@ -62,6 +64,22 @@ export default function ContratoNovo() {
   const [obsInternas, setObsInternas] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    if (!empresaAtiva?.id) { setClientes([]); setServicos([]); setLoadingData(false); return; }
+    setLoadingData(true);
+    void Promise.all([loadClientesEmpresa(empresaAtiva.id), loadServicosEmpresa(empresaAtiva.id)])
+      .then(([loadedClients, loadedServices]) => {
+        if (!active) return;
+        setClientes(loadedClients);
+        setServicos(loadedServices.filter((service) => service.ativo));
+        setError('');
+      })
+      .catch((loadError) => { if (active) setError(loadError instanceof Error ? loadError.message : 'Não foi possível carregar os dados para o contrato.'); })
+      .finally(() => { if (active) setLoadingData(false); });
+    return () => { active = false; };
+  }, [empresaAtiva?.id]);
 
   const contrataveis = useMemo(() => servicos.filter((s) => s.contratacao_permitida !== false), [servicos]);
   const bonificaveis = useMemo(() => servicos.filter((s) => s.bonus_permitido !== false), [servicos]);
@@ -136,15 +154,20 @@ export default function ContratoNovo() {
     }
   };
 
-  const salvarClienteNovo = () => {
-    if (!novoCliente.razao_social.trim()) return;
-    const saved = saveCliente({ ...novoCliente, razao_social: novoCliente.razao_social.trim() });
-    setClientes(listClientes());
-    const { id: _id, ...details } = saved;
-    setClientId(saved.id);
-    setClienteDraft({ ...emptyClient(), ...details });
-    setNovoCliente(emptyClient());
-    setNovoClienteOpen(false);
+  const salvarClienteNovo = async () => {
+    if (!novoCliente.razao_social.trim()) { setError('Informe o nome do cliente.'); return; }
+    if (!empresaAtiva?.id || !user?.id) { setError('Sua conta precisa estar vinculada a uma empresa para salvar o cliente.'); return; }
+    setSaving(true); setError('');
+    try {
+      const saved = await saveClienteEmpresa(empresaAtiva.id, user.id, { ...novoCliente, razao_social: novoCliente.razao_social.trim() });
+      setClientes((current) => [saved, ...current.filter((client) => client.id !== saved.id)]);
+      const { id: _id, ...details } = saved;
+      setClientId(saved.id);
+      setClienteDraft({ ...emptyClient(), ...details });
+      setNovoCliente(emptyClient());
+      setNovoClienteOpen(false);
+    } catch (e) { setError(e instanceof Error ? e.message : 'Não foi possível salvar o cliente.'); }
+    finally { setSaving(false); }
   };
 
   const toggleServico = (id: string) => {
@@ -212,9 +235,10 @@ export default function ContratoNovo() {
     }
     setSaving(true);
     try {
-      saveCliente({ ...clienteDraft, id: clientId });
-      setClientes(listClientes());
-      const contrato = await saveContrato(payload());
+      if (!empresaAtiva?.id || !user?.id || !clientId) throw new Error('Selecione um cliente salvo para continuar.');
+      const savedClient = await saveClienteEmpresa(empresaAtiva.id, user.id, clienteDraft, clientId);
+      setClientes((current) => current.map((client) => client.id === savedClient.id ? savedClient : client));
+      const contrato = await saveContrato({ ...payload(), client_id: savedClient.id });
       navigate(`/contratos?criado=${contrato.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível criar o contrato.');
@@ -254,7 +278,7 @@ export default function ContratoNovo() {
           <label className="text-sm font-medium">Cliente contratante</label>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <select className="flex-1 rounded-xl border border-border-color bg-bg-primary px-3 py-2.5 text-sm" value={clientId} onChange={(event) => escolherCliente(event.target.value)}>
-              <option value="">Selecione um cliente</option>
+              <option value="">{loadingData ? 'Carregando clientes…' : 'Selecione um cliente salvo'}</option>
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.razao_social}{c.cidade ? ` • ${c.cidade}` : ''}</option>)}
             </select>
             <Button type="button" variant="outline" leftIcon={<Plus className="h-4 w-4" />} onClick={() => setNovoClienteOpen(true)}>Novo cliente</Button>
@@ -279,7 +303,7 @@ export default function ContratoNovo() {
           </div>
           <p className="text-xs text-text-secondary">O vendedor selecionado será identificado no contrato e associado à venda.</p>
         </div>}
-        <div className="flex justify-end"><Button disabled={!clientId} onClick={() => setStep(2)} rightIcon={<ArrowRight className="h-4 w-4" />}>Continuar</Button></div>
+        <div className="flex justify-end"><Button disabled={loadingData || !clientId} onClick={() => setStep(2)} rightIcon={<ArrowRight className="h-4 w-4" />}>Continuar</Button></div>
       </Card>}
 
       {step === 2 && <Card className="space-y-6 p-6">
@@ -346,7 +370,7 @@ export default function ContratoNovo() {
         <div className="flex flex-wrap justify-between gap-3"><Button variant="outline" onClick={() => setStep(3)}>Voltar</Button><div className="flex gap-2"><Button variant="outline" onClick={visualizar}>Pré-visualizar contrato</Button><Button loading={saving} disabled={saving || validationErrors.length > 0} onClick={salvar}>{saving ? 'Salvando...' : 'Salvar contrato'}</Button></div></div>
       </Card>}
 
-      <Modal open={novoClienteOpen} onClose={() => setNovoClienteOpen(false)} title="Novo cliente" size="lg" footer={<><Button variant="outline" onClick={() => setNovoClienteOpen(false)}>Cancelar</Button><Button onClick={salvarClienteNovo}>Salvar</Button></>}>
+      <Modal open={novoClienteOpen} onClose={() => setNovoClienteOpen(false)} title="Novo cliente" size="lg" footer={<><Button variant="outline" onClick={() => setNovoClienteOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvarClienteNovo()}>Salvar cliente</Button></>}>
         <div className="grid gap-3 sm:grid-cols-2">
           <Input label="Razão social / Nome" value={novoCliente.razao_social} onChange={(e) => setNovoCliente({ ...novoCliente, razao_social: e.target.value })} />
           <Input label="CNPJ / CPF" value={novoCliente.documento} onChange={(e) => setNovoCliente({ ...novoCliente, documento: e.target.value })} />

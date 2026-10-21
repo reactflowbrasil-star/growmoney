@@ -37,7 +37,7 @@ export function FileUpload({
     void listarArquivos(categoria)
       .then((items) => { if (active) setSavedFiles(items); })
       .catch((loadError) => {
-        if (active) setError(loadError instanceof Error ? loadError.message : 'N�o foi poss�vel carregar seus arquivos.');
+        if (active) setError(loadError instanceof Error ? loadError.message : 'Não foi possível carregar seus arquivos.');
       });
     return () => { active = false; };
   }, [categoria]);
@@ -99,7 +99,7 @@ export function FileUpload({
       >
         <Upload className="w-8 h-8 mx-auto text-text-secondary mb-2" />
           <p className="text-sm text-text-primary font-medium">{uploading ? 'Salvando no servidor...' : label}</p>
-        <p className="text-xs text-text-secondary mt-1">PDF, imagens, Word, Excel � m�x. {maxSizeMb}MB</p>
+        <p className="text-xs text-text-secondary mt-1">PDF, imagens, Word, Excel · máx. {maxSizeMb}MB</p>
         <input
           ref={inputRef}
           type="file"
@@ -128,7 +128,7 @@ export function FileUpload({
                 <p className="text-sm font-medium truncate">{f.name}</p>
                 <p className="text-xs text-text-secondary">
                   {(f.size / 1024).toFixed(1)} KB
-                  {savedFiles[i] && <> � <a className="text-brand hover:underline" href={savedFiles[i].url} target="_blank" rel="noreferrer">Salvo no servidor</a></>}
+                  {savedFiles[i] && <> · <a className="text-brand hover:underline" href={savedFiles[i].url} target="_blank" rel="noreferrer">Salvo no servidor</a></>}
                 </p>
               </div>
               <button type="button" onClick={() => remove(i)} className="p-1.5 rounded-lg hover:bg-bg-tertiary">
@@ -153,7 +153,7 @@ export function FileUpload({
                   <a className="text-sm font-medium truncate block text-brand hover:underline" href={file.url} target="_blank" rel="noreferrer">
                     {file.nome}
                   </a>
-                  <p className="text-xs text-text-secondary">{(file.tamanho / 1024).toFixed(1)} KB � salvo na sua conta</p>
+                  <p className="text-xs text-text-secondary">{(file.tamanho / 1024).toFixed(1)} KB · salvo na sua conta</p>
                 </div>
               </li>
             ))}
@@ -163,5 +163,4 @@ export function FileUpload({
     </div>
   );
 }
-
 

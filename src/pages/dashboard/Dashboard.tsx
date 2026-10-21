@@ -16,7 +16,7 @@ const chartData = [
 ];
 
 const statusData = [
-  { name: 'Assinados', value: 42, color: '#10b981' },
+  { name: 'Assinados', value: 42, color: 'var(--brand)' },
   { name: 'Pendentes', value: 18, color: '#f59e0b' },
   { name: 'Enviados', value: 12, color: '#3b82f6' },
   { name: 'Cancelados', value: 5, color: '#ef4444' },
@@ -72,8 +72,8 @@ export default function Dashboard() {
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="gR" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
@@ -83,7 +83,7 @@ export default function Dashboard() {
                   contentStyle={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 12 }}
                   formatter={(v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)}
                 />
-                <Area type="monotone" dataKey="recebido" stroke="#10b981" strokeWidth={2.5} fill="url(#gR)" animationDuration={1200} name="Recebido" />
+                <Area type="monotone" dataKey="recebido" stroke="var(--brand)" strokeWidth={2.5} fill="url(#gR)" animationDuration={1200} name="Recebido" />
                 <Area type="monotone" dataKey="previsto" stroke="#3b82f6" strokeWidth={2} strokeDasharray="6 4" fill="transparent" animationDuration={1400} name="Previsto" />
               </AreaChart>
             </ResponsiveContainer>

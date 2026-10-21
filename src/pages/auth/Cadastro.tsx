@@ -83,13 +83,13 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent overflow-x-hidden px-4 py-4 sm:py-8">
-      <div className="w-full max-w-xl bg-bg-primary border border-border-color rounded-xl p-8 shadow-md">
-        <div className="text-center mb-6 space-y-4">
+    <main className="min-h-[100svh] w-full flex items-start sm:items-center justify-center bg-transparent overflow-x-clip px-3 py-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-8">
+      <div className="w-full max-w-lg bg-bg-primary/90 backdrop-blur-xl border border-border-color rounded-2xl p-4 sm:p-6 md:p-8 shadow-md">
+        <div className="text-center mb-5 sm:mb-6 space-y-3 sm:space-y-4">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="mx-auto h-auto max-h-[min(16svh,112px)] w-full max-w-[min(100%,300px)] object-contain"
+            className="mx-auto h-auto max-h-[min(15svh,104px)] w-full max-w-[min(100%,280px)] object-contain"
           />
           <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
@@ -106,7 +106,7 @@ export default function Cadastro() {
           </div>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
           <Input label="Nome da empresa" value={form.empresa} onChange={(e) => set('empresa', e.target.value)} leftIcon={<Building2 className="w-4 h-4" />} required autoComplete="organization" />
           <Input label="CNPJ (opcional)" value={form.cnpj} onChange={(e) => set('cnpj', e.target.value)} leftIcon={<FileText className="w-4 h-4" />} />
           <Input label="Nome do administrador" value={form.admin} onChange={(e) => set('admin', e.target.value)} leftIcon={<User className="w-4 h-4" />} required autoComplete="name" />
@@ -142,7 +142,7 @@ export default function Cadastro() {
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }
 

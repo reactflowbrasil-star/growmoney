@@ -55,7 +55,7 @@ const queryClient = new QueryClient({
   },
 });
 
-/** Basename para subpasta (ex.: /grow) - Vite injeta import.meta.env.BASE_URL */
+/** Basename para subpasta (ex.: /grow) — Vite injeta import.meta.env.BASE_URL */
 const routerBasename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || '/';
 
 function App() {
@@ -144,5 +144,4 @@ if (!rootEl) {
 }
 
 createRoot(rootEl).render(<App />);
-
 

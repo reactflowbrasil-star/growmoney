@@ -42,4 +42,3 @@ export interface UserSession {
   expira_em: string;
 }
 
-

@@ -53,7 +53,7 @@ export function Sidebar({
           ? 'relative h-full w-full'
           : cn('fixed left-0 top-0 z-40 h-screen', isCollapsed ? 'w-24' : 'w-72')
       )}
-      aria-label="Navega��o principal"
+      aria-label="Navegação principal"
     >
       <div
         className={cn(
@@ -76,7 +76,7 @@ export function Sidebar({
             className="ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary pressable"
             aria-label="Recolher menu"
           >
-            <span className="text-sm font-bold">�</span>
+            <span className="text-sm font-bold">«</span>
           </button>
         )}
       </div>
@@ -88,7 +88,7 @@ export function Sidebar({
           className="mx-auto mt-2 p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary"
           aria-label="Expandir menu"
         >
-          <span className="text-sm font-bold">�</span>
+          <span className="text-sm font-bold">»</span>
         </button>
       )}
 
@@ -143,5 +143,4 @@ export function Sidebar({
     </aside>
   );
 }
-
 

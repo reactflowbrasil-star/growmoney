@@ -47,13 +47,13 @@ function throwIfError(error: { message: string } | null, action: string): assert
 
 export async function listEnvelopes(): Promise<Envelope[]> {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  throwIfError(userError, 'N�o foi poss�vel validar sua sess�o');
+  throwIfError(userError, 'Não foi possível validar sua sessão');
   if (!user) throw new Error('Entre na sua conta para acessar os envelopes.');
   const { data, error } = await supabase
     .from('signature_envelopes')
     .select('payload')
     .order('updated_at', { ascending: false });
-  throwIfError(error, 'N�o foi poss�vel carregar os envelopes');
+  throwIfError(error, 'Não foi possível carregar os envelopes');
   const remote = (data || []).map((row) => row.payload as Envelope);
   const remoteIds = new Set(remote.map((envelope) => envelope.id));
   const local = read<Envelope[]>('grow_envelopes_v1', []).filter(
@@ -69,7 +69,7 @@ export async function listEnvelopes(): Promise<Envelope[]> {
         updated_at: envelope.updatedAt,
       }))
     );
-    throwIfError(importError, 'N�o foi poss�vel migrar os envelopes deste dispositivo');
+    throwIfError(importError, 'Não foi possível migrar os envelopes deste dispositivo');
     const imported = new Set(local.map((envelope) => envelope.id));
     write('grow_envelopes_v1', read<Envelope[]>('grow_envelopes_v1', []).filter((envelope) => !imported.has(envelope.id)));
     return [...remote, ...local].sort(
@@ -85,13 +85,13 @@ export async function getEnvelope(id: string): Promise<Envelope | null> {
     .select('payload')
     .eq('id', id)
     .maybeSingle();
-  throwIfError(error, 'N�o foi poss�vel carregar o envelope');
+  throwIfError(error, 'Não foi possível carregar o envelope');
   return (data?.payload as Envelope | undefined) ?? null;
 }
 
 export async function getEnvelopeBySignerToken(t: string): Promise<{ envelope: Envelope; signer: Signer } | null> {
   const { data, error } = await supabase.rpc('get_signature_envelope_by_token', { p_token: t });
-  throwIfError(error, 'N�o foi poss�vel localizar o documento');
+  throwIfError(error, 'Não foi possível localizar o documento');
   const envelope = data as Envelope | null;
   const signer = envelope?.signers.find((item) => item.token === t);
   return envelope && signer ? { envelope, signer } : null;
@@ -99,7 +99,7 @@ export async function getEnvelopeBySignerToken(t: string): Promise<{ envelope: E
 
 export async function saveEnvelope(envelope: Envelope): Promise<Envelope> {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  throwIfError(userError, 'N�o foi poss�vel validar sua sess�o');
+  throwIfError(userError, 'Não foi possível validar sua sessão');
   if (!user) throw new Error('Entre na sua conta para salvar o envelope.');
   const { error } = await supabase.from('signature_envelopes').upsert({
     id: envelope.id,
@@ -107,7 +107,7 @@ export async function saveEnvelope(envelope: Envelope): Promise<Envelope> {
     payload: envelope,
     updated_at: envelope.updatedAt,
   });
-  throwIfError(error, 'N�o foi poss�vel salvar o envelope no servidor');
+  throwIfError(error, 'Não foi possível salvar o envelope no servidor');
   return envelope;
 }
 
@@ -161,14 +161,14 @@ export async function sendEnvelope(id: string, actor: string): Promise<Envelope 
     addAlert({
       envelopeId: envelope.id,
       title: `Assinatura pendente: ${envelope.titulo}`,
-      body: `Ol� ${signer.nome}, voc� foi convidado a assinar "${envelope.titulo}".`,
+      body: `Olá ${signer.nome}, você foi convidado a assinar "${envelope.titulo}".`,
       email: signer.email,
     });
   });
   addAlert({
     envelopeId: envelope.id,
     title: `Enviado: ${envelope.titulo}`,
-    body: `Documento enviado para ${envelope.signers.filter((signer) => signer.role === 'sign').length} signat�rio(s).`,
+    body: `Documento enviado para ${envelope.signers.filter((signer) => signer.role === 'sign').length} signatário(s).`,
     email: actor,
   });
   return envelope;
@@ -176,7 +176,7 @@ export async function sendEnvelope(id: string, actor: string): Promise<Envelope 
 
 export async function markViewed(tokenStr: string): Promise<Envelope | null> {
   const { data, error } = await supabase.rpc('mark_signature_envelope_viewed', { p_token: tokenStr });
-  throwIfError(error, 'N�o foi poss�vel registrar a visualiza��o');
+  throwIfError(error, 'Não foi possível registrar a visualização');
   const envelope = data as Envelope | null;
   if (!envelope) return null;
   const signer = envelope.signers.find((item) => item.token === tokenStr);
@@ -201,14 +201,14 @@ export async function applySignature(
     p_signature_data_url: signatureDataUrl,
     p_mode: mode,
   });
-  throwIfError(error, 'N�o foi poss�vel registrar a assinatura');
+  throwIfError(error, 'Não foi possível registrar a assinatura');
   const envelope = data as Envelope | null;
   if (envelope) {
     const signer = envelope.signers.find((item) => item.token === tokenStr);
     if (signer) {
       addAlert({
         envelopeId: envelope.id,
-        title: envelope.status === 'concluido' ? `Conclu�do: ${envelope.titulo}` : `Assinatura recebida: ${envelope.titulo}`,
+        title: envelope.status === 'concluido' ? `Concluído: ${envelope.titulo}` : `Assinatura recebida: ${envelope.titulo}`,
         body: envelope.status === 'concluido' ? 'Envelope finalizado com sucesso.' : `${signer.nome} assinou. Aguardando demais partes.`,
         email: envelope.createdBy,
       });
@@ -228,7 +228,7 @@ export async function cancelEnvelope(id: string, actor: string): Promise<Envelop
 
 export async function deleteEnvelope(id: string): Promise<void> {
   const { error } = await supabase.from('signature_envelopes').delete().eq('id', id);
-  throwIfError(error, 'N�o foi poss�vel excluir o envelope');
+  throwIfError(error, 'Não foi possível excluir o envelope');
 }
 
 export function listSavedSignatures(): SavedSignature[] {
@@ -272,4 +272,3 @@ export function signingUrl(tokenStr: string) {
   const base = import.meta.env.BASE_URL || '/';
   return `${window.location.origin}${base.replace(/\/$/, '')}/assinar/${tokenStr}`;
 }
-

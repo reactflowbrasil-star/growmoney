@@ -23,7 +23,7 @@ const BUCKET = 'growmoney-files';
 
 export async function criarLinkArquivo(caminho: string, expiresIn = 60 * 60) {
   const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(caminho, expiresIn);
-  if (error || !data?.signedUrl) throw new Error(`N�o foi poss�vel abrir o arquivo: ${error?.message || 'erro desconhecido'}`);
+  if (error || !data?.signedUrl) throw new Error(`Não foi possível abrir o arquivo: ${error?.message || 'erro desconhecido'}`);
   return data.signedUrl;
 }
 
@@ -48,7 +48,7 @@ export async function uploadArquivo(file: File, categoria: ArquivoCategoria): Pr
     upsert: false,
   });
 
-  if (uploadError) throw new Error(`N�o foi poss�vel enviar ${file.name}: ${uploadError.message}`);
+  if (uploadError) throw new Error(`Não foi possível enviar ${file.name}: ${uploadError.message}`);
 
   const { data: registro, error: registroError } = await supabase
     .from('gm_files')
@@ -66,7 +66,7 @@ export async function uploadArquivo(file: File, categoria: ArquivoCategoria): Pr
 
   if (registroError) {
     await supabase.storage.from(BUCKET).remove([caminho]);
-    throw new Error(`O arquivo foi enviado, mas n�o foi poss�vel registrar seus dados: ${registroError.message}`);
+    throw new Error(`O arquivo foi enviado, mas não foi possível registrar seus dados: ${registroError.message}`);
   }
 
   const { data: signed, error: signedError } = await supabase.storage
@@ -74,7 +74,7 @@ export async function uploadArquivo(file: File, categoria: ArquivoCategoria): Pr
     .createSignedUrl(caminho, 60 * 60);
 
   if (signedError || !signed?.signedUrl) {
-    throw new Error(`Arquivo salvo, mas n�o foi poss�vel gerar o link de acesso: ${signedError?.message || 'erro desconhecido'}`);
+    throw new Error(`Arquivo salvo, mas não foi possível gerar o link de acesso: ${signedError?.message || 'erro desconhecido'}`);
   }
 
   return { id: registro.id, nome: file.name, caminho, url: signed.signedUrl, tamanho: file.size, tipo };
@@ -91,13 +91,13 @@ export async function listarArquivos(categoria: ArquivoCategoria): Promise<Arqui
   if (categoria !== 'auto') query.eq('categoria', categoria);
   else query.in('categoria', ['fotos', 'arquivos', 'contratos']);
   const { data, error } = await query;
-  if (error) throw new Error(`N�o foi poss�vel carregar os arquivos: ${error.message}`);
+  if (error) throw new Error(`Não foi possível carregar os arquivos: ${error.message}`);
   return Promise.all((data as ArquivoRegistro[]).map(async (file) => {
     const { data: signed, error: signedError } = await supabase.storage
       .from(BUCKET)
       .createSignedUrl(file.object_path, 60 * 60);
     if (signedError || !signed?.signedUrl) {
-      throw new Error(`N�o foi poss�vel abrir ${file.original_name}: ${signedError?.message || 'erro desconhecido'}`);
+      throw new Error(`Não foi possível abrir ${file.original_name}: ${signedError?.message || 'erro desconhecido'}`);
     }
     return {
       id: file.id,
@@ -109,4 +109,3 @@ export async function listarArquivos(categoria: ArquivoCategoria): Promise<Arqui
     };
   }));
 }
-

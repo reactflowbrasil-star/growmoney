@@ -45,7 +45,7 @@ export default function DashboardExecutivo() {
               <XAxis dataKey="mes" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
               <Tooltip contentStyle={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 12 }} formatter={(v: number) => formatBRL(v)} />
-              <Bar dataKey="vendas" fill="#10b981" radius={[6, 6, 0, 0]} animationDuration={1000} />
+              <Bar dataKey="vendas" fill="var(--brand)" radius={[6, 6, 0, 0]} animationDuration={1000} />
             </BarChart>
           </ResponsiveContainer>
         </div>

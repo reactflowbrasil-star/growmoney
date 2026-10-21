@@ -15,11 +15,12 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const previousOverflow = document.body.style.overflow;
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
     };
   }, [open, onClose]);
 
@@ -33,31 +34,39 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-0 sm:p-4">
+      <button
+        type="button"
+        aria-label="Fechar janela"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div
         className={cn(
-          'relative w-full bg-bg-primary border border-border-color shadow-xl',
-          'rounded-t-2xl sm:rounded-2xl max-h-[92vh] flex flex-col',
+          'relative flex min-h-0 w-full flex-col overflow-hidden border border-border-color bg-bg-primary shadow-xl',
+          'h-[100dvh] max-h-[100dvh] rounded-none sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl',
           widths[size]
         )}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border-color shrink-0">
-          <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border-color px-4 py-3 sm:px-6 sm:py-4">
+          <h2 className="min-w-0 break-words text-base font-semibold text-text-primary sm:text-lg">{title}</h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-bg-tertiary text-text-secondary"
+            className="shrink-0 rounded-xl p-2 text-text-secondary hover:bg-bg-tertiary"
             aria-label="Fechar"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="overflow-y-auto px-4 sm:px-6 py-4 flex-1">{children}</div>
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
+          {children}
+        </div>
         {footer && (
-          <div className="px-4 sm:px-6 py-4 border-t border-border-color flex flex-col-reverse sm:flex-row gap-2 sm:justify-end shrink-0">
+          <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-border-color bg-bg-primary px-4 py-3 sm:flex-row sm:flex-wrap sm:justify-end sm:px-6 sm:py-4 [&>button]:w-full sm:[&>button]:w-auto">
             {footer}
           </div>
         )}

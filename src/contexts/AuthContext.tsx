@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const empresaNome =
         (authUser.user_metadata?.empresa as string) ||
-        `${nome.split(' ')[0]} � Empresa`;
+        `${nome.split(' ')[0]} · Empresa`;
 
       const { error: empresaError } = await supabase.rpc('ensure_default_empresa', {
         p_nome: empresaNome,
@@ -213,7 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
       if (error) throw new Error(`Falha ao autenticar: ${error.message}`);
-      if (!data.session) throw new Error('Sess�o n�o criada');
+      if (!data.session) throw new Error('Sessão não criada');
       await hydrateFromSession(data.session as any);
     },
     [hydrateFromSession]
@@ -245,11 +245,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
       if (error) throw new Error(error.message || 'Falha ao registrar');
-      if (!data.user) throw new Error('Usu�rio n�o retornado ap�s cadastro');
+      if (!data.user) throw new Error('Usuário não retornado após cadastro');
 
       if (!data.session) {
         throw new Error(
-          'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois fa�a login.'
+          'Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faça login.'
         );
       }
 
@@ -325,7 +325,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', user.id)
       .select('id')
       .maybeSingle();
-    if (error) throw new Error(`N�o foi poss�vel salvar o perfil: ${error.message}`);
+    if (error) throw new Error(`Não foi possível salvar o perfil: ${error.message}`);
     if (!data) {
       const { error: insertError } = await supabase.from('profiles').insert({
         id: user.id,
@@ -333,7 +333,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         nome: updates.nome,
         avatar_url: updates.avatar_url ?? null,
       });
-      if (insertError) throw new Error(`N�o foi poss�vel salvar o perfil: ${insertError.message}`);
+      if (insertError) throw new Error(`Não foi possível salvar o perfil: ${insertError.message}`);
     }
     const path = updates.avatar_url === undefined ? user.avatar_url : updates.avatar_url;
     const avatar = path ? await criarLinkArquivo(path, 60 * 60 * 24 * 30).catch(() => undefined) : undefined;
@@ -367,5 +367,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
 

@@ -99,6 +99,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
       throw new Error('Esta conta não possui autorização para administrar a plataforma.');
     }
+    const { error: auditError } = await supabase.rpc('admin_log_event', {
+      p_action: 'login',
+      p_details: { method: 'password' },
+    });
+    if (auditError) console.error('Falha ao registrar login administrativo', auditError);
     setSession(toAdminSession(data.user));
   }, []);
 

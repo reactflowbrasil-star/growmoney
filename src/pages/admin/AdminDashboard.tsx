@@ -1,16 +1,32 @@
+import { useEffect, useState } from 'react';
 import { Building2, Users, FileText, Activity } from 'lucide-react';
 import { Card, PageHeader, Badge } from '@/components/ui';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { supabase } from '@/lib/supabase/client';
 
-const kpis = [
-  { label: 'Empresas', value: '-', icon: Building2, hint: 'Tenants ativos' },
-  { label: 'Usuarios', value: '-', icon: Users, hint: 'Contas na plataforma' },
-  { label: 'Contratos', value: '-', icon: FileText, hint: 'Volume global' },
-  { label: 'Saude', value: 'OK', icon: Activity, hint: 'Sistema operacional' },
-];
+type Counts = { companies: number; users: number; contracts: number };
 
 export default function AdminDashboard() {
   const { session } = useAdminAuth();
+  const [counts, setCounts] = useState<Counts | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    supabase.rpc('admin_dashboard_counts').then(({ data, error: queryError }) => {
+      if (!active) return;
+      if (queryError) setError(queryError.message);
+      else setCounts(data as Counts);
+    });
+    return () => { active = false; };
+  }, []);
+
+  const kpis = [
+    { label: 'Empresas', value: counts?.companies ?? '—', icon: Building2, hint: 'Contas na plataforma' },
+    { label: 'Usuários', value: counts?.users ?? '—', icon: Users, hint: 'Perfis cadastrados' },
+    { label: 'Contratos', value: counts?.contracts ?? '—', icon: FileText, hint: 'Volume global' },
+    { label: 'Saúde', value: error ? 'Falha' : counts ? 'OK' : '…', icon: Activity, hint: 'Conexão com o banco' },
+  ];
 
   return (
     <div className="max-w-6xl space-y-6">
@@ -18,6 +34,8 @@ export default function AdminDashboard() {
         title="Visao geral"
         description={`Bem-vindo, ${session?.username}. Acesso administrativo autorizado.`}
       />
+
+      {error && <Card className="p-4 text-sm text-aviso">Não foi possível carregar os indicadores: {error}</Card>}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((k) => (

@@ -19,7 +19,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
   #root { min-height: 100dvh; }
-  ::selection { background: rgba(16, 185, 129, 0.28); color: inherit; }
+  ::selection { background: rgba(135, 169, 19, 0.3); color: inherit; }
   h1, h2, h3, h4 {
     letter-spacing: -0.025em;
     font-weight: 700;
@@ -55,22 +55,22 @@
   }
   .card-premium:hover {
     box-shadow: var(--shadow-md);
-    border-color: rgba(16, 185, 129, 0.28);
+    border-color: rgba(135, 169, 19, 0.32);
     transform: translateY(-1px);
   }
   .card-premium:active { transform: translateY(0); }
   .gradient-brand {
-    background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+    background: linear-gradient(135deg, #526b0b 0%, #87a913 55%, #b5d64b 100%);
   }
   .gradient-hero {
     background:
-      radial-gradient(ellipse 90% 55% at 50% -25%, rgba(16, 185, 129, 0.22), transparent),
+      radial-gradient(ellipse 90% 55% at 50% -25%, rgba(135, 169, 19, 0.22), transparent),
       radial-gradient(ellipse 50% 40% at 100% 0%, rgba(59, 130, 246, 0.1), transparent),
-      radial-gradient(ellipse 40% 30% at 0% 50%, rgba(16, 185, 129, 0.06), transparent),
+      radial-gradient(ellipse 40% 30% at 0% 50%, rgba(135, 169, 19, 0.08), transparent),
       transparent;
   }
   .text-gradient {
-    background: linear-gradient(135deg, #10b981, #34d399);
+    background: linear-gradient(135deg, #526b0b, #87a913 58%, #b5d64b);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

@@ -20,11 +20,7 @@ export default function AdminUsuarios() {
     setLoading(true);
     setError('');
     try {
-      const { data, error: err } = await supabase
-        .from('profiles')
-        .select('id, email, nome, role')
-        .order('nome')
-        .limit(300);
+      const { data, error: err } = await supabase.rpc('admin_list_profiles');
       if (err) throw err;
       setRows((data as Profile[]) || []);
     } catch (e: unknown) {

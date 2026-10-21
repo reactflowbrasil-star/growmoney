@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, FileText, Calendar, Wallet, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { BRAND } from '@/lib/brand';
+import { InstallPwaButton } from '@/components/pwa/InstallPwaButton';
+
+const heroPhrases = ['Seu neg\u00f3cio em crescimento.', 'Mais controle. Mais resultado.', 'Tudo em um s\u00f3 lugar.'];
 
 const features = [
   { icon: FileText, title: 'Contratos digitais', desc: 'Crie, envie e acompanhe assinaturas em um só lugar.' },
@@ -11,6 +15,41 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const [typedPhrase, setTypedPhrase] = useState('');
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTypedPhrase(heroPhrases[0]);
+      return;
+    }
+
+    let phraseIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+    let timer = 0;
+    const tick = () => {
+      const phrase = heroPhrases[phraseIndex];
+      if (!phrase) return;
+      characterIndex += deleting ? -1 : 1;
+      setTypedPhrase(phrase.slice(0, characterIndex));
+
+      if (!deleting && characterIndex >= phrase.length) {
+        deleting = true;
+        timer = window.setTimeout(tick, 1500);
+        return;
+      }
+      if (deleting && characterIndex <= 0) {
+        deleting = false;
+        phraseIndex = (phraseIndex + 1) % heroPhrases.length;
+        timer = window.setTimeout(tick, 380);
+        return;
+      }
+      timer = window.setTimeout(tick, deleting ? 38 : 82);
+    };
+    timer = window.setTimeout(tick, 250);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-transparent text-text-primary">
       <header className="sticky top-0 z-50 border-b border-border-color/80 glass">
@@ -45,26 +84,30 @@ export default function LandingPage() {
             className="h-[96px] md:h-[120px] w-auto max-w-[480px] mx-auto object-contain mb-8"
           />
           <p className="text-sm font-medium text-brand mb-4">SaaS de gestão financeira</p>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
             Sua gestão mais inteligente.
             <br />
-            <span className="text-brand">Seu negócio em crescimento.</span>
+            <span className="text-brand" aria-label={heroPhrases[0]}>
+              <span aria-hidden="true" className="inline-block min-h-[1.25em] min-w-[1ch]">{typedPhrase}</span>
+              <span aria-hidden="true" className="ml-0.5 inline-block h-[0.85em] w-[2px] translate-y-1 bg-brand animate-pulse" />
+            </span>
           </h1>
           <p className="mt-5 text-base md:text-lg text-text-secondary max-w-2xl mx-auto">
             Contratos, agenda e financeiro num único sistema — feito para empresas que querem
             escalar sem perder o controle.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link to="/cadastro">
-              <Button size="lg" className="gap-2">
+          <div className="mt-8 flex flex-col items-stretch sm:flex-row sm:items-center justify-center gap-3">
+            <Link to="/cadastro" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full gap-2 sm:w-auto">
                 Criar conta grátis <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link to="/auth">
-              <Button size="lg" variant="outline">
+            <Link to="/auth" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
                 Já tenho conta
               </Button>
             </Link>
+            <InstallPwaButton className="w-full sm:w-auto" />
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-text-secondary">
             {['Contratos digitais', 'Parcelas e inadimplência', 'Agenda comercial', 'Dashboard em tempo real'].map(

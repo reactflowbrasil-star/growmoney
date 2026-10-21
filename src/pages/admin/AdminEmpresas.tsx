@@ -20,11 +20,7 @@ export default function AdminEmpresas() {
     setLoading(true);
     setError('');
     try {
-      const { data, error: err } = await supabase
-        .from('empresas')
-        .select('id, nome, cnpj, created_at:criado_em')
-        .order('criado_em', { ascending: false })
-        .limit(200);
+      const { data, error: err } = await supabase.rpc('admin_list_empresas');
       if (err) throw err;
       setRows((data as EmpresaRow[]) || []);
     } catch (e: unknown) {
