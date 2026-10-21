@@ -1,18 +1,124 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, FileText, Calendar, Wallet, BarChart3 } from 'lucide-react';
+import {
+  ArrowRight,
+  BarChart3,
+  Calendar,
+  Check,
+  CheckCircle2,
+  FileSignature,
+  FileText,
+  ShieldCheck,
+  Sparkles,
+  Wallet,
+} from 'lucide-react';
 import { Button } from '@/components/ui';
 import { BRAND } from '@/lib/brand';
 import { InstallPwaButton } from '@/components/pwa/InstallPwaButton';
 
-const heroPhrases = ['Seu neg\u00f3cio em crescimento.', 'Mais controle. Mais resultado.', 'Tudo em um s\u00f3 lugar.'];
+const heroPhrases = [
+  'Cresça com controle.',
+  'Organize cada oportunidade.',
+  'Assine com mais agilidade.',
+];
 
 const features = [
-  { icon: FileText, title: 'Contratos digitais', desc: 'Crie, envie e acompanhe assinaturas em um só lugar.' },
-  { icon: Wallet, title: 'Parcelas e inadimplência', desc: 'Controle financeiro com alertas e comprovantes.' },
-  { icon: Calendar, title: 'Agenda comercial', desc: 'Reuniões, visitas e follow-ups organizados.' },
-  { icon: BarChart3, title: 'Dashboard em tempo real', desc: 'KPIs e gráficos para decisões rápidas.' },
+  {
+    icon: FileSignature,
+    title: 'Contratos e assinaturas',
+    desc: 'Crie documentos, envie para assinatura e acompanhe cada etapa em um só lugar.',
+  },
+  {
+    icon: Wallet,
+    title: 'Financeiro organizado',
+    desc: 'Acompanhe parcelas, recebimentos e pendências com uma visão clara da operação.',
+  },
+  {
+    icon: Calendar,
+    title: 'Agenda comercial',
+    desc: 'Mantenha compromissos, visitas e próximos contatos no ritmo da sua equipe.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Visão do negócio',
+    desc: 'Transforme os dados da operação em indicadores simples para decidir melhor.',
+  },
 ];
+
+function ProductPreview() {
+  return (
+    <div className="relative mx-auto w-full max-w-[34rem] lg:ml-auto" aria-label="Prévia visual da plataforma">
+      <div aria-hidden="true" className="absolute -inset-7 rounded-[2.5rem] bg-brand/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-border-color/80 bg-bg-primary/95 p-4 shadow-2xl backdrop-blur-xl sm:p-6">
+        <div className="flex items-center justify-between gap-3 border-b border-border-color pb-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand/12 text-brand">
+              <BarChart3 className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xs text-text-secondary">VISÃO GERAL</p>
+              <p className="text-sm font-semibold text-text-primary">Sua operação</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand-dark dark:text-brand-light">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Tudo em ordem
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 py-4 sm:gap-4">
+          <div className="rounded-2xl bg-bg-secondary p-3.5 sm:p-4">
+            <p className="text-xs text-text-secondary">A receber</p>
+            <p className="mt-1 text-xl font-bold tracking-tight text-text-primary sm:text-2xl">R$ 42.380</p>
+            <p className="mt-1 text-[11px] font-medium text-brand-dark dark:text-brand-light">Visão financeira clara</p>
+          </div>
+          <div className="rounded-2xl bg-bg-secondary p-3.5 sm:p-4">
+            <p className="text-xs text-text-secondary">Contratos ativos</p>
+            <p className="mt-1 text-xl font-bold tracking-tight text-text-primary sm:text-2xl">24</p>
+            <p className="mt-1 text-[11px] font-medium text-text-secondary">Acompanhamento simples</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border-color p-3.5 sm:p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-text-primary">Fluxo da operação</p>
+              <p className="text-xs text-text-secondary">Um panorama para decidir</p>
+            </div>
+            <span className="rounded-lg bg-bg-secondary px-2.5 py-1 text-[11px] font-medium text-text-secondary">Este mês</span>
+          </div>
+          <svg aria-hidden="true" viewBox="0 0 420 116" className="h-24 w-full overflow-visible">
+            <defs>
+              <linearGradient id="landing-chart-fill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="var(--brand)" stopOpacity="0.24" />
+                <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d="M0 94H420M0 58H420M0 22H420" stroke="var(--border-color)" strokeDasharray="4 6" />
+            <path d="M0 91 C42 85 55 73 84 78 S137 67 168 70 S212 42 252 51 S301 35 334 42 S382 15 420 17 L420 116 L0 116Z" fill="url(#landing-chart-fill)" />
+            <path d="M0 91 C42 85 55 73 84 78 S137 67 168 70 S212 42 252 51 S301 35 334 42 S382 15 420 17" fill="none" stroke="var(--brand)" strokeWidth="3" strokeLinecap="round" />
+            <circle cx="334" cy="42" r="5" fill="var(--brand)" stroke="var(--bg-primary)" strokeWidth="3" />
+          </svg>
+          <div className="flex justify-between pt-1 text-[10px] text-text-secondary"><span>Sem 1</span><span>Sem 2</span><span>Sem 3</span><span>Sem 4</span></div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="flex min-w-0 items-center gap-2.5 rounded-xl bg-bg-secondary/80 p-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand/12 text-brand"><Check className="h-4 w-4" /></span>
+            <span className="truncate text-xs font-medium text-text-primary">Assinaturas acompanhadas</span>
+          </div>
+          <div className="flex min-w-0 items-center gap-2.5 rounded-xl bg-bg-secondary/80 p-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand/12 text-brand"><ShieldCheck className="h-4 w-4" /></span>
+            <span className="truncate text-xs font-medium text-text-primary">Dados em um só ambiente</span>
+          </div>
+        </div>
+      </div>
+      <div className="absolute -bottom-5 -left-3 hidden items-center gap-2.5 rounded-2xl border border-border-color bg-bg-primary px-4 py-3 shadow-xl sm:flex">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/12 text-brand"><Sparkles className="h-4 w-4" /></span>
+        <span><span className="block text-xs font-semibold text-text-primary">Mais clareza</span><span className="block text-[11px] text-text-secondary">em cada etapa do negócio</span></span>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [typedPhrase, setTypedPhrase] = useState('');
@@ -35,7 +141,7 @@ export default function LandingPage() {
 
       if (!deleting && characterIndex >= phrase.length) {
         deleting = true;
-        timer = window.setTimeout(tick, 1500);
+        timer = window.setTimeout(tick, 1700);
         return;
       }
       if (deleting && characterIndex <= 0) {
@@ -44,144 +150,112 @@ export default function LandingPage() {
         timer = window.setTimeout(tick, 380);
         return;
       }
-      timer = window.setTimeout(tick, deleting ? 38 : 82);
+      timer = window.setTimeout(tick, deleting ? 32 : 72);
     };
-    timer = window.setTimeout(tick, 250);
+    timer = window.setTimeout(tick, 220);
     return () => window.clearTimeout(timer);
   }, []);
 
+  const phraseParts = typedPhrase.split(/(\s+)/);
+  let wordIndex = -1;
+
   return (
-    <div className="min-h-screen bg-transparent text-text-primary">
-      <header className="sticky top-0 z-50 border-b border-border-color/80 glass">
-        <div className="max-w-6xl mx-auto px-4 h-28 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <img
-              src={BRAND.logo}
-              alt={BRAND.name}
-              className="h-[72px] md:h-[84px] w-auto max-w-[330px] object-contain"
-            />
+    <div className="min-h-screen overflow-x-clip bg-transparent text-text-primary">
+      <header className="sticky top-0 z-50 border-b border-border-color/70 bg-bg-primary/80 backdrop-blur-2xl">
+        <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-3 px-4 sm:h-20 sm:px-6 lg:px-8">
+          <Link to="/" className="flex min-w-0 items-center" aria-label={`${BRAND.name} — início`}>
+            <img src={BRAND.logo} alt={BRAND.name} className="h-11 w-auto max-w-[min(44vw,210px)] object-contain object-left sm:h-14 sm:max-w-[250px]" />
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/auth">
-              <Button variant="ghost" size="sm">
-                Entrar
-              </Button>
-            </Link>
-            <Link to="/cadastro">
-              <Button size="sm" className="gap-1">
-                Começar grátis <ArrowRight className="w-3.5 h-3.5" />
-              </Button>
-            </Link>
-          </div>
+          <nav aria-label="Acesso" className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+            <Link to="/auth"><Button variant="ghost" size="sm" className="px-3 sm:px-4">Entrar</Button></Link>
+            <Link to="/cadastro"><Button size="sm" className="gap-1.5 px-3 sm:px-4">Começar grátis <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" /></Button></Link>
+          </nav>
         </div>
       </header>
 
-      <section className="gradient-hero relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 pt-16 pb-24 md:pt-24 md:pb-32 text-center">
-          <img
-            src={BRAND.logo}
-            alt={BRAND.name}
-            className="h-[96px] md:h-[120px] w-auto max-w-[480px] mx-auto object-contain mb-8"
-          />
-          <p className="text-sm font-medium text-brand mb-4">SaaS de gestão financeira</p>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-            Sua gestão mais inteligente.
-            <br />
-            <span className="text-brand" aria-label={heroPhrases[0]}>
-              <span aria-hidden="true" className="inline-block min-h-[1.25em] min-w-[1ch]">{typedPhrase}</span>
-              <span aria-hidden="true" className="ml-0.5 inline-block h-[0.85em] w-[2px] translate-y-1 bg-brand animate-pulse" />
-            </span>
-          </h1>
-          <p className="mt-5 text-base md:text-lg text-text-secondary max-w-2xl mx-auto">
-            Contratos, agenda e financeiro num único sistema — feito para empresas que querem
-            escalar sem perder o controle.
-          </p>
-          <div className="mt-8 flex flex-col items-stretch sm:flex-row sm:items-center justify-center gap-3">
-            <Link to="/cadastro" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full gap-2 sm:w-auto">
-                Criar conta grátis <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link to="/auth" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                Já tenho conta
-              </Button>
-            </Link>
-            <InstallPwaButton className="w-full sm:w-auto" />
-          </div>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-text-secondary">
-            {['Contratos digitais', 'Parcelas e inadimplência', 'Agenda comercial', 'Dashboard em tempo real'].map(
-              (t) => (
-                <span key={t} className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-brand" /> {t}
-                </span>
-              )
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-6xl mx-auto px-4 py-16 md:py-20">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold">Tudo que você precisa</h2>
-          <p className="text-text-secondary mt-2">Módulos integrados para operar e crescer.</p>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="p-5 rounded-2xl border border-border-color bg-bg-primary card-premium"
-            >
-              <div className="w-10 h-10 rounded-xl bg-brand/15 text-brand flex items-center justify-center mb-3">
-                <f.icon className="w-5 h-5" />
+      <main>
+        <section className="gradient-hero relative isolate overflow-hidden">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_42%_50%_at_85%_42%,rgba(135,169,19,0.12),transparent_75%)]" />
+          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:grid-cols-[1.02fr_.98fr] lg:gap-10 lg:px-8 lg:py-24">
+            <div className="mx-auto w-full max-w-2xl text-center lg:mx-0 lg:text-left">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-brand-dark dark:text-brand-light">
+                <Sparkles aria-hidden="true" className="h-3.5 w-3.5" /> GESTÃO COMERCIAL E FINANCEIRA
               </div>
-              <h3 className="font-semibold">{f.title}</h3>
-              <p className="text-sm text-text-secondary mt-1">{f.desc}</p>
+              <h1 className="font-display text-[clamp(2.65rem,7.6vw,5.6rem)] font-light leading-[0.98] tracking-[-0.065em] text-text-primary">
+                Mais clareza.
+                <br />
+                <span className="sr-only">{typedPhrase || heroPhrases[0]}</span>
+                <span aria-hidden="true" className="text-gradient">
+                  {phraseParts.map((part, index) => {
+                    if (/^\s+$/.test(part)) return <span key={index}>{part}</span>;
+                    wordIndex += 1;
+                    return <span key={index} className={wordIndex % 2 === 1 ? 'font-bold' : 'font-light'}>{part}</span>;
+                  })}
+                  <span className="ml-0.5 inline-block h-[0.76em] w-[2px] translate-y-1 bg-brand align-baseline motion-safe:animate-pulse" />
+                </span>
+              </h1>
+              <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-text-secondary sm:text-lg sm:leading-8 lg:mx-0">
+                Contratos, agenda e financeiro conectados para você cuidar do crescimento com mais organização e tranquilidade.
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+                <Link to="/cadastro" className="w-full sm:w-auto"><Button size="lg" className="w-full gap-2 sm:w-auto">Criar conta grátis <ArrowRight aria-hidden="true" className="h-4 w-4" /></Button></Link>
+                <Link to="/auth" className="w-full sm:w-auto"><Button size="lg" variant="outline" className="w-full sm:w-auto">Já tenho conta</Button></Link>
+              </div>
+              <div className="mt-4 flex justify-center lg:justify-start"><InstallPwaButton className="w-full sm:w-auto" /></div>
+              <div className="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2.5 text-xs font-medium text-text-secondary sm:text-sm lg:justify-start">
+                {['Contratos e assinaturas', 'Agenda comercial', 'Financeiro integrado'].map((label) => (
+                  <span key={label} className="inline-flex items-center gap-1.5"><CheckCircle2 aria-hidden="true" className="h-4 w-4 text-brand" />{label}</span>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
+            <ProductPreview />
+          </div>
+        </section>
 
-      <section className="border-t border-border-color">
-        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-          <img
-            src={BRAND.logo}
-            alt=""
-            className="h-[84px] w-auto max-w-[360px] mx-auto object-contain mb-6 opacity-95"
-          />
-          <h2 className="text-2xl md:text-3xl font-bold">Pronto para crescer com o GROW?</h2>
-          <p className="text-text-secondary mt-2 mb-6">{BRAND.tagline}</p>
-          <Link to="/cadastro">
-            <Button size="lg" className="gap-2">
-              Começar agora <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
-      </section>
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand">Tudo conectado</p>
+            <h2 className="font-display text-3xl font-light leading-tight tracking-[-0.045em] text-text-primary sm:text-4xl">Uma rotina mais simples, <span className="font-bold">do contrato ao recebimento.</span></h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-text-secondary sm:text-base sm:leading-7">Menos informação espalhada. Mais visibilidade sobre o que acontece no seu negócio.</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+            {features.map((feature, index) => (
+              <article key={feature.title} className="card-premium group relative overflow-hidden p-5 sm:p-6">
+                <div aria-hidden="true" className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-brand/5 blur-2xl transition-colors group-hover:bg-brand/15" />
+                <span className="relative mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/12 text-brand transition-transform duration-200 group-hover:scale-105"><feature.icon aria-hidden="true" className="h-5 w-5" /></span>
+                <p className="mb-2 text-[11px] font-bold tracking-[0.16em] text-brand">0{index + 1}</p>
+                <h3 className="relative text-base font-semibold tracking-tight text-text-primary">{feature.title}</h3>
+                <p className="relative mt-2 text-sm leading-6 text-text-secondary">{feature.desc}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
-      <footer className="border-t border-border-color py-8">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-text-secondary">
+        <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
+          <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-brand/20 bg-bg-primary px-6 py-12 text-center shadow-lg sm:px-10 sm:py-16">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_100%_at_50%_100%,rgba(135,169,19,0.16),transparent_80%)]" />
+            <div className="relative mx-auto max-w-2xl">
+              <span className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/12 text-brand"><FileText aria-hidden="true" className="h-5 w-5" /></span>
+              <h2 className="font-display text-3xl font-light leading-tight tracking-[-0.045em] text-text-primary sm:text-4xl">Pronto para ter <span className="font-bold">mais clareza?</span></h2>
+              <p className="mt-3 text-sm leading-6 text-text-secondary sm:text-base sm:leading-7">{BRAND.tagline}</p>
+              <Link to="/cadastro" className="mt-7 inline-flex"><Button size="lg" className="gap-2">Começar agora <ArrowRight aria-hidden="true" className="h-4 w-4" /></Button></Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-border-color/80 bg-bg-primary/50 py-7">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-sm text-text-secondary sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <img
-              src={BRAND.logo}
-              alt=""
-              className="h-[60px] w-auto max-w-[240px] object-contain opacity-90"
-            />
-            <span>
-              © {new Date().getFullYear()} {BRAND.name}
-            </span>
+            <img src={BRAND.logo} alt="" className="h-9 w-auto max-w-[170px] object-contain object-left opacity-90" />
+            <span className="text-xs sm:text-sm">© {new Date().getFullYear()} {BRAND.name}</span>
           </div>
-          <div className="flex gap-4">
-            <Link to="/termos" className="hover:text-text-primary">
-              Termos
-            </Link>
-            <Link to="/privacidade" className="hover:text-text-primary">
-              Privacidade
-            </Link>
-          </div>
+          <nav aria-label="Informações legais" className="flex items-center gap-5 text-xs sm:text-sm">
+            <Link to="/termos" className="transition-colors hover:text-text-primary">Termos</Link>
+            <Link to="/privacidade" className="transition-colors hover:text-text-primary">Privacidade</Link>
+          </nav>
         </div>
       </footer>
     </div>
   );
 }
-
