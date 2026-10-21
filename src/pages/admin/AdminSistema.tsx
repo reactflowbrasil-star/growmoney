@@ -1,9 +1,10 @@
 import { Card, PageHeader, Badge } from "@/components/ui";
 import { ChevronDown } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 
 export default function AdminSistema() {
-  const envOk = Boolean(import.meta.env.VITE_SUPABASE_URL);
+  const envOk = isSupabaseConfigured;
 
   return (
     <div className="min-w-0 max-w-3xl space-y-4">

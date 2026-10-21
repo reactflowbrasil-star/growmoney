@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-21T18:40:19.186Z",
+  "generated_at": "2026-10-21T18:58:27.515Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -673,6 +673,16 @@
       "id": "file:supabase/migrations/20261021171000_admin_console_and_audit.sql",
       "type": "migration",
       "label": "supabase/migrations/20261021171000_admin_console_and_audit.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261021185600_restore_platform_admin_check.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261021185600_restore_platform_admin_check.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261021185725_restrict_helper_rpc_access.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"
     },
     {
       "id": "file:tailwind.config.ts",
@@ -2003,6 +2013,12 @@
     {
       "from": "file:src/pages/admin/AdminSistema.tsx",
       "to": "file:src/lib/brand.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminSistema.tsx",
+      "to": "file:src/lib/supabase/client.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },

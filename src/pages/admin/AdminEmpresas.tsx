@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Building2, RefreshCw } from "lucide-react";
 import {
   Button,
@@ -23,7 +23,7 @@ export default function AdminEmpresas() {
   const [error, setError] = useState("");
   const [busca, setBusca] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -40,11 +40,11 @@ export default function AdminEmpresas() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [load]);
 
   const filtered = rows.filter(
     (r) =>
@@ -73,10 +73,7 @@ export default function AdminEmpresas() {
       {error && (
         <Card className="p-4 text-sm text-aviso border-aviso/30">
           {error}
-          <p className="text-xs mt-1 text-text-secondary">
-            Com RLS restritiva, o admin anônimo pode não listar tudo. Use
-            service role no backend em produção.
-          </p>
+          <p className="text-xs mt-1 text-text-secondary">A listagem administrativa exige uma conta autenticada e autorizada.</p>
         </Card>
       )}
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Copy, CheckCircle2, Ban, ExternalLink } from 'lucide-react';
 import { Button, Card, Badge, PageHeader } from '@/components/ui';
@@ -27,13 +27,13 @@ export default function AssinaturaDetalhe() {
   const [arquivoUrl, setArquivoUrl] = useState('');
   const [copied, setCopied] = useState('');
 
-  const reload = async () => {
+  const reload = useCallback(async () => {
     if (id) setEnv(await getEnvelope(id));
-  };
+  }, [id]);
 
   useEffect(() => {
-    reload();
-  }, [id]);
+    void reload();
+  }, [reload]);
 
   useEffect(() => {
     if (!env?.arquivoStoragePath) return;

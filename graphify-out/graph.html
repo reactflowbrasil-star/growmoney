@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>178 nós · 355 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>180 nós · 356 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/API.md"["docs/API.md"]
@@ -133,6 +133,8 @@
   "file:supabase/migrations/20261021170529_persistent_workspace_data.sql"["supabase/migrations/20261021170529_persistent_workspace_data.sql"]
   "file:supabase/migrations/20261021170755_assign_platform_admin_to_sac.sql"["supabase/migrations/20261021170755_assign_platform_admin_to_sac.sql"]
   "file:supabase/migrations/20261021171000_admin_console_and_audit.sql"["supabase/migrations/20261021171000_admin_console_and_audit.sql"]
+  "file:supabase/migrations/20261021185600_restore_platform_admin_check.sql"["supabase/migrations/20261021185600_restore_platform_admin_check.sql"]
+  "file:supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"["supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -362,6 +364,7 @@
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|calls-rpc| "rpc:admin_list_profiles"

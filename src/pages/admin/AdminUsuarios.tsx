@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Users, RefreshCw } from "lucide-react";
 import {
   Button,
@@ -23,7 +23,7 @@ export default function AdminUsuarios() {
   const [error, setError] = useState("");
   const [busca, setBusca] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -36,11 +36,11 @@ export default function AdminUsuarios() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    load();
-  }, []);
+    void load();
+  }, [load]);
 
   const filtered = rows.filter(
     (r) =>
