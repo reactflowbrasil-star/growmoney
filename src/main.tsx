@@ -14,6 +14,7 @@ import './index.css';
 import LandingPage from '@/pages/public/LandingPage';
 import Login from '@/pages/auth/Login';
 import Cadastro from '@/pages/auth/Cadastro';
+import AuthCallback from '@/pages/auth/AuthCallback';
 import RecuperacaoSenha from '@/pages/auth/RecuperacaoSenha';
 import TermosUso from '@/pages/auth/TermosUso';
 import Privacidade from '@/pages/auth/Privacidade';
@@ -65,6 +66,7 @@ function App() {
                   <Route path="/auth" element={<Login />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/cadastro" element={<Cadastro />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/recuperar-senha" element={<RecuperacaoSenha />} />
                   <Route path="/termos" element={<TermosUso />} />
                   <Route path="/privacidade" element={<Privacidade />} />
