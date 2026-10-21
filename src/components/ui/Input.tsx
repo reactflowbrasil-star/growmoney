@@ -6,22 +6,26 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   hint?: string;
   leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, leftIcon, id, ...props }, ref) => {
+  ({ className, label, error, hint, leftIcon, rightIcon, id, ...props }, ref) => {
     const inputId = id || `input-${Math.random().toString(36).slice(2, 9)}`;
 
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary mb-1">
+          <label
+            htmlFor={inputId}
+            className="block text-sm font-medium text-text-secondary mb-1"
+          >
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
               {leftIcon}
             </span>
           )}
@@ -35,13 +39,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               'focus:outline-none focus:ring-2 focus:ring-verde-discreto',
               'disabled:opacity-50 disabled:cursor-not-allowed',
               leftIcon && 'pl-10',
+              rightIcon && 'pr-10',
               error && 'border-erro focus:ring-erro',
               className
             )}
             aria-invalid={!!error}
-            aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
+            aria-describedby={
+              error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
+            }
             {...props}
           />
+          {rightIcon && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary">
+              {rightIcon}
+            </span>
+          )}
         </div>
         {error && (
           <p id={`${inputId}-error`} className="mt-1 text-sm text-erro" role="alert">

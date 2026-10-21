@@ -1,10 +1,11 @@
 export interface Empresa {
   id: string;
   nome: string;
-  cnpj: string | null;
-  responsavel_id: string;
-  configuracoes: Record<string, unknown>;
-  criado_em: string;
+  cnpj?: string | null;
+  role?: string;
+  responsavel_id?: string;
+  configuracoes?: Record<string, unknown>;
+  criado_em?: string;
 }
 
 export interface EmpresaMember {
