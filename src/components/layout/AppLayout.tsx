@@ -48,10 +48,10 @@ export function AppLayout() {
     : undefined;
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen bg-bg-secondary">
       <Sidebar
         items={navItems}
-        logo="GrowMoney"
+        logo="/logo-grow.svg"
         user={layoutUser}
         onCollapse={setSidebarCollapsed}
       />
@@ -65,7 +65,7 @@ export function AppLayout() {
           user={layoutUser}
           onLogout={handleLogout}
         />
-        <main className="p-4 md:p-6" role="main">
+        <main className="p-4 md:p-6 lg:p-8" role="main">
           <Outlet />
         </main>
       </div>
