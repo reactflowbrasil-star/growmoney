@@ -3,9 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AdminProtectedRoute } from '@/components/admin/AdminProtectedRoute';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import './index.css';
 
 import LandingPage from '@/pages/public/LandingPage';
@@ -28,6 +31,14 @@ import Configuracoes from '@/pages/dashboard/Configuracoes';
 import Perfil from '@/pages/dashboard/Perfil';
 import Empresas from '@/pages/dashboard/Empresas';
 
+import AdminLogin from '@/pages/admin/AdminLogin';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminEmpresas from '@/pages/admin/AdminEmpresas';
+import AdminUsuarios from '@/pages/admin/AdminUsuarios';
+import AdminSistema from '@/pages/admin/AdminSistema';
+import AdminAuditoria from '@/pages/admin/AdminAuditoria';
+import AdminSeguranca from '@/pages/admin/AdminSeguranca';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -44,38 +55,52 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AuthProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/auth" element={<Login />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/cadastro" element={<Cadastro />} />
-                <Route path="/recuperar-senha" element={<RecuperacaoSenha />} />
-                <Route path="/termos" element={<TermosUso />} />
-                <Route path="/privacidade" element={<Privacidade />} />
+            <AdminAuthProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/auth" element={<Login />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/cadastro" element={<Cadastro />} />
+                  <Route path="/recuperar-senha" element={<RecuperacaoSenha />} />
+                  <Route path="/termos" element={<TermosUso />} />
+                  <Route path="/privacidade" element={<Privacidade />} />
 
-                <Route element={<ProtectedRoute />}>
-                  <Route element={<AppLayout />}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/dashboard/executivo" element={<DashboardExecutivo />} />
-                    <Route path="/clientes" element={<Clientes />} />
-                    <Route path="/clients" element={<Clientes />} />
-                    <Route path="/contratos" element={<Contratos />} />
-                    <Route path="/servicos" element={<Servicos />} />
-                    <Route path="/vendedores" element={<Vendedores />} />
-                    <Route path="/agenda" element={<Agenda />} />
-                    <Route path="/financeiro" element={<Financeiro />} />
-                    <Route path="/relatorios" element={<Relatorios />} />
-                    <Route path="/auditoria" element={<Auditoria />} />
-                    <Route path="/configuracoes" element={<Configuracoes />} />
-                    <Route path="/perfil" element={<Perfil />} />
-                    <Route path="/empresas" element={<Empresas />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route element={<AdminProtectedRoute />}>
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="empresas" element={<AdminEmpresas />} />
+                      <Route path="usuarios" element={<AdminUsuarios />} />
+                      <Route path="sistema" element={<AdminSistema />} />
+                      <Route path="auditoria" element={<AdminAuditoria />} />
+                      <Route path="seguranca" element={<AdminSeguranca />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
+                  <Route element={<ProtectedRoute />}>
+                    <Route element={<AppLayout />}>
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/dashboard/executivo" element={<DashboardExecutivo />} />
+                      <Route path="/clientes" element={<Clientes />} />
+                      <Route path="/clients" element={<Clientes />} />
+                      <Route path="/contratos" element={<Contratos />} />
+                      <Route path="/servicos" element={<Servicos />} />
+                      <Route path="/vendedores" element={<Vendedores />} />
+                      <Route path="/agenda" element={<Agenda />} />
+                      <Route path="/financeiro" element={<Financeiro />} />
+                      <Route path="/relatorios" element={<Relatorios />} />
+                      <Route path="/auditoria" element={<Auditoria />} />
+                      <Route path="/configuracoes" element={<Configuracoes />} />
+                      <Route path="/perfil" element={<Perfil />} />
+                      <Route path="/empresas" element={<Empresas />} />
+                    </Route>
+                  </Route>
+
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </AdminAuthProvider>
           </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
