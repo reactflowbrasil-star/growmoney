@@ -45,7 +45,7 @@ export function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Inicia aberta e recolhe automaticamente após 4 segundos (desktop)
+  // Inicia aberta e recolhe automaticamente ap�s 4 segundos (desktop)
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setSidebarCollapsed(true);
@@ -70,7 +70,7 @@ export function AppLayout() {
     navigate('/auth');
   };
 
-  const layoutUser = user ? { name: user.nome, email: user.email } : undefined;
+  const layoutUser = user ? { name: user.nome, email: user.email, avatar: user.avatar } : undefined;
 
   return (
     <div className="min-h-dvh bg-transparent">
@@ -134,4 +134,5 @@ export function AppLayout() {
     </div>
   );
 }
+
 

@@ -33,10 +33,13 @@ export interface UserSession {
   id: string;
   email: string;
   nome: string;
+  avatar_url?: string | null;
+  avatar?: string;
   role: 'admin' | 'gestor' | 'vendedor' | 'financeiro' | 'operador';
   empresa_id: string | null;
   empresas: Array<{ id: string; nome: string; role: string }>;
   token: string;
   expira_em: string;
 }
+
 

@@ -1,6 +1,6 @@
+import { supabase } from '@/lib/supabase/client';
 import type { Envelope, EnvelopeEvent, SavedSignature, Signer } from './assinatura-types';
 
-const ENVELOPES_KEY = 'grow_envelopes_v1';
 const SIGNATURES_KEY = 'grow_saved_signatures_v1';
 const ALERTS_KEY = 'grow_signature_alerts_v1';
 
@@ -19,7 +19,7 @@ function uid() {
 }
 
 function token() {
-  return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+  return Array.from(crypto.getRandomValues(new Uint8Array(24)))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }
@@ -27,8 +27,7 @@ function token() {
 function read<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
+    return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;
   }
@@ -38,44 +37,56 @@ function write<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function listEnvelopes(): Envelope[] {
-  return read<Envelope[]>(ENVELOPES_KEY, []).sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+function pushEvent(type: string, message: string, actor?: string): EnvelopeEvent {
+  return { id: uid(), at: new Date().toISOString(), type, message, actor };
 }
 
-export function getEnvelope(id: string): Envelope | null {
-  return listEnvelopes().find((e) => e.id === id) ?? null;
+function throwIfError(error: { message: string } | null, action: string): asserts error is null {
+  if (error) throw new Error(`${action}: ${error.message}`);
 }
 
-export function getEnvelopeBySignerToken(t: string): { envelope: Envelope; signer: Signer } | null {
-  for (const e of listEnvelopes()) {
-    const s = e.signers.find((x) => x.token === t);
-    if (s) return { envelope: e, signer: s };
-  }
-  return null;
+export async function listEnvelopes(): Promise<Envelope[]> {
+  const { data, error } = await supabase
+    .from('signature_envelopes')
+    .select('payload')
+    .order('updated_at', { ascending: false });
+  throwIfError(error, 'N�o foi poss�vel carregar os envelopes');
+  return (data || []).map((row) => row.payload as Envelope);
 }
 
-function pushEvent(_e: Envelope, type: string, message: string, actor?: string): EnvelopeEvent {
-  return {
-    id: uid(),
-    at: new Date().toISOString(),
-    type,
-    message,
-    actor,
-  };
+export async function getEnvelope(id: string): Promise<Envelope | null> {
+  const { data, error } = await supabase
+    .from('signature_envelopes')
+    .select('payload')
+    .eq('id', id)
+    .maybeSingle();
+  throwIfError(error, 'N�o foi poss�vel carregar o envelope');
+  return (data?.payload as Envelope | undefined) ?? null;
 }
 
-export function saveEnvelope(envelope: Envelope) {
-  const all = listEnvelopes();
-  const idx = all.findIndex((x) => x.id === envelope.id);
-  if (idx >= 0) all[idx] = envelope;
-  else all.unshift(envelope);
-  write(ENVELOPES_KEY, all);
+export async function getEnvelopeBySignerToken(t: string): Promise<{ envelope: Envelope; signer: Signer } | null> {
+  const { data, error } = await supabase.rpc('get_signature_envelope_by_token', { p_token: t });
+  throwIfError(error, 'N�o foi poss�vel localizar o documento');
+  const envelope = data as Envelope | null;
+  const signer = envelope?.signers.find((item) => item.token === t);
+  return envelope && signer ? { envelope, signer } : null;
+}
+
+export async function saveEnvelope(envelope: Envelope): Promise<Envelope> {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  throwIfError(userError, 'N�o foi poss�vel validar sua sess�o');
+  if (!user) throw new Error('Entre na sua conta para salvar o envelope.');
+  const { error } = await supabase.from('signature_envelopes').upsert({
+    id: envelope.id,
+    owner_id: user.id,
+    payload: envelope,
+    updated_at: envelope.updatedAt,
+  });
+  throwIfError(error, 'N�o foi poss�vel salvar o envelope no servidor');
   return envelope;
 }
 
-export function createEnvelope(input: {
+export async function createEnvelope(input: {
   titulo: string;
   descricao?: string;
   documentoTexto: string;
@@ -84,7 +95,7 @@ export function createEnvelope(input: {
   arquivoNome?: string;
   arquivoStoragePath?: string;
   signers: Array<{ nome: string; email: string; role?: 'sign' | 'cc' }>;
-}): Envelope {
+}): Promise<Envelope> {
   const now = new Date().toISOString();
   const envelope: Envelope = {
     id: uid(),
@@ -98,63 +109,53 @@ export function createEnvelope(input: {
     updatedAt: now,
     createdBy: input.createdBy,
     messageToSigners: input.messageToSigners,
-    signers: input.signers.map((s, i) => ({
+    signers: input.signers.map((signer, index) => ({
       id: uid(),
-      nome: s.nome,
-      email: s.email,
-      role: s.role || 'sign',
+      nome: signer.nome,
+      email: signer.email,
+      role: signer.role || 'sign',
       status: 'pending',
       token: token(),
-      order: i + 1,
+      order: index + 1,
     })),
-    events: [],
+    events: [pushEvent('created', 'Envelope criado', input.createdBy)],
   };
-  envelope.events = [pushEvent(envelope, 'created', 'Envelope criado', input.createdBy)];
   return saveEnvelope(envelope);
 }
 
-export function sendEnvelope(id: string, actor: string): Envelope | null {
-  const e = getEnvelope(id);
-  if (!e) return null;
-  e.status = 'enviado';
-  e.sentAt = new Date().toISOString();
-  e.updatedAt = e.sentAt;
-  e.events.push(pushEvent(e, 'sent', 'Documento enviado para assinatura', actor));
-  saveEnvelope(e);
-
-  e.signers
-    .filter((s) => s.role === 'sign')
-    .forEach((s) => {
-      addAlert({
-        envelopeId: e.id,
-        title: `Assinatura pendente: ${e.titulo}`,
-        body: `Olá ${s.nome}, você foi convidado a assinar "${e.titulo}".`,
-        email: s.email,
-      });
+export async function sendEnvelope(id: string, actor: string): Promise<Envelope | null> {
+  const envelope = await getEnvelope(id);
+  if (!envelope) return null;
+  const now = new Date().toISOString();
+  envelope.status = 'enviado';
+  envelope.sentAt = now;
+  envelope.updatedAt = now;
+  envelope.events.push(pushEvent('sent', 'Documento enviado para assinatura', actor));
+  await saveEnvelope(envelope);
+  envelope.signers.filter((signer) => signer.role === 'sign').forEach((signer) => {
+    addAlert({
+      envelopeId: envelope.id,
+      title: `Assinatura pendente: ${envelope.titulo}`,
+      body: `Ol� ${signer.nome}, voc� foi convidado a assinar "${envelope.titulo}".`,
+      email: signer.email,
     });
-
+  });
   addAlert({
-    envelopeId: e.id,
-    title: `Enviado: ${e.titulo}`,
-    body: `Documento enviado para ${e.signers.filter((s) => s.role === 'sign').length} signatário(s).`,
+    envelopeId: envelope.id,
+    title: `Enviado: ${envelope.titulo}`,
+    body: `Documento enviado para ${envelope.signers.filter((signer) => signer.role === 'sign').length} signat�rio(s).`,
     email: actor,
   });
-
-  return e;
+  return envelope;
 }
 
-export function markViewed(tokenStr: string): Envelope | null {
-  const found = getEnvelopeBySignerToken(tokenStr);
-  if (!found) return null;
-  const { envelope, signer } = found;
-  if (signer.status === 'pending') {
-    signer.status = 'viewed';
-    signer.viewedAt = new Date().toISOString();
-    envelope.updatedAt = signer.viewedAt;
-    envelope.events.push(
-      pushEvent(envelope, 'viewed', `${signer.nome} visualizou o documento`, signer.email)
-    );
-    saveEnvelope(envelope);
+export async function markViewed(tokenStr: string): Promise<Envelope | null> {
+  const { data, error } = await supabase.rpc('mark_signature_envelope_viewed', { p_token: tokenStr });
+  throwIfError(error, 'N�o foi poss�vel registrar a visualiza��o');
+  const envelope = data as Envelope | null;
+  if (!envelope) return null;
+  const signer = envelope.signers.find((item) => item.token === tokenStr);
+  if (signer?.viewedAt) {
     addAlert({
       envelopeId: envelope.id,
       title: `Visualizado: ${envelope.titulo}`,
@@ -165,75 +166,44 @@ export function markViewed(tokenStr: string): Envelope | null {
   return envelope;
 }
 
-export function applySignature(
+export async function applySignature(
   tokenStr: string,
   signatureDataUrl: string,
   mode: 'canvas' | 'typed' | 'saved'
-): Envelope | null {
-  const found = getEnvelopeBySignerToken(tokenStr);
-  if (!found) return null;
-  const { envelope, signer } = found;
-  if (signer.role !== 'sign') return envelope;
-  if (signer.status === 'signed') return envelope;
-
-  signer.status = 'signed';
-  signer.signedAt = new Date().toISOString();
-  signer.signatureDataUrl = signatureDataUrl;
-  signer.signatureMode = mode;
-  envelope.updatedAt = signer.signedAt;
-  envelope.events.push(
-    pushEvent(envelope, 'signed', `${signer.nome} assinou o documento`, signer.email)
-  );
-
-  const needSign = envelope.signers.filter((s) => s.role === 'sign');
-  const allSigned = needSign.every((s) => s.status === 'signed');
-  if (allSigned) {
-    envelope.status = 'concluido';
-    envelope.completedAt = signer.signedAt;
-    envelope.events.push(pushEvent(envelope, 'completed', 'Todas as assinaturas coletadas'));
-    needSign.forEach((s) => {
+): Promise<Envelope | null> {
+  const { data, error } = await supabase.rpc('apply_signature_to_envelope', {
+    p_token: tokenStr,
+    p_signature_data_url: signatureDataUrl,
+    p_mode: mode,
+  });
+  throwIfError(error, 'N�o foi poss�vel registrar a assinatura');
+  const envelope = data as Envelope | null;
+  if (envelope) {
+    const signer = envelope.signers.find((item) => item.token === tokenStr);
+    if (signer) {
       addAlert({
         envelopeId: envelope.id,
-        title: `Concluído: ${envelope.titulo}`,
-        body: `O documento foi assinado por todas as partes.`,
-        email: s.email,
+        title: envelope.status === 'concluido' ? `Conclu�do: ${envelope.titulo}` : `Assinatura recebida: ${envelope.titulo}`,
+        body: envelope.status === 'concluido' ? 'Envelope finalizado com sucesso.' : `${signer.nome} assinou. Aguardando demais partes.`,
+        email: envelope.createdBy,
       });
-    });
-    addAlert({
-      envelopeId: envelope.id,
-      title: `Concluído: ${envelope.titulo}`,
-      body: `Envelope finalizado com sucesso.`,
-      email: envelope.createdBy,
-    });
-  } else {
-    envelope.status = 'parcial';
-    addAlert({
-      envelopeId: envelope.id,
-      title: `Assinatura recebida: ${envelope.titulo}`,
-      body: `${signer.nome} assinou. Aguardando demais partes.`,
-      email: envelope.createdBy,
-    });
+    }
   }
-
-  saveEnvelope(envelope);
   return envelope;
 }
 
-export function cancelEnvelope(id: string, actor: string): Envelope | null {
-  const e = getEnvelope(id);
-  if (!e) return null;
-  e.status = 'cancelado';
-  e.updatedAt = new Date().toISOString();
-  e.events.push(pushEvent(e, 'cancelled', 'Envelope cancelado', actor));
-  saveEnvelope(e);
-  return e;
+export async function cancelEnvelope(id: string, actor: string): Promise<Envelope | null> {
+  const envelope = await getEnvelope(id);
+  if (!envelope) return null;
+  envelope.status = 'cancelado';
+  envelope.updatedAt = new Date().toISOString();
+  envelope.events.push(pushEvent('cancelled', 'Envelope cancelado', actor));
+  return saveEnvelope(envelope);
 }
 
-export function deleteEnvelope(id: string) {
-  write(
-    ENVELOPES_KEY,
-    listEnvelopes().filter((e) => e.id !== id)
-  );
+export async function deleteEnvelope(id: string): Promise<void> {
+  const { error } = await supabase.from('signature_envelopes').delete().eq('id', id);
+  throwIfError(error, 'N�o foi poss�vel excluir o envelope');
 }
 
 export function listSavedSignatures(): SavedSignature[] {
@@ -241,24 +211,15 @@ export function listSavedSignatures(): SavedSignature[] {
 }
 
 export function saveSignature(label: string, dataUrl: string, mode: SavedSignature['mode']) {
-  const list = listSavedSignatures();
-  const item: SavedSignature = {
-    id: uid(),
-    label,
-    dataUrl,
-    mode,
-    createdAt: new Date().toISOString(),
-  };
-  list.unshift(item);
-  write(SIGNATURES_KEY, list.slice(0, 20));
+  const signatures = listSavedSignatures();
+  const item: SavedSignature = { id: uid(), label, dataUrl, mode, createdAt: new Date().toISOString() };
+  signatures.unshift(item);
+  write(SIGNATURES_KEY, signatures.slice(0, 20));
   return item;
 }
 
 export function deleteSavedSignature(id: string) {
-  write(
-    SIGNATURES_KEY,
-    listSavedSignatures().filter((s) => s.id !== id)
-  );
+  write(SIGNATURES_KEY, listSavedSignatures().filter((signature) => signature.id !== id));
 }
 
 export function listAlerts(): SignatureAlert[] {
@@ -268,30 +229,22 @@ export function listAlerts(): SignatureAlert[] {
 }
 
 export function addAlert(input: Omit<SignatureAlert, 'id' | 'at' | 'read'>) {
-  const list = listAlerts();
-  list.unshift({
-    id: uid(),
-    at: new Date().toISOString(),
-    read: false,
-    ...input,
-  });
-  write(ALERTS_KEY, list.slice(0, 100));
+  const alerts = listAlerts();
+  alerts.unshift({ id: uid(), at: new Date().toISOString(), read: false, ...input });
+  write(ALERTS_KEY, alerts.slice(0, 100));
 }
 
 export function markAlertRead(id: string) {
-  const list = listAlerts().map((a) => (a.id === id ? { ...a, read: true } : a));
-  write(ALERTS_KEY, list);
+  write(ALERTS_KEY, listAlerts().map((alert) => (alert.id === id ? { ...alert, read: true } : alert)));
 }
 
 export function markAllAlertsRead() {
-  write(
-    ALERTS_KEY,
-    listAlerts().map((a) => ({ ...a, read: true }))
-  );
+  write(ALERTS_KEY, listAlerts().map((alert) => ({ ...alert, read: true })));
 }
 
 export function signingUrl(tokenStr: string) {
   if (typeof window === 'undefined') return `/assinar/${tokenStr}`;
-  return `${window.location.origin}/assinar/${tokenStr}`;
+  const base = import.meta.env.BASE_URL || '/';
+  return `${window.location.origin}${base.replace(/\/$/, '')}/assinar/${tokenStr}`;
 }
 

@@ -14,7 +14,7 @@ const statusMap: Record<
   rascunho: { label: 'Rascunho', variant: 'neutral' },
   enviado: { label: 'Enviado', variant: 'info' },
   parcial: { label: 'Parcial', variant: 'warning' },
-  concluido: { label: 'Concluído', variant: 'success' },
+  concluido: { label: 'Conclu�do', variant: 'success' },
   cancelado: { label: 'Cancelado', variant: 'danger' },
   expirado: { label: 'Expirado', variant: 'danger' },
 };
@@ -27,8 +27,8 @@ export default function AssinaturaDetalhe() {
   const [arquivoUrl, setArquivoUrl] = useState('');
   const [copied, setCopied] = useState('');
 
-  const reload = () => {
-    if (id) setEnv(getEnvelope(id));
+  const reload = async () => {
+    if (id) setEnv(await getEnvelope(id));
   };
 
   useEffect(() => {
@@ -43,9 +43,9 @@ export default function AssinaturaDetalhe() {
   if (!env) {
     return (
       <div className="max-w-3xl space-y-4">
-        <p className="text-text-secondary">Envelope não encontrado.</p>
+        <p className="text-text-secondary">Envelope n�o encontrado.</p>
         <Link to="/assinaturas" className="text-brand text-sm">
-          ← Voltar
+           Voltar
         </Link>
       </div>
     );
@@ -76,8 +76,7 @@ export default function AssinaturaDetalhe() {
                 size="sm"
                 leftIcon={<Send className="w-4 h-4" />}
                 onClick={() => {
-                  sendEnvelope(env.id, user?.email || 'sistema');
-                  reload();
+                  void sendEnvelope(env.id, user?.email || 'sistema').then(reload).catch((error) => window.alert(error.message));
                 }}
               >
                 Enviar para assinatura
@@ -89,8 +88,7 @@ export default function AssinaturaDetalhe() {
                 variant="outline"
                 leftIcon={<Ban className="w-4 h-4" />}
                 onClick={() => {
-                  cancelEnvelope(env.id, user?.email || 'sistema');
-                  reload();
+                  void cancelEnvelope(env.id, user?.email || 'sistema').then(reload).catch((error) => window.alert(error.message));
                 }}
               >
                 Cancelar
@@ -102,7 +100,7 @@ export default function AssinaturaDetalhe() {
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="p-5 space-y-3">
-          <h2 className="font-semibold">Signatários</h2>
+          <h2 className="font-semibold">Signat�rios</h2>
           <ul className="space-y-3">
             {env.signers.map((s) => (
               <li key={s.id} className="flex items-start justify-between gap-2 border-b border-border-color pb-3 last:border-0">
@@ -110,8 +108,8 @@ export default function AssinaturaDetalhe() {
                   <p className="text-sm font-medium">{s.nome}</p>
                   <p className="text-xs text-text-secondary">{s.email}</p>
                   <p className="text-xs mt-1 capitalize text-text-secondary">
-                    {s.role === 'sign' ? 'Assinar' : 'Cópia'} · {s.status}
-                    {s.signedAt && ` · ${new Date(s.signedAt).toLocaleString('pt-BR')}`}
+                    {s.role === 'sign' ? 'Assinar' : 'C�pia'} � {s.status}
+                    {s.signedAt && ` � ${new Date(s.signedAt).toLocaleString('pt-BR')}`}
                   </p>
                   {s.signatureDataUrl && (
                     <img src={s.signatureDataUrl} alt="Assinatura" className="mt-2 h-12 object-contain bg-white rounded border border-border-color px-2" />
@@ -140,7 +138,7 @@ export default function AssinaturaDetalhe() {
                 <p className="font-medium">{ev.message}</p>
                 <p className="text-xs text-text-secondary">
                   {new Date(ev.at).toLocaleString('pt-BR')}
-                  {ev.actor ? ` · ${ev.actor}` : ''}
+                  {ev.actor ? ` � ${ev.actor}` : ''}
                 </p>
               </li>
             ))}
@@ -151,7 +149,7 @@ export default function AssinaturaDetalhe() {
       <Card className="p-5 space-y-3">
         <h2 className="font-semibold">Documento</h2>
         {env.messageToSigners && (
-          <p className="text-sm text-text-secondary italic">“{env.messageToSigners}”</p>
+          <p className="text-sm text-text-secondary italic">"{env.messageToSigners}"</p>
         )}
         <pre className="whitespace-pre-wrap text-sm bg-bg-secondary rounded-xl p-4 border border-border-color font-sans leading-relaxed max-h-96 overflow-y-auto">
           {env.documentoTexto}
@@ -170,4 +168,5 @@ export default function AssinaturaDetalhe() {
     </div>
   );
 }
+
 

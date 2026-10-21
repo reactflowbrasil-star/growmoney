@@ -29,19 +29,28 @@ export default function AssinarDocumento() {
 
   useEffect(() => {
     if (!token) return;
-    const found = getEnvelopeBySignerToken(token);
-    if (!found) {
-      setError('Link inválido ou expirado.');
-      return;
-    }
-    markViewed(token);
-    const refreshed = getEnvelopeBySignerToken(token);
-    if (refreshed) {
-      setEnvelope(refreshed.envelope);
-      setSigner(refreshed.signer);
-      if (refreshed.signer.status === 'signed') setDone(true);
-    }
+    let active = true;
+    void (async () => {
+      try {
+        const found = await getEnvelopeBySignerToken(token);
+        if (!found) {
+          if (active) setError('Link inv�lido ou expirado.');
+          return;
+        }
+        const viewed = await markViewed(token);
+        const envelope = viewed || found.envelope;
+        const signer = envelope.signers.find((item) => item.token === token) || found.signer;
+        if (active) {
+          setEnvelope(envelope);
+          setSigner(signer);
+          if (signer.status === 'signed') setDone(true);
+        }
+      } catch (loadError) {
+        if (active) setError(loadError instanceof Error ? loadError.message : 'Falha ao carregar o documento.');
+      }
+    })();
     setSavedList(listSavedSignatures());
+    return () => { active = false; };
   }, [token]);
 
   const typedToDataUrl = (text: string) => {
@@ -67,7 +76,7 @@ export default function AssinarDocumento() {
     return null;
   };
 
-  const confirmar = () => {
+  const confirmar = async () => {
     setError('');
     if (!token || !signer || !envelope) return;
     if (signer.status === 'signed') {
@@ -86,11 +95,15 @@ export default function AssinarDocumento() {
     if (saveForLater && mode !== 'saved') {
       saveSignature(signer.nome, data, mode);
     }
-    const updated = applySignature(token, data, mode);
+    try {
+    const updated = await applySignature(token, data, mode);
     if (updated) {
       setEnvelope(updated);
       setSigner(updated.signers.find((s) => s.token === token) || signer);
       setDone(true);
+    }
+    } catch (signatureError) {
+      setError(signatureError instanceof Error ? signatureError.message : 'N�o foi poss�vel salvar a assinatura.');
     }
   };
 
@@ -100,7 +113,7 @@ export default function AssinarDocumento() {
         <Card className="p-8 max-w-md text-center space-y-3">
           <p className="text-erro">{error}</p>
           <Link to="/" className="text-brand text-sm">
-            Ir ao início
+            Ir ao in�cio
           </Link>
         </Card>
       </div>
@@ -110,7 +123,7 @@ export default function AssinarDocumento() {
   if (!envelope || !signer) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-secondary">
-        <p className="text-text-secondary text-sm">Carregando documento…</p>
+        <p className="text-text-secondary text-sm">Carregando documento.</p>
       </div>
     );
   }
@@ -128,7 +141,7 @@ export default function AssinarDocumento() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{envelope.titulo}</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Olá <strong>{signer.nome}</strong> ({signer.email}) — revise e assine abaixo.
+            Ol� <strong>{signer.nome}</strong> ({signer.email}) - revise e assine abaixo.
           </p>
           {envelope.messageToSigners && (
             <p className="text-sm mt-2 text-brand bg-brand/10 rounded-xl px-3 py-2">{envelope.messageToSigners}</p>
@@ -204,7 +217,7 @@ export default function AssinarDocumento() {
               <div className="grid sm:grid-cols-2 gap-2">
                 {savedList.length === 0 ? (
                   <p className="text-sm text-text-secondary col-span-2">
-                    Nenhuma assinatura salva neste dispositivo. Desenhe ou digite e marque “Salvar para próximas”.
+                    Nenhuma assinatura salva neste dispositivo. Desenhe ou digite e marque "Salvar para pr�ximas".
                   </p>
                 ) : (
                   savedList.map((s) => (
@@ -226,7 +239,7 @@ export default function AssinarDocumento() {
 
             <label className="flex items-start gap-2 text-sm text-text-secondary">
               <input type="checkbox" checked={saveForLater} onChange={(e) => setSaveForLater(e.target.checked)} className="mt-1 accent-brand" />
-              Salvar esta assinatura neste dispositivo para próximos documentos
+              Salvar esta assinatura neste dispositivo para pr�ximos documentos
             </label>
 
             <label className="flex items-start gap-2 text-sm">
@@ -249,4 +262,5 @@ export default function AssinarDocumento() {
     </div>
   );
 }
+
 

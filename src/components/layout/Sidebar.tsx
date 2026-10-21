@@ -53,7 +53,7 @@ export function Sidebar({
           ? 'relative h-full w-full'
           : cn('fixed left-0 top-0 z-40 h-screen', isCollapsed ? 'w-24' : 'w-72')
       )}
-      aria-label="Navegação principal"
+      aria-label="Navega��o principal"
     >
       <div
         className={cn(
@@ -76,7 +76,7 @@ export function Sidebar({
             className="ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary pressable"
             aria-label="Recolher menu"
           >
-            <span className="text-sm font-bold">«</span>
+            <span className="text-sm font-bold">�</span>
           </button>
         )}
       </div>
@@ -88,7 +88,7 @@ export function Sidebar({
           className="mx-auto mt-2 p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary"
           aria-label="Expandir menu"
         >
-          <span className="text-sm font-bold">»</span>
+          <span className="text-sm font-bold">�</span>
         </button>
       )}
 
@@ -126,9 +126,13 @@ export function Sidebar({
       {user && !isCollapsed && (
         <div className="border-t border-border-color p-3 safe-pb">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-brand/20 text-brand flex items-center justify-center text-sm font-bold shrink-0">
-              {(user.name || user.email || 'U').charAt(0).toUpperCase()}
-            </div>
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-brand/20 text-brand flex items-center justify-center text-sm font-bold shrink-0">
+                {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0">
               <p className="text-sm font-medium truncate">{user.name}</p>
               <p className="text-xs text-text-secondary truncate">{user.email}</p>
@@ -139,4 +143,5 @@ export function Sidebar({
     </aside>
   );
 }
+
 
