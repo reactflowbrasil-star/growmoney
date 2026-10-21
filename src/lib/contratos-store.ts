@@ -15,8 +15,15 @@ export type ServicoCatalogo = {
   id: string;
   nome: string;
   categoria: string;
+  descricao?: string;
+  texto_contrato?: string;
   valor: number;
   tipo: 'unico' | 'mensal';
+  tipo_cobranca?: 'unico' | 'mensal';
+  ordem: number;
+  ativo: boolean;
+  bonus_automatico?: boolean;
+  bonus_gatilhos?: string[];
   contratacao_permitida?: boolean;
   bonus_permitido?: boolean;
   exclusaoGrupo?: string;
@@ -63,15 +70,15 @@ const K_CONTRATOS = 'gm_contratos_v1';
 const K_SERVICOS = 'gm_servicos_catalogo_v1';
 
 const DEFAULT_SERVICOS: ServicoCatalogo[] = [
-  { id: 'svc-site', nome: 'Site institucional', categoria: 'Digital', valor: 2500, tipo: 'unico', exclusaoGrupo: 'web' },
-  { id: 'svc-landing', nome: 'Landing Page', categoria: 'Digital', valor: 1200, tipo: 'unico', exclusaoGrupo: 'web' },
-  { id: 'svc-seo', nome: 'SEO mensal', categoria: 'Marketing', valor: 890, tipo: 'mensal' },
-  { id: 'svc-trafego', nome: 'Tráfego pago (gestão)', categoria: 'Marketing', valor: 1200, tipo: 'mensal' },
-  { id: 'svc-social', nome: 'Social media', categoria: 'Marketing', valor: 1500, tipo: 'mensal' },
-  { id: 'svc-crm', nome: 'Implantação CRM', categoria: 'Sistemas', valor: 3500, tipo: 'unico' },
-  { id: 'svc-suporte', nome: 'Suporte premium', categoria: 'Suporte', valor: 499, tipo: 'mensal', bonus_permitido: true },
-  { id: 'svc-hospedagem', nome: 'Hospedagem anual', categoria: 'Infra', valor: 600, tipo: 'unico', bonus_permitido: true },
-  { id: 'svc-consultoria', nome: 'Consultoria estratégica', categoria: 'Consultoria', valor: 2000, tipo: 'unico' },
+  { id: 'svc-site', nome: 'Site institucional', categoria: 'Digital', descricao: 'Site completo com páginas institucionais', texto_contrato: 'Desenvolvimento de site institucional', valor: 2500, tipo: 'unico', tipo_cobranca: 'unico', ordem: 1, ativo: true, exclusaoGrupo: 'web' },
+  { id: 'svc-landing', nome: 'Landing Page', categoria: 'Digital', descricao: 'Página de captura focada em conversão', texto_contrato: 'Desenvolvimento de landing page', valor: 1200, tipo: 'unico', tipo_cobranca: 'unico', ordem: 2, ativo: true, exclusaoGrupo: 'web' },
+  { id: 'svc-seo', nome: 'SEO mensal', categoria: 'Marketing', descricao: 'Otimização orgânica contínua', valor: 890, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 3, ativo: true },
+  { id: 'svc-trafego', nome: 'Tráfego pago (gestão)', categoria: 'Marketing', descricao: 'Anúncios no Google Ads, Anúncio no Meta Ads', texto_contrato: 'Gestão de mídia paga', valor: 1200, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 4, ativo: true },
+  { id: 'svc-social', nome: 'Social media', categoria: 'Marketing', valor: 1500, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 5, ativo: true },
+  { id: 'svc-crm', nome: 'Implantação CRM', categoria: 'Sistemas', valor: 3500, tipo: 'unico', tipo_cobranca: 'unico', ordem: 6, ativo: true },
+  { id: 'svc-suporte', nome: 'Suporte premium', categoria: 'Suporte', valor: 499, tipo: 'mensal', tipo_cobranca: 'mensal', ordem: 7, ativo: true, bonus_permitido: true },
+  { id: 'svc-hospedagem', nome: 'Hospedagem anual', categoria: 'Infra', valor: 600, tipo: 'unico', tipo_cobranca: 'unico', ordem: 8, ativo: true, bonus_permitido: true },
+  { id: 'svc-consultoria', nome: 'Consultoria estratégica', categoria: 'Consultoria', valor: 2000, tipo: 'unico', tipo_cobranca: 'unico', ordem: 9, ativo: true },
 ];
 
 function read<T>(key: string, fallback: T): T {
@@ -111,11 +118,58 @@ export function saveCliente(c: Omit<ClienteLocal, 'id'> & { id?: string }): Clie
   return item;
 }
 
+function normalizeServico(s: Partial<ServicoCatalogo> & { id: string; nome: string }): ServicoCatalogo {
+  const tipo = (s.tipo_cobranca || s.tipo || 'unico') as 'unico' | 'mensal';
+  return {
+    id: s.id,
+    nome: s.nome,
+    categoria: s.categoria || '',
+    descricao: s.descricao || '',
+    texto_contrato: s.texto_contrato || '',
+    valor: Number(s.valor) || 0,
+    tipo,
+    tipo_cobranca: tipo,
+    ordem: Number(s.ordem) || 0,
+    ativo: s.ativo !== false,
+    bonus_automatico: !!s.bonus_automatico,
+    bonus_gatilhos: s.bonus_gatilhos || [],
+    contratacao_permitida: s.contratacao_permitida !== false,
+    bonus_permitido: s.bonus_permitido !== false,
+    exclusaoGrupo: s.exclusaoGrupo,
+  };
+}
+
 export function listServicosCatalogo(): ServicoCatalogo[] {
   const existing = read<ServicoCatalogo[] | null>(K_SERVICOS, null);
-  if (existing && existing.length) return existing;
+  if (existing && existing.length) {
+    return existing
+      .map((s) => normalizeServico(s))
+      .sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome));
+  }
   write(K_SERVICOS, DEFAULT_SERVICOS);
-  return DEFAULT_SERVICOS;
+  return [...DEFAULT_SERVICOS];
+}
+
+export function listServicosAtivos(): ServicoCatalogo[] {
+  return listServicosCatalogo().filter((s) => s.ativo);
+}
+
+export function saveServico(data: Omit<ServicoCatalogo, 'id'> & { id?: string }): ServicoCatalogo {
+  const list = listServicosCatalogo();
+  const id = data.id || crypto.randomUUID();
+  const item = normalizeServico({ ...data, id });
+  const idx = list.findIndex((x) => x.id === id);
+  if (idx >= 0) list[idx] = item;
+  else list.push(item);
+  write(K_SERVICOS, list);
+  return item;
+}
+
+export function deleteServico(id: string) {
+  write(
+    K_SERVICOS,
+    listServicosCatalogo().filter((s) => s.id !== id)
+  );
 }
 
 export function listContratos(): ContratoLocal[] {
@@ -156,6 +210,11 @@ export function deleteContrato(id: string) {
 
 export function formatBRL(n: number) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export function formatValorCobranca(n: number, tipo: 'unico' | 'mensal') {
+  const base = formatBRL(n);
+  return tipo === 'mensal' ? `${base}/mês` : base;
 }
 
 export function addMonths(isoDate: string, months: number): string {
