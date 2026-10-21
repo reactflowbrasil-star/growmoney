@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: session.user.email || profile?.email || '',
         nome: profile?.nome || displayNameFromUser(session.user),
         avatar_url: profile?.avatar_url || null,
-        avatar: profile?.avatar_url ? await criarLinkArquivo(profile.avatar_url).catch(() => undefined) : undefined,
+        avatar: profile?.avatar_url ? await criarLinkArquivo(profile.avatar_url, 60 * 60 * 24 * 30).catch(() => undefined) : undefined,
         role: (profile?.role as any) || 'admin',
         empresa_id: null,
         empresas: [],
@@ -336,7 +336,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (insertError) throw new Error(`N�o foi poss�vel salvar o perfil: ${insertError.message}`);
     }
     const path = updates.avatar_url === undefined ? user.avatar_url : updates.avatar_url;
-    const avatar = path ? await criarLinkArquivo(path).catch(() => undefined) : undefined;
+    const avatar = path ? await criarLinkArquivo(path, 60 * 60 * 24 * 30).catch(() => undefined) : undefined;
     setUser((current) => current ? { ...current, nome: updates.nome, avatar_url: path, avatar } : current);
   }, [user]);
 

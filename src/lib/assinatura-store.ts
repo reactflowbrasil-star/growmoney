@@ -46,12 +46,37 @@ function throwIfError(error: { message: string } | null, action: string): assert
 }
 
 export async function listEnvelopes(): Promise<Envelope[]> {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  throwIfError(userError, 'N�o foi poss�vel validar sua sess�o');
+  if (!user) throw new Error('Entre na sua conta para acessar os envelopes.');
   const { data, error } = await supabase
     .from('signature_envelopes')
     .select('payload')
     .order('updated_at', { ascending: false });
   throwIfError(error, 'N�o foi poss�vel carregar os envelopes');
-  return (data || []).map((row) => row.payload as Envelope);
+  const remote = (data || []).map((row) => row.payload as Envelope);
+  const remoteIds = new Set(remote.map((envelope) => envelope.id));
+  const local = read<Envelope[]>('grow_envelopes_v1', []).filter(
+    (envelope) => envelope.createdBy.trim().toLowerCase() === (user.email || '').toLowerCase()
+      && !remoteIds.has(envelope.id)
+  );
+  if (local.length) {
+    const { error: importError } = await supabase.from('signature_envelopes').upsert(
+      local.map((envelope) => ({
+        id: envelope.id,
+        owner_id: user.id,
+        payload: envelope,
+        updated_at: envelope.updatedAt,
+      }))
+    );
+    throwIfError(importError, 'N�o foi poss�vel migrar os envelopes deste dispositivo');
+    const imported = new Set(local.map((envelope) => envelope.id));
+    write('grow_envelopes_v1', read<Envelope[]>('grow_envelopes_v1', []).filter((envelope) => !imported.has(envelope.id)));
+    return [...remote, ...local].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+  }
+  return remote;
 }
 
 export async function getEnvelope(id: string): Promise<Envelope | null> {

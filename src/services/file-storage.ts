@@ -21,8 +21,8 @@ interface ArquivoRegistro {
 
 const BUCKET = 'growmoney-files';
 
-export async function criarLinkArquivo(caminho: string) {
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(caminho, 60 * 60);
+export async function criarLinkArquivo(caminho: string, expiresIn = 60 * 60) {
+  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(caminho, expiresIn);
   if (error || !data?.signedUrl) throw new Error(`N�o foi poss�vel abrir o arquivo: ${error?.message || 'erro desconhecido'}`);
   return data.signedUrl;
 }
