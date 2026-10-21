@@ -55,7 +55,7 @@ export default function AdminSeguranca() {
   return (
     <div className="max-w-xl space-y-6">
       <PageHeader
-        title="Seguran�a"
+        title="Segurança"
         description="Gerencie a conta administrativa do Supabase"
       />
 
@@ -172,4 +172,3 @@ export default function AdminSeguranca() {
     </div>
   );
 }
-

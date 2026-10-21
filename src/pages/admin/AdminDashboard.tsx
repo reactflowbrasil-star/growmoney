@@ -29,27 +29,27 @@ export default function AdminDashboard() {
   const kpis = [
     {
       label: "Empresas",
-      value: counts?.companies ?? "-",
+      value: counts?.companies ?? "—",
       icon: Building2,
       hint: "Contas na plataforma",
     },
     {
-      label: "Usu�rios",
-      value: counts?.users ?? "-",
+      label: "Usuários",
+      value: counts?.users ?? "—",
       icon: Users,
       hint: "Perfis cadastrados",
     },
     {
       label: "Contratos",
-      value: counts?.contracts ?? "-",
+      value: counts?.contracts ?? "—",
       icon: FileText,
       hint: "Volume global",
     },
     {
-      label: "Sa�de",
-      value: error ? "Falha" : counts ? "OK" : ".",
+      label: "Saúde",
+      value: error ? "Falha" : counts ? "OK" : "…",
       icon: Activity,
-      hint: "Conex�o com o banco",
+      hint: "Conexão com o banco",
     },
   ];
 
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
 
       {error && (
         <Card className="p-4 text-sm text-aviso">
-          N�o foi poss�vel carregar os indicadores: {error}
+          Não foi possível carregar os indicadores: {error}
         </Card>
       )}
 
@@ -89,11 +89,11 @@ export default function AdminDashboard() {
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         <Card className="min-w-0 space-y-3 p-4 sm:p-5">
-          <h2 className="font-semibold">A��es r�pidas</h2>
+          <h2 className="font-semibold">Ações rápidas</h2>
           <ul className="grid gap-2 sm:grid-cols-2">
             {[
               { to: "/admin/empresas", label: "Gerenciar empresas" },
-              { to: "/admin/usuarios", label: "Ver usu�rios" },
+              { to: "/admin/usuarios", label: "Ver usuários" },
               { to: "/admin/seguranca", label: "Alterar senha" },
               { to: "/admin/auditoria", label: "Abrir auditoria" },
             ].map((action) => (
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
           </div>
           <details className="group">
             <summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
-              Ver informa��es da sess�o
+              Ver informações da sessão
             </summary>
             <div className="space-y-2 rounded-xl bg-bg-secondary p-3">
               <p className="break-words text-sm text-text-secondary">
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
                   : "-"}
               </p>
               <p className="text-xs text-text-secondary">
-                A conta administrativa � autenticada pelo Supabase e autorizada
+                A conta administrativa é autenticada pelo Supabase e autorizada
                 pela lista de administradores da plataforma.
               </p>
             </div>
@@ -139,4 +139,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

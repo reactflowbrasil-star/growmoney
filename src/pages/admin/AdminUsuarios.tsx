@@ -31,7 +31,7 @@ export default function AdminUsuarios() {
       if (err) throw err;
       setRows((data as Profile[]) || []);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Falha ao carregar usu�rios.");
+      setError(e instanceof Error ? e.message : "Falha ao carregar usuários.");
       setRows([]);
     } finally {
       setLoading(false);
@@ -51,7 +51,7 @@ export default function AdminUsuarios() {
   return (
     <div className="max-w-6xl space-y-4">
       <PageHeader
-        title="Usu�rios"
+        title="Usuários"
         description="Contas cadastradas na plataforma"
         actions={
           <Button
@@ -69,7 +69,7 @@ export default function AdminUsuarios() {
       <Card padding="none" className="overflow-hidden">
         <div className="p-4 border-b border-border-color">
           <Input
-            placeholder="Buscar usu�rio..."
+            placeholder="Buscar usuário..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="min-h-11 w-full sm:max-w-sm"
@@ -77,13 +77,13 @@ export default function AdminUsuarios() {
         </div>
         {loading ? (
           <p className="p-8 text-center text-sm text-text-secondary">
-            Carregando.
+            Carregando…
           </p>
         ) : filtered.length === 0 ? (
           <div className="p-8">
             <EmptyState
-              title="Nenhum usu�rio"
-              description="Perfis aparecer�o ap�s cadastros."
+              title="Nenhum usuário"
+              description="Perfis aparecerão após cadastros."
               icon={<Users className="w-6 h-6" />}
             />
           </div>
@@ -98,7 +98,7 @@ export default function AdminUsuarios() {
                         {r.nome || "Sem nome"}
                       </h2>
                       <p className="mt-1 break-all text-xs text-text-secondary">
-                        {r.email || "E-mail n�o informado"}
+                        {r.email || "E-mail não informado"}
                       </p>
                     </div>
                     <Badge variant={r.role === "admin" ? "brand" : "neutral"}>
@@ -131,7 +131,7 @@ export default function AdminUsuarios() {
                       key={r.id}
                       className="border-b border-border-color last:border-0"
                     >
-                      <td className="px-4 py-3 font-medium">{r.nome || "-"}</td>
+                      <td className="px-4 py-3 font-medium">{r.nome || "—"}</td>
                       <td className="px-4 py-3 text-text-secondary">
                         {r.email || "-"}
                       </td>
@@ -153,4 +153,3 @@ export default function AdminUsuarios() {
     </div>
   );
 }
-

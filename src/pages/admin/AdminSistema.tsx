@@ -9,7 +9,7 @@ export default function AdminSistema() {
     <div className="min-w-0 max-w-3xl space-y-4">
       <PageHeader
         title="Sistema"
-        description="Configura��o e sa�de da plataforma"
+        description="Configuração e saúde da plataforma"
       />
       <Card className="space-y-4 p-4 sm:p-5">
         <h2 className="font-semibold">Identidade</h2>
@@ -27,7 +27,7 @@ export default function AdminSistema() {
         </div>
       </Card>
       <Card className="space-y-3 p-4 sm:p-5">
-        <h2 className="font-semibold">Integra��es</h2>
+        <h2 className="font-semibold">Integrações</h2>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
           <span>Supabase</span>
           <Badge variant={envOk ? "success" : "danger"}>
@@ -42,20 +42,19 @@ export default function AdminSistema() {
       <Card padding="none" className="overflow-hidden">
         <details className="group">
           <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-semibold text-text-primary sm:px-5 [&::-webkit-details-marker]:hidden">
-            <span>Notas de opera��o</span>
+            <span>Notas de operação</span>
             <ChevronDown
               aria-hidden="true"
               className="h-4 w-4 shrink-0 text-text-secondary transition-transform group-open:rotate-180"
             />
           </summary>
           <p className="border-t border-border-color p-4 text-sm text-text-secondary sm:p-5">
-            Em produ��o, o painel admin deve usar autentica��o server-side e
-            service role do Supabase. As listagens de empresas/usu�rios
-            respeitam as pol�ticas RLS atuais.
+            Em produção, o painel admin deve usar autenticação server-side e
+            service role do Supabase. As listagens de empresas/usuários
+            respeitam as políticas RLS atuais.
           </p>
         </details>
       </Card>
     </div>
   );
 }
-

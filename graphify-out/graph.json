@@ -440,9 +440,9 @@
       "label": "src/pages/auth/RecuperacaoSenha.tsx"
     },
     {
-      "id": "file:src/pages/auth/Recupera��oSenha.tsx",
+      "id": "file:src/pages/auth/RecuperaçãoSenha.tsx",
       "type": "file",
-      "label": "src/pages/auth/Recupera��oSenha.tsx"
+      "label": "src/pages/auth/RecuperaçãoSenha.tsx"
     },
     {
       "id": "file:src/pages/auth/TermosUso.tsx",
@@ -2123,7 +2123,7 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:src/pages/auth/Recupera��oSenha.tsx",
+      "from": "file:src/pages/auth/RecuperaçãoSenha.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -3012,4 +3012,3 @@
     }
   ]
 }
-

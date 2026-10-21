@@ -45,13 +45,13 @@ export default function AdminAuditoria() {
       <Card padding="none" className="overflow-hidden">
         {loading ? (
           <p className="p-8 text-center text-sm text-text-secondary">
-            Carregando eventos.
+            Carregando eventos…
           </p>
         ) : logs.length === 0 ? (
           <div className="p-8">
             <EmptyState
               title="Sem eventos"
-              description="A��es do admin aparecer�o aqui."
+              description="Ações do admin aparecerão aqui."
               icon={<Shield className="w-6 h-6" />}
             />
           </div>
@@ -92,4 +92,3 @@ export default function AdminAuditoria() {
     </div>
   );
 }
-

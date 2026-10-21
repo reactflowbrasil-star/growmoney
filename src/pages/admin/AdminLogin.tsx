@@ -45,7 +45,7 @@ export default function AdminLogin() {
               Painel Admin
             </p>
             <p className="text-sm text-text-secondary mt-1">
-              Acesso restrito � administra��o da plataforma
+              Acesso restrito à administração da plataforma
             </p>
           </div>
         </div>
@@ -86,11 +86,10 @@ export default function AdminLogin() {
 
         <p className="mt-6 text-center text-xs text-text-secondary">
           <Link to="/" className="text-brand hover:underline">
-             Voltar ao site
+            ← Voltar ao site
           </Link>
         </p>
       </Card>
     </main>
   );
 }
-

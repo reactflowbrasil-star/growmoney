@@ -16,18 +16,18 @@ import { BRAND } from "@/lib/brand";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
 const nav = [
-  { to: "/admin", label: "Vis�o geral", icon: LayoutDashboard, end: true },
+  { to: "/admin", label: "Visão geral", icon: LayoutDashboard, end: true },
   { to: "/admin/empresas", label: "Empresas", icon: Building2 },
-  { to: "/admin/usuarios", label: "Usu�rios", icon: Users },
+  { to: "/admin/usuarios", label: "Usuários", icon: Users },
   { to: "/admin/sistema", label: "Sistema", icon: Server },
   { to: "/admin/auditoria", label: "Auditoria", icon: Shield },
-  { to: "/admin/seguranca", label: "Seguran�a", icon: Settings },
+  { to: "/admin/seguranca", label: "Segurança", icon: Settings },
 ];
 
 function AdminNavigation({ mobile = false }: { mobile?: boolean }) {
   return (
     <nav
-      aria-label={mobile ? "Navega��o administrativa" : "Menu administrativo"}
+      aria-label={mobile ? "Navegação administrativa" : "Menu administrativo"}
       className="space-y-1"
     >
       {nav.map((item) => (
@@ -153,10 +153,10 @@ export function AdminLayout() {
 
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-sm font-semibold text-text-primary sm:text-base">
-                Administra��o da plataforma
+                Administração da plataforma
               </h1>
               <p className="truncate text-xs text-text-secondary">
-                Gest�o global � {BRAND.name}
+                Gestão global · {BRAND.name}
               </p>
             </div>
 
@@ -179,4 +179,3 @@ export function AdminLayout() {
     </div>
   );
 }
-

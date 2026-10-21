@@ -74,8 +74,8 @@ export default function AdminEmpresas() {
         <Card className="p-4 text-sm text-aviso border-aviso/30">
           {error}
           <p className="text-xs mt-1 text-text-secondary">
-            Com RLS restritiva, o admin an�nimo pode n�o listar tudo. Use
-            service role no backend em produ��o.
+            Com RLS restritiva, o admin anônimo pode não listar tudo. Use
+            service role no backend em produção.
           </p>
         </Card>
       )}
@@ -91,13 +91,13 @@ export default function AdminEmpresas() {
         </div>
         {loading ? (
           <p className="p-8 text-center text-sm text-text-secondary">
-            Carregando.
+            Carregando…
           </p>
         ) : filtered.length === 0 ? (
           <div className="p-8">
             <EmptyState
               title="Nenhuma empresa"
-              description="Empresas cadastradas aparecer�o aqui."
+              description="Empresas cadastradas aparecerão aqui."
               icon={<Building2 className="w-6 h-6" />}
             />
           </div>
@@ -120,7 +120,7 @@ export default function AdminEmpresas() {
                       <div>
                         <dt className="text-xs text-text-secondary">CNPJ</dt>
                         <dd className="mt-1 break-words text-text-primary">
-                          {r.cnpj || "N�o informado"}
+                          {r.cnpj || "Não informado"}
                         </dd>
                       </div>
                       <div>
@@ -155,7 +155,7 @@ export default function AdminEmpresas() {
                         {r.cnpj || "-"}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-text-secondary">
-                        {r.id.slice(0, 8)}.
+                        {r.id.slice(0, 8)}…
                       </td>
                       <td className="px-4 py-3 text-right">
                         <Badge variant="success">ativa</Badge>
@@ -171,4 +171,3 @@ export default function AdminEmpresas() {
     </div>
   );
 }
-
