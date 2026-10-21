@@ -1,14 +1,31 @@
-﻿import { Card, Input, EmptyState } from '@/components/ui';
-import { cn } from '@/lib/utils';
-import { ClipboardList } from 'lucide-react';
+import { Shield } from 'lucide-react';
+import { Card, EmptyState, Badge, PageHeader } from '@/components/ui';
+
+const logs = [
+  { id: '1', acao: 'Login', usuario: 'sistema', quando: 'Hoje', detalhe: 'Sessão iniciada' },
+];
 
 export default function Auditoria() {
   return (
-    <div className="p-4 md:p-8 space-y-6 bg-branco min-h-screen">
-      <h1 className="text-2xl font-bold text-preto">Auditoria</h1>
-      <Card className={cn('p-4')}>
-        <Input placeholder="Buscar log..." className="max-w-sm mb-4" />
-        <EmptyState title="Nenhum log" description="Sem registros." icon={<ClipboardList className="w-6 h-6" />} />
+    <div className="max-w-7xl space-y-4">
+      <PageHeader title="Auditoria" description="Trilha de ações sensíveis no sistema" />
+      <Card padding="none" className="overflow-hidden">
+        {logs.length === 0 ? (
+          <div className="p-8"><EmptyState title="Sem eventos" description="Ações relevantes aparecerão aqui." icon={<Shield className="w-6 h-6" />} /></div>
+        ) : (
+          <ul className="divide-y divide-border-color">
+            {logs.map((l) => (
+              <li key={l.id} className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <Badge variant="info">{l.acao}</Badge>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{l.detalhe}</p>
+                  <p className="text-xs text-text-secondary">{l.usuario}</p>
+                </div>
+                <span className="text-xs text-text-secondary">{l.quando}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
     </div>
   );

@@ -1,16 +1,32 @@
-import { Card, Button, Input } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { Button, Input, Card, PageHeader, FileUpload } from '@/components/ui';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Perfil() {
+  const { user } = useAuth();
+  const [nome, setNome] = useState(user?.nome || '');
+  const [msg, setMsg] = useState('');
+
   return (
-    <div className="p-4 md:p-8 space-y-6 bg-branco min-h-screen">
-      <h1 className="text-2xl font-bold text-preto">Perfil</h1>
-      <Card className={cn('p-4 max-w-2xl')}>
-        <div className="space-y-4">
-          <Input placeholder="Nome" />
-          <Input placeholder="Email" />
-          <Button className="bg-verde-discreto text-branco"> Salvar</Button>
+    <div className="max-w-xl space-y-6">
+      <PageHeader title="Meu perfil" description="Dados pessoais e avatar" />
+      <Card className="p-5 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-brand/15 text-brand flex items-center justify-center text-xl font-bold">
+            {(nome || user?.email || 'U').charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="font-semibold">{nome || user?.nome}</p>
+            <p className="text-sm text-text-secondary">{user?.email}</p>
+          </div>
         </div>
+        <Input label="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
+        <div>
+          <p className="text-sm font-medium mb-2">Foto de perfil</p>
+          <FileUpload accept="image/*" />
+        </div>
+        <Button onClick={() => { setMsg('Perfil atualizado.'); setTimeout(() => setMsg(''), 2000); }}>Salvar</Button>
+        {msg && <p className="text-sm text-brand">{msg}</p>}
       </Card>
     </div>
   );
