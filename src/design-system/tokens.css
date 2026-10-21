@@ -1,0 +1,115 @@
+:root {
+  /* Cores — grafite, preto, branco, verde discreto */
+  --color-grafite: #2d2d2d;
+  --color-grafite-light: #4a4a4a;
+  --color-grafite-dark: #1a1a1a;
+  --color-preto: #000000;
+  --color-branco: #ffffff;
+  --color-verde-discreto: #2e7d4f;
+  --color-verde-discreto-light: #4caf6b;
+  --color-verde-discreto-dark: #1b5e3a;
+  --color-cinza: #f5f5f5;
+  --color-cinza-escuro: #e0e0e0;
+  --color-cinza-medio: #9e9e9e;
+  --color-erro: #d32f2f;
+  --color-aviso: #f9a825;
+  --color-sucesso: #2e7d4f;
+  --color-informacao: #1976d2;
+
+  /* Tema claro */
+  --bg-primary: var(--color-branco);
+  --bg-secondary: var(--color-cinza);
+  --bg-tertiary: var(--color-cinza-escuro);
+  --text-primary: var(--color-grafite);
+  --text-secondary: var(--color-grafite-light);
+  --text-disabled: var(--color-cinza-medio);
+  --border-color: var(--color-cinza-escuro);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] {
+  /* Tema escuro */
+  --bg-primary: var(--color-grafite-dark);
+  --bg-secondary: var(--color-grafite);
+  --bg-tertiary: var(--color-grafite-light);
+  --text-primary: var(--color-branco);
+  --text-secondary: var(--color-cinza-escuro);
+  --text-disabled: var(--color-cinza-medio);
+  --border-color: var(--color-grafite-light);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Tipografia */
+:root {
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 700;
+}
+
+/* Espaçamento */
+:root {
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+}
+
+/* Bordas */
+:root {
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --border-width: 1px;
+}
+
+/* Sombras */
+:root {
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Transições */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
+}
+
+/* Estados */
+:root {
+  --state-success: var(--color-sucesso);
+  --state-error: var(--color-erro);
+  --state-aviso: var(--color-aviso);
+  --state-info: var(--color-informacao);
+}
+
+/* Breakpoints */
+:root {
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+}
