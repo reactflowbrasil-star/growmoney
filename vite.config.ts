@@ -2,7 +2,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// Para cPanel em https://canal360.run.place/grow use:
+//   VITE_BASE=/grow/ npm run build
+// Para raiz (Netlify etc.):
+//   npm run build  (padrão /)
+const base = process.env.VITE_BASE || '/';
+
 export default defineConfig({
+  base,
   plugins: [react()],
   resolve: {
     alias: {

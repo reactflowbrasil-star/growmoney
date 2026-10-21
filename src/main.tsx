@@ -54,6 +54,9 @@ const queryClient = new QueryClient({
   },
 });
 
+/** Basename para subpasta (ex.: /grow) — Vite injeta import.meta.env.BASE_URL */
+const routerBasename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || '/';
+
 function App() {
   return (
     <StrictMode>
@@ -61,7 +64,7 @@ function App() {
         <ThemeProvider>
           <AuthProvider>
             <AdminAuthProvider>
-              <BrowserRouter>
+              <BrowserRouter basename={routerBasename === '/' ? undefined : routerBasename}>
                 <Routes>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/auth" element={<Login />} />
