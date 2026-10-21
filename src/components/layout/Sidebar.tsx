@@ -66,7 +66,7 @@ export function Sidebar({
           alt={BRAND.name}
           className={cn(
             'object-contain transition-all',
-            isCollapsed ? 'h-10 w-10' : 'h-[75px] w-auto max-w-[272px] object-left'
+            isCollapsed ? 'h-10 w-10' : 'h-14 w-auto max-w-full object-left'
           )}
         />
         {!isCollapsed && !embedded && (

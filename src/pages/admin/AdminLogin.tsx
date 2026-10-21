@@ -32,13 +32,13 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 overflow-x-hidden">
       <Card className="w-full max-w-md p-6 md:p-8">
         <div className="text-center mb-8 space-y-3">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-[96px] md:h-[120px] w-auto max-w-[360px] mx-auto object-contain"
+            className="mx-auto h-auto max-h-[min(16svh,112px)] w-full max-w-[min(100%,280px)] object-contain"
           />
           <div>
             <p className="text-xs uppercase tracking-widest text-brand font-semibold">Painel Admin</p>

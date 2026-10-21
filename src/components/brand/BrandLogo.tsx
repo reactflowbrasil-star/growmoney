@@ -22,7 +22,7 @@ export function BrandLogo({
       className={cn(
         heightClass,
         'w-auto object-contain object-left select-none',
-        compact ? 'max-w-[72px]' : 'max-w-[390px]',
+        compact ? 'max-w-[72px]' : 'max-w-full',
         className
       )}
       decoding="async"

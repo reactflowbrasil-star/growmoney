@@ -10,7 +10,7 @@ export default function AdminSistema() {
       <Card className="p-5 space-y-4">
         <h2 className="font-semibold">Identidade</h2>
         <div className="flex items-center gap-4">
-          <img src={BRAND.logo} alt="" className="h-14 w-auto max-w-[180px] object-contain" />
+          <img src={BRAND.logo} alt="" className="h-14 w-auto max-w-full object-contain" />
           <div className="text-sm">
             <p className="font-medium">{BRAND.name}</p>
             <p className="text-text-secondary">{BRAND.product}</p>

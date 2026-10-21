@@ -38,7 +38,7 @@ export function AdminLayout() {
             <img
               src={BRAND.logo}
               alt={BRAND.name}
-              className="h-[102px] w-auto max-w-[408px] object-contain"
+              className="h-auto max-h-16 w-auto max-w-full object-contain"
             />
             <span className="text-[10px] uppercase tracking-widest text-brand font-semibold">
               Painel Admin

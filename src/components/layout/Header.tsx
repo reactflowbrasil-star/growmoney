@@ -44,7 +44,7 @@ export function Header({
         <img
           src={BRAND.logo}
           alt={BRAND.name}
-          className="h-9 w-auto max-w-[120px] object-contain"
+          className="h-9 w-auto max-w-[min(26vw,120px)] object-contain"
         />
       </Link>
 

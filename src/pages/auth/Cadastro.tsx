@@ -83,13 +83,13 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-transparent overflow-x-hidden px-4 py-4 sm:py-8">
       <div className="w-full max-w-xl bg-bg-primary border border-border-color rounded-xl p-8 shadow-md">
         <div className="text-center mb-6 space-y-4">
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-[286px] md:h-[340px] w-auto max-w-[884px] mx-auto object-contain"
+            className="mx-auto h-auto max-h-[min(16svh,112px)] w-full max-w-[min(100%,300px)] object-contain"
           />
           <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
