@@ -10,7 +10,8 @@ const config: Config = {
         brand: {
           DEFAULT: '#87a913',
           light: '#b5d64b',
-          dark: '#526b0b',
+          dark: 'var(--brand-contrast)',
+          hover: 'var(--brand-hover)',
         },
         grafite: {
           DEFAULT: '#2d2d2d',
@@ -24,14 +25,14 @@ const config: Config = {
           DEFAULT: '#ffffff',
         },
         verde: {
-          DEFAULT: '#87a913',
+          DEFAULT: 'var(--brand-contrast)',
           light: '#b5d64b',
-          dark: '#526b0b',
+          dark: 'var(--brand-hover)',
         },
         'verde-discreto': {
-          DEFAULT: '#87a913',
+          DEFAULT: 'var(--brand-contrast)',
           light: '#b5d64b',
-          dark: '#526b0b',
+          dark: 'var(--brand-hover)',
         },
         bg: {
           primary: 'var(--bg-primary)',

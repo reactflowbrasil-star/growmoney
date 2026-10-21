@@ -2,6 +2,8 @@
   --brand: #87a913;
   --brand-light: #b5d64b;
   --brand-dark: #526b0b;
+  --brand-contrast: #526b0b;
+  --brand-hover: #526b0b;
   --brand-glow: rgba(135, 169, 19, 0.38);
   --color-erro: #ef4444;
   --color-aviso: #f59e0b;
@@ -35,6 +37,8 @@
   --header-height: 4.5rem;
 }
 [data-theme="dark"] {
+  --brand-contrast: #b5d64b;
+  --brand-hover: #526b0b;
   --bg-primary: #0b1220;
   --bg-secondary: #080d16;
   --bg-tertiary: #151c2c;

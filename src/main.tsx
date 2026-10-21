@@ -10,6 +10,7 @@ import { AdminProtectedRoute } from '@/components/admin/AdminProtectedRoute';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { SonarGrid } from '@/components/ui/sonar-grid';
+import { FloatingThemeSwitcher } from '@/components/ui/FloatingThemeSwitcher';
 import './index.css';
 
 import LandingPage from '@/pages/public/LandingPage';
@@ -127,6 +128,7 @@ function App() {
 
                   <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
+                    <FloatingThemeSwitcher />
                   </BrowserRouter>
                 </AdminAuthProvider>
               </AuthProvider>

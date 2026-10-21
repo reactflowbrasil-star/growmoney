@@ -3,6 +3,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  /* Brand text uses a theme-specific high-contrast shade; brand fills stay #87a913. */
+  .text-brand { color: var(--brand-contrast); }
+}
+
 @layer base {
   * { @apply border-border-color; }
   html {
