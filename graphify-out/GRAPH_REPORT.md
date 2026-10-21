@@ -1,6 +1,6 @@
 # GrowMoney — grafo do projeto
 
-> Gerado por `npm run graphify` em 2026-10-21T18:35:57.486Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
+> Gerado por `npm run graphify` em 2026-10-21T18:40:19.186Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
 
 ## Escopo
 
