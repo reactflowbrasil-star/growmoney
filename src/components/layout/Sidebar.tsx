@@ -33,14 +33,14 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
         'fixed left-0 top-0 z-40 h-screen flex flex-col',
         'bg-bg-primary border-r border-border-color',
         'transition-[width] duration-300 ease-in-out',
-        collapsed ? 'w-20' : 'w-64'
+        collapsed ? 'w-24' : 'w-72'
       )}
       aria-label="Navegação principal"
     >
       <div
         className={cn(
           'flex items-center border-b border-border-color gap-2 shrink-0',
-          collapsed ? 'h-20 px-2 justify-center' : 'h-20 px-4'
+          collapsed ? 'h-28 px-2 justify-center' : 'h-28 px-4'
         )}
       >
         <img
@@ -49,8 +49,8 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
           className={cn(
             'object-contain transition-all',
             collapsed
-              ? 'h-12 w-12'
-              : 'h-14 w-auto max-w-[210px] object-left'
+              ? 'h-[72px] w-[72px]'
+              : 'h-[84px] w-auto max-w-[315px] object-left'
           )}
         />
         {!collapsed && (

@@ -58,7 +58,7 @@ export function AppLayout() {
       />
       <div
         className={`transition-[margin-left] duration-300 ease-in-out ${
-          sidebarCollapsed ? 'ml-20' : 'ml-20 md:ml-64'
+          sidebarCollapsed ? 'ml-24' : 'ml-24 md:ml-72'
         }`}
       >
         <Header

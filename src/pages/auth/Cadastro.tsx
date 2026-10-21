@@ -88,70 +88,22 @@ export default function Cadastro() {
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-16 md:h-20 w-auto max-w-[260px] mx-auto object-contain"
+            className="h-[96px] md:h-[120px] w-auto max-w-[390px] mx-auto object-contain"
           />
           <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <Input
-            label="Nome da empresa"
-            value={form.empresa}
-            onChange={(e) => set('empresa', e.target.value)}
-            leftIcon={<Building2 className="w-4 h-4" />}
-            required
-            autoComplete="organization"
-          />
-          <Input
-            label="CNPJ (opcional)"
-            value={form.cnpj}
-            onChange={(e) => set('cnpj', e.target.value)}
-            leftIcon={<FileText className="w-4 h-4" />}
-          />
-          <Input
-            label="Nome do administrador"
-            value={form.admin}
-            onChange={(e) => set('admin', e.target.value)}
-            leftIcon={<User className="w-4 h-4" />}
-            required
-            autoComplete="name"
-          />
-          <Input
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(e) => set('email', e.target.value)}
-            leftIcon={<Mail className="w-4 h-4" />}
-            required
-            autoComplete="email"
-          />
-          <Input
-            label="Senha"
-            type="password"
-            value={form.senha}
-            onChange={(e) => set('senha', e.target.value)}
-            leftIcon={<Lock className="w-4 h-4" />}
-            required
-            autoComplete="new-password"
-          />
-          <Input
-            label="Confirmar senha"
-            type="password"
-            value={form.confirmar}
-            onChange={(e) => set('confirmar', e.target.value)}
-            leftIcon={<Lock className="w-4 h-4" />}
-            required
-            autoComplete="new-password"
-          />
+          <Input label="Nome da empresa" value={form.empresa} onChange={(e) => set('empresa', e.target.value)} leftIcon={<Building2 className="w-4 h-4" />} required autoComplete="organization" />
+          <Input label="CNPJ (opcional)" value={form.cnpj} onChange={(e) => set('cnpj', e.target.value)} leftIcon={<FileText className="w-4 h-4" />} />
+          <Input label="Nome do administrador" value={form.admin} onChange={(e) => set('admin', e.target.value)} leftIcon={<User className="w-4 h-4" />} required autoComplete="name" />
+          <Input label="Email" type="email" value={form.email} onChange={(e) => set('email', e.target.value)} leftIcon={<Mail className="w-4 h-4" />} required autoComplete="email" />
+          <Input label="Senha" type="password" value={form.senha} onChange={(e) => set('senha', e.target.value)} leftIcon={<Lock className="w-4 h-4" />} required autoComplete="new-password" />
+          <Input label="Confirmar senha" type="password" value={form.confirmar} onChange={(e) => set('confirmar', e.target.value)} leftIcon={<Lock className="w-4 h-4" />} required autoComplete="new-password" />
 
           <label className="flex items-start gap-2 text-sm text-text-secondary">
-            <input
-              type="checkbox"
-              checked={termos}
-              onChange={(e) => setTermos(e.target.checked)}
-              className="accent-brand mt-1"
-            />
+            <input type="checkbox" checked={termos} onChange={(e) => setTermos(e.target.checked)} className="accent-brand mt-1" />
             Aceito os termos de uso e política de privacidade
           </label>
 

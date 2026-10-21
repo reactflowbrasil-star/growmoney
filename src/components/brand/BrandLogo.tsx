@@ -10,7 +10,7 @@ type BrandLogoProps = {
 };
 
 export function BrandLogo({
-  heightClass = 'h-14',
+  heightClass = 'h-[84px]',
   className,
   linkTo = '/',
   compact = false,
@@ -22,7 +22,7 @@ export function BrandLogo({
       className={cn(
         heightClass,
         'w-auto object-contain object-left select-none',
-        compact ? 'max-w-[48px]' : 'max-w-[260px]',
+        compact ? 'max-w-[72px]' : 'max-w-[390px]',
         className
       )}
       decoding="async"

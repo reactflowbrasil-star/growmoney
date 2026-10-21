@@ -30,7 +30,7 @@ export function Header({
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 h-20 flex items-center gap-4 px-4',
+        'sticky top-0 z-30 h-28 flex items-center gap-4 px-4',
         'bg-bg-primary border-b border-border-color',
         'shadow-sm'
       )}
@@ -51,7 +51,7 @@ export function Header({
         <img
           src={BRAND.logo}
           alt={BRAND.name}
-          className="h-12 md:h-14 w-auto max-w-[200px] md:max-w-[240px] object-contain"
+          className="h-[72px] md:h-[84px] w-auto max-w-[300px] md:max-w-[360px] object-contain"
         />
       </Link>
 
@@ -146,16 +146,10 @@ export function Header({
                 <p className="text-sm font-medium text-text-primary">{user?.name || 'Usuário'}</p>
                 <p className="text-xs text-text-secondary truncate">{user?.email || ''}</p>
               </div>
-              <Link
-                to="/perfil"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary"
-              >
+              <Link to="/perfil" className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary">
                 <User className="w-4 h-4" /> Meu Perfil
               </Link>
-              <Link
-                to="/configuracoes"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary"
-              >
+              <Link to="/configuracoes" className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary">
                 <Settings className="w-4 h-4" /> Configurações
               </Link>
               <button
