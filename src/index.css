@@ -44,6 +44,10 @@
   }
   .btn-glow:hover { box-shadow: 0 0 20px var(--brand-glow); }
   .animate-in { animation: fadeSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .nav-link-active {
+    color: #10b981;
+    background-color: rgb(16 185 129 / 0.15);
+  }
 }
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(12px); }

@@ -23,6 +23,11 @@ const config: Config = {
           light: '#4caf6b',
           dark: '#1b5e3a',
         },
+        brand: {
+          DEFAULT: '#10b981',
+          light: '#34d399',
+          dark: '#059669',
+        },
         'verde-discreto': {
           DEFAULT: '#2e7d4f',
           light: '#4caf6b',
