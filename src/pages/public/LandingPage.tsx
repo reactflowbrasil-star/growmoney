@@ -47,7 +47,7 @@ const features = [
 
 function ProductPreview() {
   return (
-    <div className="relative mx-auto w-full max-w-[34rem] lg:ml-auto" aria-label="Prévia visual da plataforma">
+    <div className="relative mx-auto w-full max-w-[34rem] lg:ml-auto" aria-hidden="true">
       <div aria-hidden="true" className="absolute -inset-7 rounded-[2.5rem] bg-brand/10 blur-3xl" />
       <div className="relative overflow-hidden rounded-[1.75rem] border border-border-color/80 bg-bg-primary/95 p-4 shadow-2xl backdrop-blur-xl sm:p-6">
         <div className="flex items-center justify-between gap-3 border-b border-border-color pb-4">
@@ -56,12 +56,12 @@ function ProductPreview() {
               <BarChart3 className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-xs text-text-secondary">VISÃO GERAL</p>
+              <p className="text-xs text-text-secondary">EXEMPLO ILUSTRATIVO</p>
               <p className="text-sm font-semibold text-text-primary">Sua operação</p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand-dark dark:text-brand-light">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Tudo em ordem
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-bg-secondary px-2.5 py-1 text-[11px] font-semibold text-text-secondary">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Dados de exemplo
           </span>
         </div>
 

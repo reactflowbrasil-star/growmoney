@@ -85,9 +85,12 @@ body.auth-layout-active [role='group'][aria-label='Seletor de tema'] { display: 
 }
 
 @media (max-height: 700px) {
-  .auth-card { padding-block: 0.75rem !important; }
-  .auth-brand { margin-bottom: 0.5rem !important; }
-  .auth-divider { margin-block: 0.5rem !important; }
+  .auth-card { padding-block: 0.625rem !important; }
+  .auth-logo { max-height: 56px !important; }
+  .auth-brand { margin-bottom: 0.375rem !important; }
+  .auth-divider { margin-block: 0.25rem !important; }
+  .auth-form { row-gap: 0.375rem !important; }
+  .auth-form input { padding-block: 0.375rem; }
   .auth-google button { min-height: 38px; padding-block: 0.375rem; }
   .auth-form label { margin-bottom: 0.125rem; }
   .auth-footer { margin-top: 0.375rem !important; }
