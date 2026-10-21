@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button, Input, Card } from '@/components/ui';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { BRAND } from '@/lib/brand';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -36,9 +37,13 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-secondary p-4">
       <Card className="w-full max-w-md p-6">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-verde-discreto">GrowMoney</h1>
-          <p className="text-text-secondary">Gestao financeira para sua empresa</p>
+        <div className="text-center mb-6 space-y-3">
+          <img
+            src={BRAND.logo}
+            alt={BRAND.name}
+            className="h-12 w-auto max-w-[200px] mx-auto object-contain"
+          />
+          <p className="text-text-secondary text-sm">{BRAND.tagline}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,11 +71,7 @@ export default function Login() {
                 className="focus:outline-none"
                 tabIndex={-1}
               >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             }
             required
@@ -92,7 +93,7 @@ export default function Login() {
           </Link>
         </div>
         <div className="mt-2 text-center text-sm text-text-secondary">
-          Nao tem conta?{' '}
+          Não tem conta?{' '}
           <Link to="/cadastro" className="text-verde-discreto hover:underline">
             Cadastre-se
           </Link>
