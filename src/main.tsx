@@ -55,7 +55,7 @@ const queryClient = new QueryClient({
   },
 });
 
-/** Basename para subpasta (ex.: /grow) — Vite injeta import.meta.env.BASE_URL */
+/** Basename para subpasta (ex.: /grow) - Vite injeta import.meta.env.BASE_URL */
 const routerBasename = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || '/';
 
 function App() {
@@ -66,7 +66,7 @@ function App() {
         className="pointer-events-none fixed inset-0 z-0"
         color="var(--brand)"
         spacing={32}
-        baseOpacity={0.12}
+        baseOpacity={0.22}
         pingEvery={4.5}
         speed={220}
         ringWidth={100}
@@ -144,4 +144,5 @@ if (!rootEl) {
 }
 
 createRoot(rootEl).render(<App />);
+
 

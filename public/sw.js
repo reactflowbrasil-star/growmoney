@@ -1,4 +1,4 @@
-const CACHE = 'grow-v2';
+const CACHE = 'grow-v3';
 const PRECACHE = ['/', '/index.html', '/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
