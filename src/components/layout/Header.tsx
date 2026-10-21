@@ -21,95 +21,78 @@ export function Header({
   onNotificationRead,
   onLogout,
 }: HeaderProps) {
-  const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 h-28 flex items-center gap-4 px-4',
-        'bg-bg-primary border-b border-border-color',
-        'shadow-sm'
+        'sticky top-0 z-30 h-14 md:h-16 flex items-center gap-2 md:gap-4 px-3 md:px-4',
+        'bg-bg-primary/90 backdrop-blur-xl border-b border-border-color'
       )}
     >
       <button
         onClick={onMenuToggle}
-        className={cn(
-          'p-2 rounded-md hover:bg-bg-tertiary',
-          'focus:outline-none focus:ring-2 focus:ring-verde-discreto',
-          'md:hidden'
-        )}
+        className="p-2.5 rounded-xl hover:bg-bg-tertiary pressable focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         aria-label="Abrir menu"
       >
-        <Menu className="w-6 h-6 text-text-primary" />
+        <Menu className="w-5 h-5 text-text-primary" />
       </button>
 
-      <Link to="/dashboard" className="flex items-center shrink-0" aria-label={BRAND.name}>
+      <Link to="/dashboard" className="flex items-center shrink-0 md:hidden" aria-label={BRAND.name}>
         <img
           src={BRAND.logo}
           alt={BRAND.name}
-          className="h-[72px] md:h-[84px] w-auto max-w-[300px] md:max-w-[360px] object-contain"
+          className="h-9 w-auto max-w-[120px] object-contain"
         />
       </Link>
 
       <div className="flex-1 max-w-md mx-auto hidden sm:block">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
           <input
-            type="text"
-            placeholder="Buscar..."
+            type="search"
+            placeholder="Buscar no sistema…"
             onChange={(e) => onSearch?.(e.target.value)}
-            onFocus={() => setSearchOpen(true)}
-            onBlur={() => setSearchOpen(false)}
             className={cn(
-              'w-full pl-10 pr-4 py-2.5 text-sm rounded-xl',
+              'w-full pl-10 pr-4 py-2 text-sm rounded-xl',
               'bg-bg-secondary border border-border-color',
               'text-text-primary placeholder:text-text-secondary',
-              'focus:outline-none focus:ring-2 focus:ring-verde-discreto'
+              'focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand/40',
+              'transition-shadow'
             )}
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-1 ml-auto">
         <div className="relative">
           <button
-            onClick={() => setNotifOpen(!notifOpen)}
-            className={cn(
-              'p-2 rounded-md hover:bg-bg-tertiary relative',
-              'focus:outline-none focus:ring-2 focus:ring-verde-discreto'
-            )}
+            onClick={() => {
+              setNotifOpen(!notifOpen);
+              setProfileOpen(false);
+            }}
+            className="p-2.5 rounded-xl hover:bg-bg-tertiary relative pressable"
             aria-label="Notificações"
           >
             <Bell className="w-5 h-5 text-text-primary" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-erro text-branco text-xs rounded-full flex items-center justify-center">
-                {unreadCount}
-              </span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-erro rounded-full ring-2 ring-bg-primary" />
             )}
           </button>
-
           {notifOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-bg-primary border border-border-color rounded-md shadow-lg py-2 z-50">
-              <h3 className="px-4 py-2 text-sm font-semibold text-text-primary border-b border-border-color">
-                Notificações
-              </h3>
+            <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-bg-primary border border-border-color rounded-2xl shadow-lg py-2 z-50 animate-in">
+              <h3 className="px-4 py-2 text-sm font-semibold border-b border-border-color">Notificações</h3>
               {notifications.length === 0 ? (
-                <p className="px-4 py-4 text-sm text-text-secondary text-center">Sem notificações</p>
+                <p className="px-4 py-6 text-sm text-text-secondary text-center">Sem notificações</p>
               ) : (
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((n) => (
                     <button
                       key={n.id}
                       onClick={() => onNotificationRead?.(n.id)}
-                      className={cn(
-                        'w-full text-left px-4 py-3 hover:bg-bg-tertiary',
-                        'border-b border-border-color last:border-0',
-                        !n.read && 'bg-verde-discreto/5'
-                      )}
+                      className="w-full text-left px-4 py-3 hover:bg-bg-tertiary border-b border-border-color last:border-0"
                     >
                       <p className="text-sm text-text-primary">{n.title}</p>
                       <p className="text-xs text-text-secondary">{n.time}</p>
@@ -123,38 +106,35 @@ export function Header({
 
         <div className="relative">
           <button
-            onClick={() => setProfileOpen(!profileOpen)}
-            className={cn(
-              'flex items-center gap-2 p-2 rounded-md hover:bg-bg-tertiary',
-              'focus:outline-none focus:ring-2 focus:ring-verde-discreto'
-            )}
+            onClick={() => {
+              setProfileOpen(!profileOpen);
+              setNotifOpen(false);
+            }}
+            className="flex items-center gap-2 p-1.5 pl-2 rounded-xl hover:bg-bg-tertiary pressable"
             aria-label="Perfil"
           >
-            {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full" />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-verde-discreto flex items-center justify-center text-branco text-sm font-bold">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </div>
-            )}
-            <span className="hidden md:block text-sm text-text-primary">{user?.name || 'Usuário'}</span>
+            <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white text-sm font-bold">
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <span className="hidden md:block text-sm font-medium text-text-primary max-w-[100px] truncate">
+              {user?.name || 'Usuário'}
+            </span>
           </button>
-
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-bg-primary border border-border-color rounded-md shadow-lg py-2 z-50">
+            <div className="absolute right-0 mt-2 w-52 bg-bg-primary border border-border-color rounded-2xl shadow-lg py-2 z-50 animate-in">
               <div className="px-4 py-2 border-b border-border-color">
-                <p className="text-sm font-medium text-text-primary">{user?.name || 'Usuário'}</p>
+                <p className="text-sm font-medium truncate">{user?.name || 'Usuário'}</p>
                 <p className="text-xs text-text-secondary truncate">{user?.email || ''}</p>
               </div>
-              <Link to="/perfil" className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary">
-                <User className="w-4 h-4" /> Meu Perfil
+              <Link to="/perfil" className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-tertiary">
+                <User className="w-4 h-4" /> Meu perfil
               </Link>
-              <Link to="/configuracoes" className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-bg-tertiary">
+              <Link to="/configuracoes" className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-tertiary">
                 <Settings className="w-4 h-4" /> Configurações
               </Link>
               <button
                 onClick={onLogout}
-                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-erro hover:bg-bg-tertiary"
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-erro hover:bg-erro/10"
               >
                 <LogOut className="w-4 h-4" /> Sair
               </button>

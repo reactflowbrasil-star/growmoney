@@ -15,9 +15,10 @@ interface SidebarProps {
   logo?: string;
   user?: { name: string; email: string; avatar?: string };
   onCollapse?: (collapsed: boolean) => void;
+  embedded?: boolean;
 }
 
-export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarProps) {
+export function Sidebar({ items, logo = BRAND.logo, user, onCollapse, embedded = false }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
@@ -30,17 +31,18 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen flex flex-col',
-        'bg-bg-primary border-r border-border-color',
+        'flex flex-col bg-bg-primary border-r border-border-color',
         'transition-[width] duration-300 ease-in-out',
-        collapsed ? 'w-24' : 'w-72'
+        embedded
+          ? 'relative h-full w-full'
+          : cn('fixed left-0 top-0 z-40 h-screen', collapsed ? 'w-24' : 'w-72')
       )}
       aria-label="Navegação principal"
     >
       <div
         className={cn(
           'flex items-center border-b border-border-color gap-2 shrink-0',
-          collapsed ? 'h-28 px-2 justify-center' : 'h-28 px-4'
+          collapsed ? 'h-16 px-2 justify-center' : 'h-16 px-4'
         )}
       >
         <img
@@ -48,16 +50,14 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
           alt={BRAND.name}
           className={cn(
             'object-contain transition-all',
-            collapsed
-              ? 'h-[72px] w-[72px]'
-              : 'h-[84px] w-auto max-w-[315px] object-left'
+            collapsed ? 'h-10 w-10' : 'h-11 w-auto max-w-[160px] object-left'
           )}
         />
-        {!collapsed && (
+        {!collapsed && !embedded && (
           <button
             type="button"
             onClick={toggleCollapse}
-            className="ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary"
+            className="ml-auto p-1.5 rounded-lg text-text-secondary hover:bg-bg-tertiary pressable"
             aria-label="Recolher menu"
           >
             <span className="text-sm font-bold">«</span>
@@ -65,7 +65,7 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
         )}
       </div>
 
-      {collapsed && (
+      {collapsed && !embedded && (
         <button
           type="button"
           onClick={toggleCollapse}
@@ -85,11 +85,12 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
             <Link
               key={item.href}
               to={item.href}
+              onClick={() => embedded && onCollapse?.(false)}
               className={cn(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-brand/15 text-brand'
-                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary',
+                  ? 'nav-link-active'
+                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary pressable',
                 collapsed && 'justify-center px-2'
               )}
               title={item.label}
@@ -107,7 +108,7 @@ export function Sidebar({ items, logo = BRAND.logo, user, onCollapse }: SidebarP
       </nav>
 
       {user && !collapsed && (
-        <div className="border-t border-border-color p-3">
+        <div className="border-t border-border-color p-3 safe-pb">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-full bg-brand/20 text-brand flex items-center justify-center text-sm font-bold shrink-0">
               {(user.name || user.email || 'U').charAt(0).toUpperCase()}
