@@ -41,7 +41,7 @@ export default function Login() {
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-[120px] md:h-[144px] w-auto max-w-[420px] mx-auto object-contain"
+            className="h-[168px] md:h-[200px] w-auto max-w-[520px] mx-auto object-contain"
           />
           <p className="text-text-secondary text-sm">{BRAND.tagline}</p>
         </div>

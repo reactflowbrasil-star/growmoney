@@ -88,7 +88,7 @@ export default function Cadastro() {
           <img
             src={BRAND.logo}
             alt={BRAND.name}
-            className="h-[96px] md:h-[120px] w-auto max-w-[390px] mx-auto object-contain"
+            className="h-[168px] md:h-[200px] w-auto max-w-[520px] mx-auto object-contain"
           />
           <h1 className="text-2xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
