@@ -18,6 +18,7 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (nome: string, email: string, senha: string, empresaNome: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   switchEmpresa: (empresaId: string) => void;
   refreshEmpresas: () => Promise<void>;
@@ -30,6 +31,19 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
+}
+
+function displayNameFromUser(user: {
+  email?: string | null;
+  user_metadata?: Record<string, unknown>;
+}) {
+  const meta = user.user_metadata || {};
+  return (
+    (meta.full_name as string) ||
+    (meta.name as string) ||
+    (meta.nome as string) ||
+    (user.email ? user.email.split('@')[0] : 'Usuario')
+  );
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -70,6 +84,97 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const ensureProfileAndEmpresa = useCallback(
+    async (authUser: {
+      id: string;
+      email?: string | null;
+      user_metadata?: Record<string, unknown>;
+    }) => {
+      const nome = displayNameFromUser(authUser);
+      const email = authUser.email || '';
+
+      await supabase.from('profiles').upsert({
+        id: authUser.id,
+        email,
+        nome,
+        role: 'admin',
+      });
+
+      const { data: memberships } = await supabase
+        .from('empresa_members')
+        .select('id')
+        .eq('usuario_id', authUser.id)
+        .eq('status', 'aceito')
+        .limit(1);
+
+      if (memberships && memberships.length > 0) return;
+
+      const empresaNome =
+        (authUser.user_metadata?.empresa as string) ||
+        `${nome.split(' ')[0]} · Empresa`;
+
+      const { data: novaEmpresa, error: empresaError } = await supabase
+        .from('empresas')
+        .insert({
+          nome: empresaNome,
+          responsavel_id: authUser.id,
+          configuracoes: {},
+        })
+        .select('*')
+        .single();
+
+      if (empresaError) {
+        console.warn('empresa OAuth:', empresaError.message);
+        return;
+      }
+
+      if (novaEmpresa) {
+        await supabase.from('empresa_members').insert({
+          empresa_id: novaEmpresa.id,
+          usuario_id: authUser.id,
+          role: 'admin',
+          status: 'aceito',
+          aceito_em: new Date().toISOString(),
+        });
+      }
+    },
+    []
+  );
+
+  const hydrateFromSession = useCallback(
+    async (session: {
+      user: {
+        id: string;
+        email?: string | null;
+        user_metadata?: Record<string, unknown>;
+      };
+      access_token: string;
+      expires_at?: number;
+    }) => {
+      await ensureProfileAndEmpresa(session.user);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      const sessionUser: UserSession = {
+        id: session.user.id,
+        email: session.user.email || profile?.email || '',
+        nome: profile?.nome || displayNameFromUser(session.user),
+        role: (profile?.role as any) || 'admin',
+        empresa_id: null,
+        empresas: [],
+        token: session.access_token,
+        expira_em: String(session.expires_at || ''),
+      };
+      setUser(sessionUser);
+      await loadUserCompanies(session.user.id);
+    },
+    [ensureProfileAndEmpresa, loadUserCompanies]
+  );
+
   useEffect(() => {
     let mounted = true;
 
@@ -78,28 +183,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-
         if (!mounted) return;
 
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .maybeSingle();
-
-          const sessionUser: UserSession = {
-            id: session.user.id,
-            email: session.user.email || profile?.email || '',
-            nome: profile?.nome || session.user.user_metadata?.nome || 'Usuario',
-            role: (profile?.role as any) || 'vendedor',
-            empresa_id: null,
-            empresas: [],
-            token: session.access_token,
-            expira_em: String(session.expires_at || ''),
-          };
-          setUser(sessionUser);
-          await loadUserCompanies(session.user.id);
+          await hydrateFromSession(session as any);
         }
       } catch (err) {
         console.warn('Erro ao restaurar sessao', err);
@@ -112,12 +199,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
-      if (!session) {
+      if (event === 'SIGNED_OUT' || !session) {
         setUser(null);
         setEmpresas([]);
         setEmpresaAtiva(null);
+        return;
+      }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        try {
+          await hydrateFromSession(session as any);
+        } catch (e) {
+          console.warn('hydrate auth', e);
+        }
       }
     });
 
@@ -125,7 +220,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [loadUserCompanies]);
+  }, [hydrateFromSession]);
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -134,36 +229,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
       if (error) throw new Error(`Falha ao autenticar: ${error.message}`);
-
-      const { data: usuario } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user?.id)
-        .maybeSingle();
-
-      const session: UserSession = {
-        id: data.user!.id,
-        email: data.user!.email || email,
-        nome: usuario?.nome || data.user!.user_metadata?.nome || 'Usuario',
-        role: (usuario?.role as any) || 'admin',
-        empresa_id: null,
-        empresas: [],
-        token: data.session?.access_token || '',
-        expira_em: String(data.session?.expires_at || ''),
-      };
-
-      setUser(session);
-      await loadUserCompanies(session.id);
+      if (!data.session) throw new Error('Sessão não criada');
+      await hydrateFromSession(data.session as any);
     },
-    [loadUserCompanies]
+    [hydrateFromSession]
   );
+
+  const loginWithGoogle = useCallback(async () => {
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'select_account',
+        },
+      },
+    });
+    if (error) throw new Error(error.message || 'Falha ao iniciar login com Google');
+  }, []);
 
   const register = useCallback(
     async (nome: string, email: string, senha: string, empresaNome: string) => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: senha,
-        options: { data: { nome } },
+        options: { data: { nome, empresa: empresaNome } },
       });
       if (error) throw new Error(error.message || 'Falha ao registrar');
       if (!data.user) throw new Error('Usuário não retornado após cadastro');
@@ -279,6 +371,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     login,
     register,
+    loginWithGoogle,
     logout,
     switchEmpresa,
     refreshEmpresas,
