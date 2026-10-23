@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, Search, Menu, LogOut, Settings, User, ShieldCheck } from 'lucide-react';
+import { Bell, Search, Menu, LogOut, Settings, User, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 import { BrandLogo } from '@/components/brand/BrandLogo';
@@ -12,6 +12,8 @@ interface HeaderProps {
   user?: { name: string; email: string; avatar?: string };
   notifications?: Array<{ id: string; title: string; time: string; read: boolean }>;
   onNotificationRead?: (id: string) => void;
+  soundEnabled?: boolean;
+  onToggleSound?: () => void;
   onLogout?: () => void;
 }
 
@@ -21,6 +23,8 @@ export function Header({
   user,
   notifications = [],
   onNotificationRead,
+  soundEnabled = true,
+  onToggleSound,
   onLogout,
 }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
@@ -92,7 +96,18 @@ export function Header({
             <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-bg-primary border border-border-color rounded-2xl shadow-lg py-2 z-50 animate-in">
               <div className="flex items-center justify-between border-b border-border-color px-4 py-2">
                 <h3 className="text-sm font-semibold">Atualizações</h3>
-                {unreadCount > 0 && <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">{unreadCount} novas</span>}
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">{unreadCount} novas</span>}
+                  <button
+                    type="button"
+                    onClick={onToggleSound}
+                    className="rounded-lg p-1.5 text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
+                    aria-label={soundEnabled ? 'Desativar som alto das notificações' : 'Ativar som alto das notificações'}
+                    title={soundEnabled ? 'Som alto ativado' : 'Som desativado'}
+                  >
+                    {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               {notifications.length === 0 ? (
                 <p className="px-4 py-6 text-sm text-text-secondary text-center">Sem notificações</p>

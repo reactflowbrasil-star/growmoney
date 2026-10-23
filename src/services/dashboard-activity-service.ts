@@ -14,6 +14,12 @@ export interface DashboardActivity {
   changedFields: string[];
 }
 
+export interface DashboardLiveNotification {
+  id: string;
+  title: string;
+  occurredAt: string;
+}
+
 type AuditRow = {
   id: string;
   empresa_id: string | null;
@@ -52,6 +58,69 @@ function mapActivity(row: AuditRow, actorName: string): DashboardActivity | null
       ? fields.filter((field): field is string => typeof field === 'string').slice(0, 20)
       : [],
   };
+}
+
+function toLiveNotification(activity: DashboardActivity): DashboardLiveNotification {
+  const action = activity.action === 'created' ? 'criou' : activity.action === 'updated' ? 'alterou' : 'excluiu';
+  return {
+    id: activity.id,
+    title: `${activity.actorName} ${action} ${activity.entity.replace(/[_-]+/g, ' ')}`,
+    occurredAt: activity.occurredAt,
+  };
+}
+
+/**
+ * Streams newly-created audit entries. Postgres RLS is applied by Realtime,
+ * so regular members only receive their company's and their own events.
+ */
+export function subscribeToDashboardActivity(
+  empresaId: string | null,
+  userId: string,
+  isPlatformAdmin: boolean,
+  onNotification: (notification: DashboardLiveNotification) => void
+): () => void {
+  const channel = supabase.channel(`dashboard-activity:${userId}:${empresaId || 'personal'}`);
+  const receiveAudit = (payload: { new: AuditRow }) => {
+    const row = payload.new;
+    const activity = mapActivity(row, row.usuario_id === userId ? 'Você' : 'Outro usuário');
+    if (activity) onNotification(toLiveNotification(activity));
+  };
+
+  if (isPlatformAdmin) {
+    // Platform admins are authorized by RLS to see system-wide audit activity.
+    channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'auditoria' }, receiveAudit);
+  } else {
+    if (empresaId) {
+      channel.on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'auditoria', filter: `empresa_id=eq.${empresaId}` },
+        receiveAudit
+      );
+    }
+    // RLS additionally limits this subscription to personal rows owned by the user.
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'auditoria', filter: `usuario_id=eq.${userId}` },
+      receiveAudit
+    );
+  }
+
+  if (isPlatformAdmin) {
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'gm_admin_audit' },
+      (payload: { new: { id: string; action: string; created_at: string } }) => {
+        onNotification({
+          id: payload.new.id,
+          title: `Administração: ${payload.new.action.replace(/[_-]+/g, ' ')}`,
+          occurredAt: payload.new.created_at,
+        });
+      }
+    );
+  }
+
+  void channel.subscribe();
+  return () => { void supabase.removeChannel(channel); };
 }
 
 /**

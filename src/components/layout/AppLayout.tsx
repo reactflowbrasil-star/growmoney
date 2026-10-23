@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Volume2, VolumeX, X } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
-import { getRecentDashboardActivity } from '@/services/dashboard-activity-service';
+import { getRecentDashboardActivity, subscribeToDashboardActivity } from '@/services/dashboard-activity-service';
 import { navItems } from '@/config/nav';
 
 export function AppLayout() {
@@ -18,6 +18,54 @@ export function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: string; title: string; time: string; read: boolean }>>([]);
+  const [soundEnabled, setSoundEnabled] = useState(() => typeof window === 'undefined' || localStorage.getItem('growmoney-alert-sound-enabled') !== 'false');
+  const [liveAlert, setLiveAlert] = useState<{ id: string; title: string; time: string } | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const seenNotificationIds = useRef(new Set<string>());
+
+  const enableAudioFromGesture = useCallback(() => {
+    if (typeof window === 'undefined' || !('AudioContext' in window)) return;
+    try {
+      if (!audioContextRef.current) audioContextRef.current = new AudioContext();
+      if (audioContextRef.current.state === 'suspended') void audioContextRef.current.resume();
+    } catch {
+      // The visual notification remains available when audio is unsupported.
+    }
+  }, []);
+
+  const playLoudAlert = useCallback(() => {
+    if (!soundEnabled) return;
+    enableAudioFromGesture();
+    const context = audioContextRef.current;
+    if (!context || context.state !== 'running') return;
+    const startAt = context.currentTime + 0.02;
+    [880, 1046].forEach((frequency, index) => {
+      const start = startAt + index * 0.25;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.exponentialRampToValueAtTime(0.95, start + 0.025);
+      gain.gain.setValueAtTime(0.95, start + 0.14);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + 0.23);
+    });
+  }, [enableAudioFromGesture, soundEnabled]);
+
+  useEffect(() => {
+    const unlockAudio = () => enableAudioFromGesture();
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, [enableAudioFromGesture]);
 
   const loadNotifications = useCallback(async () => {
     if (!user) return;
@@ -36,6 +84,39 @@ export function AppLayout() {
   }, [empresaAtiva?.id, user]);
 
   useEffect(() => { void loadNotifications(); }, [loadNotifications]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    return subscribeToDashboardActivity(empresaAtiva?.id || null, user.id, isAdmin, (event) => {
+      if (seenNotificationIds.current.has(event.id)) return;
+      seenNotificationIds.current.add(event.id);
+      const time = new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short', timeStyle: 'medium', timeZone: 'America/Sao_Paulo',
+      }).format(new Date(event.occurredAt));
+
+      setNotifications((current) => [
+        { id: event.id, title: event.title, time, read: false },
+        ...current.filter((notification) => notification.id !== event.id),
+      ].slice(0, 20));
+      setLiveAlert({ id: event.id, title: event.title, time });
+      if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+      alertTimerRef.current = setTimeout(() => setLiveAlert(null), 5000);
+      playLoudAlert();
+    });
+  }, [empresaAtiva?.id, isAdmin, playLoudAlert, user?.id]);
+
+  useEffect(() => () => {
+    if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    if (audioContextRef.current) void audioContextRef.current.close();
+  }, []);
+
+  const toggleNotificationSound = () => {
+    enableAudioFromGesture();
+    setSoundEnabled((enabled) => {
+      localStorage.setItem('growmoney-alert-sound-enabled', String(!enabled));
+      return !enabled;
+    });
+  };
 
   const markNotificationRead = (id: string) => {
     if (!user?.id) return;
@@ -122,6 +203,8 @@ export function AppLayout() {
           user={layoutUser}
           notifications={notifications}
           onNotificationRead={markNotificationRead}
+          soundEnabled={soundEnabled}
+          onToggleSound={toggleNotificationSound}
           onLogout={handleLogout}
         />
         <main className="p-4 md:p-6 lg:p-8 mobile-nav-pad animate-in" role="main">
@@ -130,6 +213,28 @@ export function AppLayout() {
       </div>
 
       <MobileBottomNav isAdmin={isAdmin} />
+      {liveAlert && (
+        <div
+          key={liveAlert.id}
+          role="alert"
+          aria-live="assertive"
+          className="fixed right-4 top-20 z-[80] w-[min(24rem,calc(100vw-2rem))] animate-in rounded-2xl border border-brand/40 bg-bg-primary p-4 shadow-2xl ring-1 ring-brand/20"
+        >
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-text-primary">Atualização no sistema</p>
+              <p className="mt-1 break-words text-sm text-text-primary">{liveAlert.title}</p>
+              <p className="mt-1 text-xs text-text-secondary">{liveAlert.time}</p>
+            </div>
+            <button onClick={() => setLiveAlert(null)} aria-label="Fechar notificação" className="rounded-lg p-1 text-text-secondary hover:bg-bg-tertiary">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

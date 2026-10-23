@@ -1,10 +1,10 @@
 # GrowMoney — grafo do projeto
 
-> Gerado por `npm run graphify` em 2026-10-23T04:33:04.122Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
+> Gerado por `npm run graphify` em 2026-10-23T04:36:49.180Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
 
 ## Escopo
 
-- 165 arquivos de código, schema, documentação e configuração.
+- 166 arquivos de código, schema, documentação e configuração.
 - 29 tabelas identificadas.
 - 9 RPCs identificadas.
 - 439 relações explícitas.
