@@ -16,7 +16,7 @@ export class ServicoService {
       throw new Error('Permissao insuficiente para atualizar servico');
     }
 
-    return ServicoRepository.update(id, empresaId, data);
+    return ServicoRepository.update(id, empresaId, data, _userId);
   }
 
   static async delete(id: string, empresaId: string, _userId: string, userRole: string): Promise<void> {
@@ -51,4 +51,3 @@ export class ServicoService {
     return ServicoRepository.getCategoriaStats(empresaId);
   }
 }
-

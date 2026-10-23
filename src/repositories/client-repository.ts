@@ -1,24 +1,25 @@
 import { supabase } from '@/lib/supabase/client';
-import type { CreateClienteData, UpdateClienteData, Cliente, PaginatedResult, ClientType, ClientStatus } from '@/lib/client-types';
-
-interface FiltrosEmpresa {
-  empresaId: string;
-  status?: ClientStatus;
-  tipo?: ClientType;
-  responsavel?: string;
-  busca?: string;
-  page?: number;
-  limit?: number;
-  order_by?: 'nome' | 'criado_em' | 'atualizado_em';
-  order_dir?: 'asc' | 'desc';
-}
+import type { CreateClienteData, UpdateClienteData, FiltrosCliente, Cliente, PaginatedResult, ClienteHistorico } from '@/lib/client-types';
 
 export class ClientRepository {
   static async create(data: CreateClienteData, userId: string): Promise<Cliente> {
+    const { empresa_id, nome, razao_social, tipo, documento, email, telefone, whatsapp, cep, endereco, responsavel, status, observacoes } = data;
     const { data: cliente, error } = await supabase
       .from('clients')
       .insert({
-        ...data,
+        empresa_id,
+        nome,
+        razao_social,
+        tipo,
+        documento,
+        email,
+        telefone,
+        whatsapp,
+        cep,
+        endereco,
+        responsavel,
+        status: status || 'ativo',
+        observacoes,
         criado_por: userId,
         criado_em: new Date().toISOString(),
         atualizado_em: new Date().toISOString(),
@@ -27,6 +28,7 @@ export class ClientRepository {
       .single();
 
     if (error) throw new Error(`Falha ao criar cliente: ${error.message}`);
+    if (!cliente) throw new Error('Falha ao criar cliente: resposta vazia do servidor');
     return cliente as unknown as Cliente;
   }
 
@@ -36,7 +38,7 @@ export class ClientRepository {
       .select('*')
       .eq('id', id)
       .eq('empresa_id', empresaId)
-      .single();
+      .maybeSingle();
 
     if (error && error.code !== 'PGRST116') throw new Error(`Falha ao buscar cliente: ${error.message}`);
     return (data as unknown as Cliente) || null;
@@ -48,25 +50,26 @@ export class ClientRepository {
       .select('*')
       .eq('documento', documento)
       .eq('empresa_id', empresaId)
-      .single();
+      .maybeSingle();
 
     if (error && error.code !== 'PGRST116') throw new Error(`Falha ao buscar cliente: ${error.message}`);
     return (data as unknown as Cliente) || null;
   }
 
-  static async findMany(filtros: FiltrosEmpresa): Promise<PaginatedResult<Cliente>> {
-    const page = filtros.page || 1;
-    const limit = filtros.limit || 20;
+  static async findMany(filtros: FiltrosCliente & { empresa_id: string }): Promise<PaginatedResult<Cliente>> {
+    const page = Math.max(1, Math.floor(filtros.page || 1));
+    const limit = Math.min(100, Math.max(1, Math.floor(filtros.limit || 20)));
     const offset = (page - 1) * limit;
 
-    let query = supabase.from('clients').select('*', { count: 'exact' }).eq('empresa_id', filtros.empresaId);
+    let query = supabase.from('clients').select('*', { count: 'exact' }).eq('empresa_id', filtros.empresa_id);
 
     if (filtros.status) query = query.eq('status', filtros.status);
     if (filtros.tipo) query = query.eq('tipo', filtros.tipo);
     if (filtros.responsavel) query = query.eq('responsavel', filtros.responsavel);
 
-    if (filtros.busca) {
-      query = query.or(`nome.ilike.%${filtros.busca}%,documento.ilike.%${filtros.busca}%,email.ilike.%${filtros.busca}%`);
+    if (filtros.busca?.trim()) {
+      const busca = filtros.busca.trim().replace(/[%,()]/g, ' ').replace(/\s+/g, ' ');
+      query = query.or(`nome.ilike.%${busca}%,documento.ilike.%${busca}%,email.ilike.%${busca}%`);
     }
 
     const orderColumn = filtros.order_by === 'nome' ? 'nome'
@@ -101,27 +104,30 @@ export class ClientRepository {
       .eq('id', id)
       .eq('empresa_id', empresaId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw new Error(`Falha ao atualizar cliente: ${error.message}`);
+    if (!cliente) throw new Error('Cliente nao encontrado nesta empresa');
     return cliente as unknown as Cliente;
   }
 
   static async delete(id: string, empresaId: string): Promise<void> {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('clients')
       .delete()
       .eq('id', id)
-      .eq('empresa_id', empresaId);
+      .eq('empresa_id', empresaId)
+      .select('id');
 
     if (error) throw new Error(`Falha ao excluir cliente: ${error.message}`);
+    if (!data?.length) throw new Error('Cliente nao encontrado nesta empresa');
   }
 
   static async archive(id: string, empresaId: string, userId: string): Promise<Cliente> {
     return this.update(id, empresaId, { status: 'arquivado' }, userId);
   }
 
-  static async getHistorico(clienteId: string, empresaId: string): Promise<any[]> {
+  static async getHistorico(clienteId: string, empresaId: string): Promise<ClienteHistorico[]> {
     const { data, error } = await supabase
       .from('client_historico')
       .select('*')
@@ -130,7 +136,7 @@ export class ClientRepository {
       .order('criado_em', { ascending: false });
 
     if (error) throw new Error(`Falha ao buscar historico: ${error.message}`);
-    return (data as unknown as any[]) || [];
+    return (data as unknown as ClienteHistorico[]) || [];
   }
 
   static async addHistorico(clienteId: string, empresaId: string, acao: string, detalhes: string, userId: string): Promise<void> {

@@ -37,7 +37,6 @@ export function ClientForm({ initialData, onSubmit, empresaId, isEdit = false, l
     email: initialData?.email || '',
     telefone: initialData?.telefone || '',
     whatsapp: initialData?.whatsapp || '',
-    cao: initialData?.cao || '',
     responsavel: initialData?.responsavel || '',
     observacoes: initialData?.observacoes || '',
   });
@@ -59,9 +58,9 @@ export function ClientForm({ initialData, onSubmit, empresaId, isEdit = false, l
           email: formData.email || undefined,
           telefone: formData.telefone || undefined,
           whatsapp: formData.whatsapp || undefined,
-          cao: formData.cao || undefined,
           responsavel: formData.responsavel || undefined,
           observacoes: formData.observacoes || undefined,
+          status: status as ClientStatus,
         },
         isEdit
       );
@@ -113,10 +112,6 @@ export function ClientForm({ initialData, onSubmit, empresaId, isEdit = false, l
         <div>
           <label htmlFor="whatsapp" className="block text-sm font-medium text-text-secondary mb-1">WhatsApp</label>
           <Input id="whatsapp" type="tel" leftIcon={<MessageCircle className="w-4 h-4" />} value={formData.whatsapp} onChange={(event) => setFormData({ ...formData, whatsapp: event.target.value })} />
-        </div>
-        <div>
-          <label htmlFor="cao" className="block text-sm font-medium text-text-secondary mb-1">CAO</label>
-          <Input id="cao" value={formData.cao} onChange={(event) => setFormData({ ...formData, cao: event.target.value })} />
         </div>
         <div>
           <label htmlFor="responsavel" className="block text-sm font-medium text-text-secondary mb-1">Responsavel</label>

@@ -16,7 +16,7 @@ export class EmpresaRepository {
 
     if (error) throw new Error(`Falha ao criar empresa: ${error.message}`);
     
-    await supabase
+    const { error: memberError } = await supabase
       .from('empresa_members')
       .insert({
         empresa_id: empresa.id,
@@ -25,6 +25,10 @@ export class EmpresaRepository {
         status: 'aceito',
         aceito_em: new Date().toISOString(),
       });
+
+    if (memberError) {
+      throw new Error(`Empresa criada, mas falha ao vincular o responsável: ${memberError.message}`);
+    }
 
     return empresa as unknown as Empresa;
   }

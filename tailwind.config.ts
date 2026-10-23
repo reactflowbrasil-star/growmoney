@@ -8,10 +8,9 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#87a913',
-          light: '#b5d64b',
-          dark: 'var(--brand-contrast)',
-          hover: 'var(--brand-hover)',
+          DEFAULT: 'var(--brand)',
+          light: 'var(--brand-light)',
+          dark: 'var(--brand-dark)',
         },
         grafite: {
           DEFAULT: '#2d2d2d',
@@ -25,14 +24,14 @@ const config: Config = {
           DEFAULT: '#ffffff',
         },
         verde: {
-          DEFAULT: 'var(--brand-contrast)',
-          light: '#b5d64b',
-          dark: 'var(--brand-hover)',
+          DEFAULT: '#2e7d4f',
+          light: '#4caf6b',
+          dark: '#1b5e3a',
         },
         'verde-discreto': {
-          DEFAULT: 'var(--brand-contrast)',
-          light: '#b5d64b',
-          dark: 'var(--brand-hover)',
+          DEFAULT: '#2e7d4f',
+          light: '#4caf6b',
+          dark: '#1b5e3a',
         },
         bg: {
           primary: 'var(--bg-primary)',
@@ -57,7 +56,6 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       spacing: {

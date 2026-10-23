@@ -1,14 +1,14 @@
-export type ClientStatus = 'ativo' | 'inativo' | 'arquivado' | 'suspenso';
-export type ClientType = 'pessoa_fisica' | 'pessoa_juridica';
+export type ClientStatus = 'ativo' | 'inativo' | 'arquivado' | 'suspenso' | 'prospecto';
+export type ClientType = 'pessoa_fisica' | 'pessoa_juridica' | 'pf' | 'pj';
 
 export interface Endereco {
-  logadouro: string;
-  numero: string;
+  logradouro?: string;
+  numero?: string;
   complemento?: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  cep: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep?: string;
   pais?: string;
 }
 
@@ -22,7 +22,8 @@ export interface Cliente {
   email?: string;
   telefone?: string;
   whatsapp?: string;
- cao?: string;
+  cep?: string;
+  endereco?: Endereco;
   responsavel?: string;
   status: ClientStatus;
   observacoes?: string;
@@ -35,6 +36,7 @@ export interface Cliente {
 export interface ClienteHistorico {
   id: string;
   cliente_id: string;
+  empresa_id: string;
   acao: string;
   detalhes: string;
   usuario_id: string;
@@ -50,18 +52,19 @@ export interface CreateClienteData {
   email?: string;
   telefone?: string;
   whatsapp?: string;
-  cao?: string;
+  cep?: string;
+  endereco?: Endereco;
   responsavel?: string;
+  status?: ClientStatus;
   observacoes?: string;
-  endereço?: Endereco;
 }
 
-export interface UpdateClienteData extends Partial<CreateClienteData> {
+export interface UpdateClienteData extends Partial<Omit<CreateClienteData, 'empresa_id'>> {
   status?: ClientStatus;
 }
 
 export interface FiltrosCliente {
-  empresaId: string;
+  empresa_id?: string;
   busca?: string;
   status?: ClientStatus;
   tipo?: ClientType;

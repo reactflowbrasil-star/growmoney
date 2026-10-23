@@ -11,12 +11,12 @@ export class VendedorService {
     return VendedorRepository.create(data, userId);
   }
 
-  static async update(id: string, empresaId: string, data: UpdateVendedorData, userId: string, userRole: string): Promise<Vendedor> {
+  static async update(id: string, empresaId: string, data: UpdateVendedorData, _userId: string, userRole: string): Promise<Vendedor> {
     if (!hasPermission(userRole as any, 'vendedores:write')) {
       throw new Error('Permissao insuficiente para atualizar vendedor');
     }
 
-    return VendedorRepository.update(id, empresaId, data, userId);
+    return VendedorRepository.update(id, empresaId, data, _userId);
   }
 
   static async delete(id: string, empresaId: string, _userId: string, userRole: string): Promise<void> {

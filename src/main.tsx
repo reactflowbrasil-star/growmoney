@@ -43,6 +43,8 @@ import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminEmpresas from '@/pages/admin/AdminEmpresas';
 import AdminUsuarios from '@/pages/admin/AdminUsuarios';
+import AdminRecursos from '@/pages/admin/AdminRecursos';
+import AdminArquivos from '@/pages/admin/AdminArquivos';
 import AdminSistema from '@/pages/admin/AdminSistema';
 import AdminAuditoria from '@/pages/admin/AdminAuditoria';
 import AdminSeguranca from '@/pages/admin/AdminSeguranca';
@@ -99,6 +101,11 @@ function App() {
                       <Route index element={<AdminDashboard />} />
                       <Route path="empresas" element={<AdminEmpresas />} />
                       <Route path="usuarios" element={<AdminUsuarios />} />
+                      <Route path="clientes" element={<AdminRecursos resource="clientes" />} />
+                      <Route path="contratos" element={<AdminRecursos resource="contratos" />} />
+                      <Route path="assinaturas" element={<AdminRecursos resource="assinaturas" />} />
+                      <Route path="arquivos" element={<AdminArquivos />} />
+                      <Route path="financeiro" element={<AdminRecursos resource="financeiro" />} />
                       <Route path="sistema" element={<AdminSistema />} />
                       <Route path="auditoria" element={<AdminAuditoria />} />
                       <Route path="seguranca" element={<AdminSeguranca />} />

@@ -1,89 +1,59 @@
-import { useEffect, useState } from "react";
-import { Shield } from "lucide-react";
-import { Card, PageHeader, Badge, EmptyState } from "@/components/ui";
-import { supabase } from "@/lib/supabase/client";
-
-type AuditEvent = {
-  id: string;
-  email: string | null;
-  action: string;
-  details: Record<string, unknown>;
-  created_at: string;
-};
+import { Shield } from 'lucide-react';
+import { Card, PageHeader, Badge, EmptyState } from '@/components/ui';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { useEffect, useState } from 'react';
+import { getRecentAdminAuditEvents } from '@/services/admin-audit-service';
+import type { AdminAuditEvent } from '@/repositories/admin-audit-repository';
 
 export default function AdminAuditoria() {
-  const [logs, setLogs] = useState<AuditEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { session } = useAdminAuth();
+  const [logs, setLogs] = useState<AdminAuditEvent[]>([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let active = true;
-    supabase
-      .rpc("admin_list_audit", { p_limit: 200 })
-      .then(({ data, error: queryError }) => {
+    void getRecentAdminAuditEvents()
+      .then((data) => {
         if (!active) return;
-        if (queryError) setError(queryError.message);
-        else setLogs((data || []) as AuditEvent[]);
-        setLoading(false);
+        setLogs(data);
+      })
+      .catch((queryError: unknown) => {
+        if (!active) return;
+        setError(queryError instanceof Error ? queryError.message : 'Não foi possível carregar a auditoria.');
       });
-    return () => {
-      active = false;
-    };
-  }, []);
+    return () => { active = false; };
+  }, [session?.id]);
 
   return (
-    <div className="max-w-4xl space-y-4">
-      <PageHeader
-        title="Auditoria"
-        description="Eventos administrativos da plataforma"
-      />
-      {error && (
-        <Card className="p-4 text-sm text-aviso">
-          Falha ao carregar a auditoria: {error}
-        </Card>
-      )}
+    <div className="max-w-4xl space-y-4 sm:space-y-5">
+      <PageHeader title="Auditoria" description="Eventos administrativos da plataforma" />
+      {error && <p role="alert" className="rounded-lg bg-erro/10 px-3 py-2 text-sm text-erro">{error}</p>}
       <Card padding="none" className="overflow-hidden">
-        {loading ? (
-          <p className="p-8 text-center text-sm text-text-secondary">
-            Carregando eventos…
-          </p>
-        ) : logs.length === 0 ? (
+        {logs.length === 0 ? (
           <div className="p-8">
             <EmptyState
               title="Sem eventos"
-              description="Ações do admin aparecerão aqui."
+              description="Ainda não há eventos disponíveis para esta sessão."
               icon={<Shield className="w-6 h-6" />}
             />
           </div>
         ) : (
           <ul className="divide-y divide-border-color">
-            {logs.map((log) => (
+            {logs.map((l) => (
               <li
-                key={log.id}
-                className="flex min-w-0 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-start sm:gap-4"
+                key={l.id}
+                className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
               >
-                <Badge variant="info" className="max-w-full break-words">
-                  {log.action}
-                </Badge>
-                <div className="min-w-0 flex-1 text-sm">
-                  <p className="break-words">{log.email || "Administrador"}</p>
-                  {Object.keys(log.details || {}).length > 0 && (
-                    <details className="group mt-1">
-                      <summary className="min-h-11 cursor-pointer list-none py-2 text-xs font-medium text-brand [&::-webkit-details-marker]:hidden">
-                        Ver detalhes do evento
-                      </summary>
-                      <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-xl bg-bg-secondary p-3 text-xs text-text-secondary">
-                        {JSON.stringify(log.details, null, 2)}
-                      </pre>
-                    </details>
-                  )}
-                </div>
-                <time
-                  className="text-xs text-text-secondary sm:whitespace-nowrap"
-                  dateTime={log.created_at}
-                >
-                  {new Date(log.created_at).toLocaleString("pt-BR")}
-                </time>
+                <Badge variant="info">{l.action}</Badge>
+                <p className="text-sm flex-1">
+                  {l.email || 'Administrador'}
+                  {l.details && Object.keys(l.details).length > 0 ? ` · ${JSON.stringify(l.details)}` : ''}
+                </p>
+                <span className="text-xs text-text-secondary sm:text-right sm:shrink-0">
+                  {l.created_at && !Number.isNaN(new Date(l.created_at).getTime())
+                    ? new Date(l.created_at).toLocaleString('pt-BR')
+                    : 'Horário não disponível'}
+                </span>
               </li>
             ))}
           </ul>

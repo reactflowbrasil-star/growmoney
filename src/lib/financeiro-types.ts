@@ -68,8 +68,8 @@ export interface FiltrosFinanceiro {
 export interface RelatorioFinanceiro {
   periodo: string;
   saldos: SaldoFinanceiro;
-  por_cliente: Record<string, SaldoFinanceiro>;
-  por_vendedor: Record<string, SaldoFinanceiro>;
+  'por cliente': Record<string, SaldoFinanceiro>;
+  'por vendedor': Record<string, SaldoFinanceiro>;
   vencimentos: ParcelaFinanceira[];
   pagamentos: LancamentoFinanceiro[];
 }

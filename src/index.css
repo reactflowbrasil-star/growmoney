@@ -174,7 +174,9 @@ body.auth-layout-active [role='group'][aria-label='Seletor de tema'] { display: 
     @apply transition-colors duration-150 hover:bg-bg-tertiary/80 active:bg-bg-tertiary;
   }
   .nav-link-active {
-    @apply bg-brand/15 text-brand relative;
+    background-color: color-mix(in srgb, var(--brand) 15%, transparent);
+    color: var(--brand);
+    position: relative;
   }
   .nav-link-active::before {
     content: '';

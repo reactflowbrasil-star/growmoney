@@ -1,139 +1,77 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Building2, Users, FileText, Activity, ArrowRight } from "lucide-react";
-import { Card, PageHeader, Badge } from "@/components/ui";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
-import { supabase } from "@/lib/supabase/client";
+import { Building2, Users, FileText, Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Card, PageHeader, Badge } from '@/components/ui';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
-type Counts = { companies: number; users: number; contracts: number };
+const areas = [
+  { label: 'Empresas', description: 'Cadastros, status e dados empresariais.', to: '/admin/empresas', icon: Building2 },
+  { label: 'Usuários', description: 'Contas vinculadas à plataforma.', to: '/admin/usuarios', icon: Users },
+  { label: 'Sistema', description: 'Identidade e integrações configuradas.', to: '/admin/sistema', icon: Activity },
+  { label: 'Auditoria', description: 'Eventos registrados nesta sessão.', to: '/admin/auditoria', icon: FileText },
+];
 
 export default function AdminDashboard() {
   const { session } = useAdminAuth();
-  const [counts, setCounts] = useState<Counts | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    supabase
-      .rpc("admin_dashboard_counts")
-      .then(({ data, error: queryError }) => {
-        if (!active) return;
-        if (queryError) setError(queryError.message);
-        else setCounts(data as Counts);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const kpis = [
-    {
-      label: "Empresas",
-      value: counts?.companies ?? "—",
-      icon: Building2,
-      hint: "Contas na plataforma",
-    },
-    {
-      label: "Usuários",
-      value: counts?.users ?? "—",
-      icon: Users,
-      hint: "Perfis cadastrados",
-    },
-    {
-      label: "Contratos",
-      value: counts?.contracts ?? "—",
-      icon: FileText,
-      hint: "Volume global",
-    },
-    {
-      label: "Saúde",
-      value: error ? "Falha" : counts ? "OK" : "…",
-      icon: Activity,
-      hint: "Conexão com o banco",
-    },
-  ];
 
   return (
-    <div className="min-w-0 space-y-5 sm:space-y-6">
+    <div className="max-w-6xl space-y-5 sm:space-y-6">
       <PageHeader
-        title="Visao geral"
-        description={`Bem-vindo, ${session?.username}. Acesso administrativo autorizado.`}
+        title="Visão geral"
+        description={`Bem-vindo, ${session?.username || 'administrador'}. Acesse as áreas administrativas da plataforma.`}
       />
 
-      {error && (
-        <Card className="p-4 text-sm text-aviso">
-          Não foi possível carregar os indicadores: {error}
-        </Card>
-      )}
+      <Card className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <div className="h-10 w-10 shrink-0 rounded-full bg-brand/10 text-brand flex items-center justify-center">
+          <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-semibold text-text-primary">Sessão administrativa ativa</h2>
+          <p className="text-sm text-text-secondary mt-0.5">
+            {session?.loggedAt
+              ? `Iniciada em ${new Date(session.loggedAt).toLocaleString('pt-BR')}.`
+              : 'A sessão atual está autenticada.'}
+          </p>
+        </div>
+        <Badge variant="success" className="self-start sm:self-auto">Autenticado</Badge>
+      </Card>
 
-      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((k) => (
-          <Card key={k.label} className="min-w-0 p-3 card-premium sm:p-4">
-            <div className="flex min-w-0 items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-text-secondary">
-                  {k.label}
-                </p>
-                <p className="text-2xl font-bold mt-1">{k.value}</p>
-                <p className="mt-1 break-words text-xs text-text-secondary">
-                  {k.hint}
-                </p>
-              </div>
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand sm:h-10 sm:w-10">
-                <k.icon className="w-5 h-5" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      <section aria-labelledby="admin-areas-heading" className="space-y-3">
+        <div>
+          <h2 id="admin-areas-heading" className="font-semibold text-text-primary">Áreas administrativas</h2>
+          <p className="text-sm text-text-secondary mt-1">Escolha uma área para consultar e gerenciar os dados.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          {areas.map(({ label, description, to, icon: Icon }) => (
+            <Link key={to} to={to} className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-xl">
+              <Card className="h-full p-4 transition-colors group-hover:border-brand/40 group-hover:bg-bg-tertiary/50">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="h-10 w-10 shrink-0 rounded-xl bg-brand/10 text-brand flex items-center justify-center">
+                    <Icon aria-hidden="true" className="h-5 w-5" />
+                  </span>
+                  <ArrowRight aria-hidden="true" className="h-4 w-4 text-text-secondary transition-transform group-hover:translate-x-1" />
+                </div>
+                <h3 className="mt-4 font-semibold text-text-primary">{label}</h3>
+                <p className="mt-1 text-sm text-text-secondary">{description}</p>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-        <Card className="min-w-0 space-y-3 p-4 sm:p-5">
-          <h2 className="font-semibold">Ações rápidas</h2>
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {[
-              { to: "/admin/empresas", label: "Gerenciar empresas" },
-              { to: "/admin/usuarios", label: "Ver usuários" },
-              { to: "/admin/seguranca", label: "Alterar senha" },
-              { to: "/admin/auditoria", label: "Abrir auditoria" },
-            ].map((action) => (
-              <li key={action.to}>
-                <Link
-                  to={action.to}
-                  className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-border-color px-3 py-2 text-sm font-medium text-text-primary hover:border-brand/40 hover:bg-bg-secondary"
-                >
-                  <span>{action.label}</span>
-                  <ArrowRight
-                    aria-hidden="true"
-                    className="h-4 w-4 shrink-0 text-brand"
-                  />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Card>
-        <Card className="min-w-0 space-y-3 p-4 sm:p-5">
-          <h2 className="font-semibold">Status da sessao</h2>
-          <div className="flex items-center gap-2">
-            <Badge variant="success">Admin autenticado</Badge>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Card className="p-4 sm:p-5">
+          <h2 className="font-semibold">Indicadores da plataforma</h2>
+          <div className="mt-3 flex items-start gap-3 rounded-lg bg-bg-secondary p-3">
+            <Activity aria-hidden="true" className="w-5 h-5 text-text-secondary mt-0.5 shrink-0" />
+            <p className="text-sm text-text-secondary">Os totais globais serão exibidos quando os dados estiverem disponíveis para esta sessão administrativa.</p>
           </div>
-          <details className="group">
-            <summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
-              Ver informações da sessão
-            </summary>
-            <div className="space-y-2 rounded-xl bg-bg-secondary p-3">
-              <p className="break-words text-sm text-text-secondary">
-                Login em{" "}
-                {session?.loggedAt
-                  ? new Date(session.loggedAt).toLocaleString("pt-BR")
-                  : "-"}
-              </p>
-              <p className="text-xs text-text-secondary">
-                A conta administrativa é autenticada pelo Supabase e autorizada
-                pela lista de administradores da plataforma.
-              </p>
-            </div>
-          </details>
+        </Card>
+        <Card className="p-4 sm:p-5 space-y-3">
+          <h2 className="font-semibold">Proteja sua conta</h2>
+          <p className="text-sm text-text-secondary">Mantenha as credenciais administrativas atualizadas.</p>
+          <Link to="/admin/seguranca" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded">
+            Configurar segurança <ArrowRight aria-hidden="true" className="h-4 w-4" />
+          </Link>
         </Card>
       </div>
     </div>

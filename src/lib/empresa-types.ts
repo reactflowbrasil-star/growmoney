@@ -5,6 +5,11 @@ export interface Empresa {
   responsavel_id: string;
   configuracoes: Record<string, unknown>;
   criado_em: string;
+  razao_social?: string | null;
+  nome_fantasia?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  endereco?: Record<string, string>;
 }
 
 export interface EmpresaMember {
@@ -31,6 +36,11 @@ export interface Convite {
 export interface CreateEmpresaData {
   nome: string;
   cnpj?: string;
+  razao_social?: string;
+  nome_fantasia?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: Record<string, string>;
 }
 
 export interface CreateConviteData {

@@ -29,7 +29,7 @@ vi.mock('@/lib/supabase/client', () => ({
   },
 }));
 
-window.matchMedia = window.matchMedia || vi.fn(() => ({
+globalThis.matchMedia = globalThis.matchMedia || vi.fn(() => ({
   matches: false,
   media: '',
   addListener: vi.fn(),

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
-import type { CreateServicoData, UpdateServicoData, Servico, PaginatedResult, ServicoStatus } from '@/lib/servico-types';
+import type { CreateServicoData, UpdateServicoData, Servico, ServicoStatus } from '@/lib/servico-types';
+import type { PaginatedResult } from '@/lib/contrato-types';
 
 interface FiltrosEmpresa {
   empresaId: string;
@@ -81,7 +82,7 @@ export class ServicoRepository {
     };
   }
 
-  static async update(id: string, empresaId: string, data: UpdateServicoData): Promise<Servico> {
+  static async update(id: string, empresaId: string, data: UpdateServicoData, _userId: string): Promise<Servico> {
     const { data: servico, error } = await supabase
       .from('services')
       .update({

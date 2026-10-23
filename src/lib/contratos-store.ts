@@ -79,6 +79,7 @@ export type ContratoLocal = {
   forma_pagamento: string;
   parcelas: number;
   valor_parcela: number;
+  valor_ultima_parcela?: number;
   entrada_valor: number;
   periodicidade: 'mensal' | 'trimestral' | 'semestral' | 'anual' | null;
   plano_recorrente: boolean;
@@ -296,6 +297,31 @@ export async function updateContratoStatus(id: string, status: ContratoLocal['st
   const userId = await currentUserId();
   const { error } = await supabase.from('gm_contracts').update({ status, updated_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
   if (error) throw new Error(`Não foi possível atualizar o contrato: ${error.message}`);
+}
+
+export async function updateContrato(
+  id: string,
+  changes: Partial<Omit<ContratoLocal, 'id' | 'numero' | 'created_at'>>
+): Promise<ContratoLocal> {
+  const userId = await currentUserId();
+  const { data: existing, error: readError } = await supabase
+    .from('gm_contracts')
+    .select('payload,status')
+    .eq('id', id)
+    .maybeSingle();
+  if (readError) throw new Error(`Não foi possível carregar o contrato: ${readError.message}`);
+  if (!existing) throw new Error('Contrato não encontrado ou sem permissão para alterá-lo.');
+
+  const payload = { ...(existing.payload as ContratoLocal), ...changes };
+  const { data, error } = await supabase
+    .from('gm_contracts')
+    .update({ payload, status: payload.status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select('id, numero, status, payload, created_at')
+    .single();
+  if (error) throw new Error(`Não foi possível atualizar o contrato: ${error.message}`);
+  return fromRemote(data as ContratoRemoto);
 }
 
 export async function deleteContrato(id: string) {

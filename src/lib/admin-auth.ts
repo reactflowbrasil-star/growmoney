@@ -1,6 +1,7 @@
-/** A short-lived in-memory view of a Supabase-authenticated platform admin. */
+/** Session data displayed by the admin shell after the database authorizes the user. */
 export type AdminSession = {
-  userId: string;
+  id: string;
+  email: string;
   username: string;
   loggedAt: string;
 };

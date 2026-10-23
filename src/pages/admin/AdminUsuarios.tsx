@@ -1,155 +1,81 @@
-import { useCallback, useEffect, useState } from "react";
-import { Users, RefreshCw } from "lucide-react";
-import {
-  Button,
-  Card,
-  EmptyState,
-  PageHeader,
-  Badge,
-  Input,
-} from "@/components/ui";
-import { supabase } from "@/lib/supabase/client";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pencil, Plus, RefreshCw, Search, Trash2, Users } from 'lucide-react';
+import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
+import { AdminUserService, type AdminCompanyOption, type AdminUser } from '@/services/admin-user-service';
 
-type Profile = {
-  id: string;
-  email: string | null;
-  nome: string | null;
-  role: string | null;
-};
+type UserForm = { nome: string; telefone: string; email: string; password: string; empresaId: string };
+const blankForm: UserForm = { nome: '', telefone: '', email: '', password: '', empresaId: '' };
 
 export default function AdminUsuarios() {
-  const [rows, setRows] = useState<Profile[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [companies, setCompanies] = useState<AdminCompanyOption[]>([]);
+  const [search, setSearch] = useState('');
+  const [editing, setEditing] = useState<AdminUser | null>(null);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(blankForm);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [busca, setBusca] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true); setError('');
     try {
-      const { data, error: err } = await supabase.rpc("admin_list_profiles");
-      if (err) throw err;
-      setRows((data as Profile[]) || []);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Falha ao carregar usuários.");
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
+      const result = await AdminUserService.list();
+      setUsers(result.users); setCompanies(result.companies);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Falha ao carregar usuários.'); }
+    finally { setLoading(false); }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  const filtered = rows.filter(
-    (r) =>
-      (r.nome || "").toLowerCase().includes(busca.toLowerCase()) ||
-      (r.email || "").toLowerCase().includes(busca.toLowerCase()),
-  );
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return users.filter((user) => !term || `${user.nome} ${user.email} ${user.role} ${user.memberships.map((item) => item.empresa_nome).join(' ')}`.toLowerCase().includes(term));
+  }, [users, search]);
+
+  const newUser = () => { setEditing(null); setForm({ ...blankForm, empresaId: companies[0]?.id || '' }); setError(''); setOpen(true); };
+  const editUser = (user: AdminUser) => { setEditing(user); setForm({ ...blankForm, nome: user.nome, telefone: user.telefone || '' }); setError(''); setOpen(true); };
+
+  const save = async (event: React.FormEvent) => {
+    event.preventDefault(); setSaving(true); setError('');
+    try {
+      if (editing) await AdminUserService.update(editing.id, form.nome, form.telefone);
+      else await AdminUserService.create(form.empresaId, form.email, form.password, form.nome);
+      setOpen(false); await load();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Falha ao salvar usuário.'); }
+    finally { setSaving(false); }
+  };
+
+  const deleteUser = async (user: AdminUser) => {
+    const membership = user.memberships.find((item) => item.role === 'vendedor');
+    if (!membership || user.memberships.length !== 1 || !window.confirm(`Excluir a conta de ${user.nome} (${user.email})? Esta ação não pode ser desfeita.`)) return;
+    setError('');
+    try { await AdminUserService.delete(membership.empresa_id, user.id); await load(); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : 'Falha ao excluir usuário.'); }
+  };
 
   return (
-    <div className="max-w-6xl space-y-4">
-      <PageHeader
-        title="Usuários"
-        description="Contas cadastradas na plataforma"
-        actions={
-          <Button
-            className="w-full sm:w-auto"
-            variant="outline"
-            size="sm"
-            leftIcon={<RefreshCw className="w-4 h-4" />}
-            onClick={load}
-          >
-            Atualizar
-          </Button>
-        }
-      />
-      {error && <Card className="p-4 text-sm text-aviso">{error}</Card>}
+    <div className="max-w-7xl space-y-4">
+      <PageHeader title="Usuários" description="Contas, dados de perfil e vínculos empresariais" actions={<div className="flex gap-2"><Button size="sm" variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={() => void load()}>Atualizar</Button><Button size="sm" leftIcon={<Plus className="h-4 w-4" />} disabled={!companies.length} onClick={newUser}>Novo vendedor</Button></div>} />
+      {error && !open && <div className="rounded-xl border border-erro/30 bg-erro/10 p-4 text-sm text-erro" role="alert">{error}</div>}
       <Card padding="none" className="overflow-hidden">
-        <div className="p-4 border-b border-border-color">
-          <Input
-            placeholder="Buscar usuário..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            className="min-h-11 w-full sm:max-w-sm"
-          />
-        </div>
-        {loading ? (
-          <p className="p-8 text-center text-sm text-text-secondary">
-            Carregando…
-          </p>
-        ) : filtered.length === 0 ? (
-          <div className="p-8">
-            <EmptyState
-              title="Nenhum usuário"
-              description="Perfis aparecerão após cadastros."
-              icon={<Users className="w-6 h-6" />}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="divide-y divide-border-color md:hidden">
-              {filtered.map((r) => (
-                <article key={r.id} className="p-4">
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2 className="break-words text-sm font-semibold text-text-primary">
-                        {r.nome || "Sem nome"}
-                      </h2>
-                      <p className="mt-1 break-all text-xs text-text-secondary">
-                        {r.email || "E-mail não informado"}
-                      </p>
-                    </div>
-                    <Badge variant={r.role === "admin" ? "brand" : "neutral"}>
-                      {r.role || "user"}
-                    </Badge>
-                  </div>
-                  <details className="group mt-2">
-                    <summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
-                      Ver identificador
-                    </summary>
-                    <p className="break-all rounded-xl bg-bg-secondary p-3 font-mono text-xs text-text-secondary">
-                      {r.id}
-                    </p>
-                  </details>
-                </article>
-              ))}
-            </div>
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[36rem] text-left text-sm">
-                <thead>
-                  <tr className="text-text-secondary border-b border-border-color bg-bg-secondary/50">
-                    <th className="px-4 py-3 font-medium">Nome</th>
-                    <th className="px-4 py-3 font-medium">E-mail</th>
-                    <th className="px-4 py-3 font-medium">Papel</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((r) => (
-                    <tr
-                      key={r.id}
-                      className="border-b border-border-color last:border-0"
-                    >
-                      <td className="px-4 py-3 font-medium">{r.nome || "—"}</td>
-                      <td className="px-4 py-3 text-text-secondary">
-                        {r.email || "-"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge
-                          variant={r.role === "admin" ? "brand" : "neutral"}
-                        >
-                          {r.role || "user"}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+        <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label="Buscar usuários" placeholder="Buscar nome, e-mail ou empresa..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
+        {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando usuários…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum usuário" description="As contas disponíveis aparecerão aqui." icon={<Users className="h-6 w-6" />} /></div> : (
+          <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="px-4 py-3 font-medium">Usuário</th><th className="px-4 py-3 font-medium">Papel</th><th className="px-4 py-3 font-medium">Empresas</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead><tbody>
+            {filtered.map((user) => { const canDelete = user.role === 'vendedor' && user.memberships.length === 1 && user.memberships[0]?.role === 'vendedor'; return <tr key={user.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3"><p className="font-medium">{user.nome || '—'}</p><p className="text-xs text-text-secondary">{user.email}</p>{user.telefone && <p className="text-xs text-text-secondary">{user.telefone}</p>}</td><td className="px-4 py-3"><Badge variant={user.role === 'admin' ? 'brand' : 'neutral'}>{user.role}</Badge></td><td className="max-w-64 px-4 py-3 text-text-secondary">{user.memberships.map((membership) => membership.empresa_nome).join(', ') || 'Sem vínculo'}</td><td className="whitespace-nowrap px-4 py-3 text-right"><Button variant="ghost" size="sm" aria-label={`Editar ${user.nome}`} onClick={() => editUser(user)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label={`Excluir ${user.nome}`} disabled={!canDelete} title={canDelete ? 'Excluir conta' : 'Apenas contas de vendedor vinculadas a uma única empresa podem ser excluídas por este fluxo'} onClick={() => void deleteUser(user)}><Trash2 className="h-4 w-4 text-erro" /></Button></td></tr>; })}
+          </tbody></table></div>
         )}
       </Card>
+      <Modal open={open} onClose={() => !saving && setOpen(false)} title={editing ? 'Editar usuário' : 'Criar usuário vendedor'} footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="admin-user-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Criar usuário'}</Button></>}>
+        <form id="admin-user-form" onSubmit={save} className="grid gap-4 sm:grid-cols-2">{error && <div className="sm:col-span-2 rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</div>}
+          <Input label="Nome" required value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
+          {editing ? <Input label="Telefone" type="tel" value={form.telefone} onChange={(event) => setForm({ ...form, telefone: event.target.value })} /> : <>
+            <Input label="E-mail" type="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+            <Input label="Senha inicial" type="password" minLength={8} required hint="Mínimo de 8 caracteres." value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} />
+            <div className="sm:col-span-2"><label htmlFor="new-user-company" className="mb-1.5 block text-sm font-medium">Empresa</label><select id="new-user-company" className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 text-sm" required value={form.empresaId} onChange={(event) => setForm({ ...form, empresaId: event.target.value })}><option value="">Selecione a empresa…</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.nome}</option>)}</select><p className="mt-1 text-xs text-text-secondary">A conta criada terá papel de vendedor na empresa selecionada.</p></div>
+          </>}
+        </form>
+      </Modal>
     </div>
   );
 }
