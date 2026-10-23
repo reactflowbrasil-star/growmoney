@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Search, Download, FileText, Pencil, Trash2, Users } from 'lucide-react';
-import { Button, Input, Card, EmptyState, Modal, Badge, PageHeader } from '@/components/ui';
+import { Plus, Search, Download, FileText, Pencil, Trash2, Users, Eye, EyeOff } from 'lucide-react';
+import { Button, Input, Card, EmptyState, Modal, PageHeader } from '@/components/ui';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 import { exportCsv, exportPdf } from '@/lib/export';
 import { ClientService } from '@/services/client-service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,6 +41,8 @@ export default function Clientes() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);
+  const [viewing, setViewing] = useState<Cliente | null>(null);
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords('clientes-operacional');
 
   const role = empresaAtiva?.role || user?.role || '';
   const loadClients = useCallback(async () => {
@@ -119,9 +123,8 @@ export default function Clientes() {
     }
   };
 
-  const filtered = useMemo(() => rows, [rows]);
+  const filtered = useMemo(() => rows.filter((row) => showHidden ? hiddenIds.has(row.id) : !hiddenIds.has(row.id)), [rows, showHidden, hiddenIds]);
   const tipoLabel = (tipo: ClientType) => tipo === 'pessoa_fisica' || tipo === 'pf' ? 'Pessoa física' : 'Pessoa jurídica';
-  const statusVariant = (status: ClientStatus) => status === 'ativo' ? 'success' : status === 'suspenso' ? 'warning' : 'neutral';
 
   return (
     <div className="max-w-7xl space-y-4">
@@ -134,39 +137,29 @@ export default function Clientes() {
       } />
       {error && !open && <div role="alert" className="rounded-lg border border-erro/30 bg-erro/10 px-4 py-3 text-sm text-erro">{error}</div>}
       <Card padding="none" className="overflow-hidden">
-        <div className="p-4 border-b border-border-color">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-border-color">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
             <Input aria-label="Buscar cliente" placeholder="Buscar cliente..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-10" />
           </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir ativos' : `Exibir ocultos (${hiddenCount})`}</Button>
         </div>
         {loading ? <div className="p-8 text-center text-sm text-text-secondary">Carregando clientes…</div> : filtered.length === 0 ? (
           <div className="p-8"><EmptyState title="Nenhum cliente" description="Cadastre seu primeiro cliente." icon={<Users className="w-6 h-6" />} /></div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="text-text-secondary border-b border-border-color bg-bg-secondary/50 text-left">
-                <th className="px-4 py-3 font-medium">Nome</th><th className="px-4 py-3 font-medium hidden sm:table-cell">Documento</th>
-                <th className="px-4 py-3 font-medium hidden md:table-cell">E-mail</th><th className="px-4 py-3 font-medium">Tipo</th>
-                <th className="px-4 py-3 font-medium">Status</th>{canManage && <th className="px-4 py-3 font-medium text-right">Ações</th>}
-              </tr></thead>
-              <tbody>
-                {filtered.map((r) => (
-                  <tr key={r.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40">
-                    <td className="px-4 py-3 font-medium">{r.nome}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-text-secondary">{r.documento}</td>
-                    <td className="px-4 py-3 hidden md:table-cell text-text-secondary">{r.email || '—'}</td>
-                    <td className="px-4 py-3"><Badge variant="info">{tipoLabel(r.tipo)}</Badge></td>
-                    <td className="px-4 py-3"><Badge variant={statusVariant(r.status)}>{r.status}</Badge></td>
-                    {canManage && <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <button aria-label={`Editar ${r.nome}`} onClick={() => abrirEdicao(r)} className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"><Pencil className="w-4 h-4 text-text-secondary" /></button>
-                      <button aria-label={`Excluir ${r.nome}`} onClick={() => void excluir(r)} className="p-2 rounded-lg hover:bg-erro/10 inline-flex"><Trash2 className="w-4 h-4 text-erro" /></button>
-                    </td>}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AdminAccordionList items={filtered.map((r) => ({
+            id: r.id, title: r.nome, subtitle: r.documento,
+            details: [
+              { label: 'E-mail', value: r.email }, { label: 'Telefone', value: r.telefone },
+              { label: 'Tipo', value: tipoLabel(r.tipo) }, { label: 'Status', value: r.status },
+              { label: 'Razão social', value: r.razao_social },
+            ],
+            actions: <>
+              <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(r)}>Visualizar</Button>
+              <Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(r.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>
+              {canManage && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => abrirEdicao(r)}>Editar</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void excluir(r)}>Excluir</Button></>}
+            </>,
+          }))} />
         )}
       </Card>
       {(canManage || (!editing && open)) && <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Editar cliente' : 'Novo cliente'} size="lg" footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="cliente-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Salvar'}</Button></>}>
@@ -192,6 +185,9 @@ export default function Clientes() {
           </div>
         </form>
       </Modal>}
+      <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar cliente" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>
+        {viewing && <dl className="grid gap-3 sm:grid-cols-2">{[['Nome', viewing.nome], ['Razão social', viewing.razao_social], ['CPF/CNPJ', viewing.documento], ['E-mail', viewing.email], ['Telefone', viewing.telefone], ['Tipo', tipoLabel(viewing.tipo)], ['Status', viewing.status]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-all text-sm text-text-primary">{value || '—'}</dd></div>)}</dl>}
+      </Modal>
     </div>
   );
 }

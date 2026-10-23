@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { LiveChatTrigger } from '@/components/chat/LiveChat';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -14,6 +15,8 @@ interface HeaderProps {
   onNotificationRead?: (id: string) => void;
   soundEnabled?: boolean;
   onToggleSound?: () => void;
+  chatUnreadCount?: number;
+  onOpenChat?: () => void;
   onLogout?: () => void;
 }
 
@@ -25,6 +28,8 @@ export function Header({
   onNotificationRead,
   soundEnabled = true,
   onToggleSound,
+  chatUnreadCount = 0,
+  onOpenChat,
   onLogout,
 }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
@@ -76,6 +81,7 @@ export function Header({
         {isAdmin && <Link to="/admin" className="hidden sm:inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand px-3 text-sm font-semibold text-white shadow-md shadow-brand/20 transition hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" aria-label="Abrir painel administrativo">
           <ShieldCheck className="h-4 w-4" /> <span>PAINEL ADMIN</span>
         </Link>}
+        {onOpenChat && <LiveChatTrigger unreadCount={chatUnreadCount} onClick={() => { setNotifOpen(false); setProfileOpen(false); onOpenChat(); }} />}
         <div className="relative">
           <button
             onClick={() => {

@@ -1,7 +1,9 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Search, Download, FileText, Trash2, Send, Eye, Pencil } from 'lucide-react';
-import { Button, Input, Card, EmptyState, Badge, PageHeader, Modal } from '@/components/ui';
+import { Plus, Search, Download, FileText, Trash2, Send, Eye, EyeOff, Pencil } from 'lucide-react';
+import { Button, Input, Card, EmptyState, PageHeader, Modal } from '@/components/ui';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 import { exportCsv, exportPdf } from '@/lib/export';
 import {
   listContratosRemotos,
@@ -14,13 +16,6 @@ import {
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 
-const statusVariant: Record<ContratoLocal['status'], 'neutral' | 'info' | 'success' | 'danger'> = {
-  rascunho: 'neutral',
-  enviado: 'info',
-  assinado: 'success',
-  cancelado: 'danger',
-};
-
 export default function Contratos() {
   const { isAdmin: isPlatformAdmin } = useAdminAuth();
   const { empresaAtiva } = useAuth();
@@ -31,6 +26,8 @@ export default function Contratos() {
   const [busca, setBusca] = useState('');
   const [editing, setEditing] = useState<ContratoLocal | null>(null);
   const [editError, setEditError] = useState('');
+  const [viewing, setViewing] = useState<ContratoLocal | null>(null);
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords('contratos-operacional');
   const canEdit = canManage;
   const [params] = useSearchParams();
   const criado = params.get('criado');
@@ -51,13 +48,13 @@ export default function Contratos() {
 
   const filtered = useMemo(
     () =>
-      rows.filter(
+      rows.filter((row) => showHidden ? hiddenIds.has(row.id) : !hiddenIds.has(row.id)).filter(
         (r) =>
           r.cliente_nome.toLowerCase().includes(busca.toLowerCase()) ||
           String(r.numero).includes(busca) ||
           r.status.includes(busca.toLowerCase())
       ),
-    [rows, busca]
+    [rows, busca, showHidden, hiddenIds]
   );
 
   const runAction = async (action: () => Promise<unknown>) => {
@@ -166,7 +163,7 @@ export default function Contratos() {
       {error && <p className="rounded-lg border border-erro/30 bg-erro/10 px-4 py-3 text-sm text-erro" role="alert">{error}</p>}
 
       <Card padding="none" className="overflow-hidden">
-        <div className="p-4 border-b border-border-color">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-border-color">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
             <Input
@@ -176,6 +173,7 @@ export default function Contratos() {
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir ativos' : `Exibir ocultos (${hiddenCount})`}</Button>
         </div>
 
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando contratos…</p> : filtered.length === 0 ? (
@@ -189,70 +187,23 @@ export default function Contratos() {
             )}
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border-color text-left text-text-secondary">
-                  <th className="px-4 py-3 font-medium">Nº</th>
-                  <th className="px-4 py-3 font-medium">Cliente</th>
-                  <th className="px-4 py-3 font-medium">Valor</th>
-                  <th className="px-4 py-3 font-medium hidden sm:table-cell">Parcelas</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium hidden md:table-cell">Vigência</th>
-                  {canManage && <th className="px-4 py-3 font-medium text-right">Ações</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => (
-                  <tr key={r.id} className="border-b border-border-color/60 hover:bg-bg-tertiary/40">
-                    <td className="px-4 py-3 font-mono text-xs">CT-{String(r.numero).padStart(4, '0')}</td>
-                    <td className="px-4 py-3 font-medium">{r.cliente_nome}</td>
-                    <td className="px-4 py-3 tabular-nums">{formatBRL(r.valor)}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell text-text-secondary tabular-nums">
-                      {r.parcelas}x {formatBRL(r.valor_parcela)}
-                      {r.valor_ultima_parcela && r.valor_ultima_parcela !== r.valor_parcela && <span className="block text-xs">Última: {formatBRL(r.valor_ultima_parcela)}</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={statusVariant[r.status]}>{r.status}</Badge>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-text-secondary text-xs">
-                      {r.data_inicio}
-                      {r.data_termino ? ` → ${r.data_termino}` : ''}
-                    </td>
-                    {canManage && <td className="px-4 py-3 text-right whitespace-nowrap">
-                      {canEdit && <button
-                        className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
-                        title="Editar contrato"
-                        aria-label={`Editar contrato ${r.numero}`}
-                        onClick={() => { setEditing(r); setEditError(''); }}
-                      ><Pencil className="w-4 h-4 text-text-secondary" /></button>}
-                      <button
-                        className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
-                        title="Enviar"
-                        onClick={() => void runAction(() => updateContratoStatus(r.id, 'enviado'))}
-                      >
-                        <Send className="w-4 h-4 text-brand" />
-                      </button>
-                      <button
-                        className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
-                        title="Marcar assinado"
-                        onClick={() => void runAction(() => updateContratoStatus(r.id, 'assinado'))}
-                      >
-                        <Eye className="w-4 h-4 text-text-secondary" />
-                      </button>
-                      <button
-                        className="p-2 rounded-lg hover:bg-erro/10 inline-flex"
-                        title="Excluir"
-                        onClick={() => void runAction(() => deleteContrato(r.id))}
-                      >
-                        <Trash2 className="w-4 h-4 text-erro" />
-                      </button>
-                    </td>}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AdminAccordionList items={filtered.map((r) => ({
+            id: r.id,
+            title: `${r.cliente_nome} · CT-${String(r.numero).padStart(4, '0')}`,
+            subtitle: `${formatBRL(r.valor)} · ${r.status}`,
+            details: [
+              { label: 'CPF/CNPJ', value: r.cliente_documento },
+              { label: 'Parcelas', value: `${r.parcelas}x ${formatBRL(r.valor_parcela)}${r.valor_ultima_parcela && r.valor_ultima_parcela !== r.valor_parcela ? ` · última ${formatBRL(r.valor_ultima_parcela)}` : ''}` },
+              { label: 'Vigência', value: `${r.data_inicio || '—'}${r.data_termino ? ` → ${r.data_termino}` : ''}` },
+              { label: 'Condições de pagamento', value: r.pagamento_observacao },
+              { label: 'Observações', value: r.observacoes },
+            ],
+            actions: <>
+              <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(r)}>Visualizar</Button>
+              <Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(r.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>
+              {canManage && <>{canEdit && <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => { setEditing(r); setEditError(''); }}>Editar</Button>}<Button variant="outline" size="sm" leftIcon={<Send className="h-4 w-4" />} onClick={() => void runAction(() => updateContratoStatus(r.id, 'enviado'))}>Enviar</Button><Button variant="outline" size="sm" onClick={() => void runAction(() => updateContratoStatus(r.id, 'assinado'))}>Marcar assinado</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void runAction(() => deleteContrato(r.id))}>Excluir</Button></>}
+            </>,
+          }))} />
         )}
       </Card>
 
@@ -276,6 +227,9 @@ export default function Contratos() {
           </div>
         </form>}
       </Modal>}
+      <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar contrato" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>
+        {viewing && <dl className="grid gap-3 sm:grid-cols-2">{[['Número', `CT-${String(viewing.numero).padStart(4, '0')}`], ['Cliente', viewing.cliente_nome], ['CPF/CNPJ', viewing.cliente_documento], ['Valor total', formatBRL(viewing.valor)], ['Entrada', formatBRL(viewing.entrada_valor)], ['Parcelas', `${viewing.parcelas}x ${formatBRL(viewing.valor_parcela)}`], ['Status', viewing.status], ['Início', viewing.data_inicio], ['Término', viewing.data_termino], ['Condições', viewing.pagamento_observacao], ['Observações', viewing.observacoes]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-words text-sm text-text-primary">{value || '—'}</dd></div>)}</dl>}
+      </Modal>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, RefreshCw, Search, Trash2, Users } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
+import { Eye, EyeOff, Pencil, Plus, RefreshCw, Search, Trash2, Users } from 'lucide-react';
+import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { AdminUserService, type AdminCompanyOption, type AdminUser } from '@/services/admin-user-service';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 
 type UserForm = { nome: string; telefone: string; email: string; password: string; empresaId: string };
 const blankForm: UserForm = { nome: '', telefone: '', email: '', password: '', empresaId: '' };
@@ -20,6 +21,8 @@ export default function AdminUsuarios() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [viewing, setViewing] = useState<AdminUser | null>(null);
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords('usuarios');
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -34,8 +37,9 @@ export default function AdminUsuarios() {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return users.filter((user) => !term || `${user.nome} ${user.email} ${user.role} ${user.memberships.map((item) => item.empresa_nome).join(' ')}`.toLowerCase().includes(term));
-  }, [users, search]);
+    return users.filter((user) => (showHidden ? hiddenIds.has(user.id) : !hiddenIds.has(user.id))
+      && (!term || `${user.nome} ${user.email} ${user.role} ${user.memberships.map((item) => item.empresa_nome).join(' ')}`.toLowerCase().includes(term)));
+  }, [users, search, showHidden, hiddenIds]);
 
   const newUser = () => { setEditing(null); setForm({ ...blankForm, empresaId: companies[0]?.id || '' }); setError(''); setNotice(''); setOpen(true); };
   const editUser = (user: AdminUser) => { setEditing(user); setForm({ ...blankForm, nome: user.nome, telefone: user.telefone || '' }); setError(''); setOpen(true); };
@@ -68,7 +72,7 @@ export default function AdminUsuarios() {
       {error && !open && <div className="rounded-xl border border-erro/30 bg-erro/10 p-4 text-sm text-erro" role="alert">{error}</div>}
       {notice && <div className="rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm text-text-primary" role="status">{notice}</div>}
       <Card padding="none" className="overflow-hidden">
-        <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label="Buscar usuários" placeholder="Buscar nome, e-mail ou empresa..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-color p-4"><div className="relative w-full max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label="Buscar usuários" placeholder="Buscar nome, e-mail ou empresa..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div><Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir itens ativos' : `Exibir ocultos (${hiddenCount})`}</Button><p className="w-full text-xs text-text-secondary">Ocultar afeta somente esta lista neste navegador; a conta continua ativa.</p></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando usuários…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum usuário" description="As contas disponíveis aparecerão aqui." icon={<Users className="h-6 w-6" />} /></div> : (
           <>
           <AdminAccordionList items={filtered.map((user) => ({
@@ -80,11 +84,12 @@ export default function AdminUsuarios() {
               { label: 'Empresas', value: user.memberships.map((membership) => membership.empresa_nome).join(', ') || 'Sem vínculo' },
               ...(user.telefone ? [{ label: 'Telefone', value: user.telefone }] : []),
             ],
-            actions: isAdmin ? <UserActions user={user} canDelete={user.role === 'vendedor' && user.memberships.length === 1 && user.memberships[0]?.role === 'vendedor'} onEdit={editUser} onDelete={(selected) => void deleteUser(selected)} /> : undefined,
+            actions: <>
+              <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(user)}>Visualizar</Button>
+              <Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(user.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>
+              {isAdmin && <UserActions user={user} canDelete={user.role === 'vendedor' && user.memberships.length === 1 && user.memberships[0]?.role === 'vendedor'} onEdit={editUser} onDelete={(selected) => void deleteUser(selected)} />}
+            </>,
           }))} />
-          <div className="hidden overflow-x-hidden lg:block"><table className="w-full table-fixed text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="w-[28%] px-4 py-3 font-medium">Usuário</th><th className="w-[16%] px-4 py-3 font-medium">Papel</th><th className="px-4 py-3 font-medium">Empresas</th>{isAdmin && <th className="w-28 px-4 py-3 text-right font-medium">Ações</th>}</tr></thead><tbody>
-            {filtered.map((user) => { const canDelete = user.role === 'vendedor' && user.memberships.length === 1 && user.memberships[0]?.role === 'vendedor'; return <tr key={user.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3"><p className="font-medium">{user.nome || '—'}</p><p className="text-xs text-text-secondary">{user.email}</p>{user.telefone && <p className="text-xs text-text-secondary">{user.telefone}</p>}</td><td className="px-4 py-3"><Badge variant={user.role === 'admin' ? 'brand' : 'neutral'}>{user.role}</Badge></td><td className="max-w-64 px-4 py-3 text-text-secondary">{user.memberships.map((membership) => membership.empresa_nome).join(', ') || 'Sem vínculo'}</td>{isAdmin && <td className="whitespace-nowrap px-4 py-3 text-right"><Button variant="ghost" size="sm" aria-label={`Editar ${user.nome}`} onClick={() => editUser(user)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label={`Excluir ${user.nome}`} disabled={!canDelete} title={canDelete ? 'Excluir conta' : 'Apenas contas de vendedor vinculadas a uma única empresa podem ser excluídas por este fluxo'} onClick={() => void deleteUser(user)}><Trash2 className="h-4 w-4 text-erro" /></Button></td>}</tr>; })}
-          </tbody></table></div>
           </>
         )}
       </Card>
@@ -98,6 +103,12 @@ export default function AdminUsuarios() {
           </>}
         </form>
       </Modal>}
+      <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar usuário" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>
+        {viewing && <dl className="grid gap-3 sm:grid-cols-2">{[
+          ['Nome', viewing.nome], ['E-mail', viewing.email], ['Papel', viewing.role], ['Telefone', viewing.telefone || '—'],
+          ['Empresas', viewing.memberships.map((item) => item.empresa_nome).join(', ') || 'Sem vínculo'],
+        ].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-all text-sm text-text-primary">{value}</dd></div>)}</dl>}
+      </Modal>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export function AdminAccordionList({ items, emptyMessage = 'Nenhum item para exi
   if (!items.length) return <p className="p-4 text-center text-sm text-text-secondary">{emptyMessage}</p>;
 
   return (
-    <div className="space-y-2 p-3 lg:hidden" aria-label="Registros em lista expansível">
+    <div className="space-y-2 p-3" aria-label="Registros em lista expansível">
       {items.map((item) => (
         <details key={item.id} className="group min-w-0 overflow-hidden rounded-xl border border-border-color bg-bg-primary">
           <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">

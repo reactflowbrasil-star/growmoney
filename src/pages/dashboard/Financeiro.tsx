@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Download, FileText, Plus, Wallet } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, FileUpload, Input, Modal, PageHeader } from '@/components/ui';
+import { Download, Eye, EyeOff, FileText, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
+import { Button, Card, EmptyState, FileUpload, Input, Modal, PageHeader } from '@/components/ui';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 import { exportCsv, exportPdf, formatBRL } from '@/lib/export';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,11 +17,14 @@ export default function Financeiro() {
   const canManage = isPlatformAdmin || empresaAtiva?.role === 'admin';
   const [rows, setRows] = useState<Lancamento[]>([]);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Lancamento | null>(null);
+  const [viewing, setViewing] = useState<Lancamento | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [comprovantePath, setComprovantePath] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords('financeiro-operacional');
 
   const load = useCallback(async () => {
     if (!empresaAtiva?.id) { setRows([]); setLoading(false); return; }
@@ -45,13 +50,13 @@ export default function Financeiro() {
     if (!empresaAtiva?.id || !user?.id) { setError('Selecione uma empresa para registrar lançamentos.'); return; }
     if (!form.cliente.trim() || !form.vencimento || Number(form.valor) <= 0) { setError('Informe cliente, valor acima de zero e vencimento.'); return; }
     setSaving(true); setError('');
-    const { error: saveError } = await supabase.from('gm_financial_entries').insert({
-      empresa_id: empresaAtiva.id, cliente: form.cliente.trim(), valor: Number(form.valor),
-      vencimento: form.vencimento, comprovante_path: comprovantePath, criado_por: user.id,
-    });
+    const entry = { cliente: form.cliente.trim(), valor: Number(form.valor), vencimento: form.vencimento, comprovante_path: comprovantePath };
+    const { error: saveError } = editing
+      ? await supabase.from('gm_financial_entries').update({ ...entry, atualizado_em: new Date().toISOString() }).eq('id', editing.id).eq('empresa_id', empresaAtiva.id)
+      : await supabase.from('gm_financial_entries').insert({ ...entry, empresa_id: empresaAtiva.id, criado_por: user.id });
     setSaving(false);
     if (saveError) { setError(`Não foi possível salvar o lançamento: ${saveError.message}`); return; }
-    setOpen(false); setForm(emptyForm); setComprovantePath(null); await load();
+    setOpen(false); setEditing(null); setForm(emptyForm); setComprovantePath(null); await load();
   };
 
   const marcarPago = async (row: Lancamento) => {
@@ -62,6 +67,13 @@ export default function Financeiro() {
   };
 
   const canWrite = hasPermission('financeiro:write');
+  const visibleRows = displayRows.filter((row) => showHidden ? hiddenIds.has(row.id) : !hiddenIds.has(row.id));
+  const abrirEdicao = (row: Lancamento) => { setEditing(row); setForm({ cliente: row.cliente, valor: String(row.valor), vencimento: row.vencimento }); setComprovantePath(row.comprovante_path); setError(''); setOpen(true); };
+  const excluir = async (row: Lancamento) => {
+    if (!empresaAtiva?.id || !window.confirm(`Excluir o lançamento de ${row.cliente}? Esta ação não pode ser desfeita.`)) return;
+    const { error: deleteError } = await supabase.from('gm_financial_entries').delete().eq('id', row.id).eq('empresa_id', empresaAtiva.id);
+    if (deleteError) setError(`Não foi possível excluir o lançamento: ${deleteError.message}`); else await load();
+  };
   return <div className="max-w-7xl space-y-4">
     <PageHeader title="Financeiro" description="Lançamentos, recebimentos e comprovantes" actions={<>
       <Button variant="outline" size="sm" leftIcon={<Download className="h-4 w-4" />} onClick={() => exportCsv('financeiro', displayRows.map((r) => ({ Cliente: r.cliente, Valor: r.valor, Vencimento: r.vencimento, Status: r.status })))}>CSV</Button>
@@ -70,9 +82,10 @@ export default function Financeiro() {
     </>} />
     {error && !open && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</p>}
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[{ label: 'Previsto', value: totals.previsto }, { label: 'Recebido', value: totals.pago }, { label: 'Atrasado', value: totals.atrasado }, { label: 'Saldo', value: totals.saldo }].map((item) => <Card key={item.label} className="p-4"><p className="text-xs font-medium text-text-secondary">{item.label}</p><p className="mt-1 text-xl font-bold tabular-nums">{formatBRL(item.value)}</p></Card>)}</div>
-    <Card padding="none" className="overflow-hidden">{loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando lançamentos…</p> : displayRows.length === 0 ? <div className="p-8"><EmptyState title="Sem lançamentos" description="Registre recebimentos e anexe comprovantes." icon={<Wallet className="h-6 w-6" />} /></div> : <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="px-4 py-3 font-medium">Cliente</th><th className="px-4 py-3 font-medium">Valor</th><th className="hidden px-4 py-3 font-medium sm:table-cell">Vencimento</th><th className="px-4 py-3 font-medium">Status</th>{canManage && <th className="px-4 py-3 text-right font-medium">Ações</th>}</tr></thead><tbody>{displayRows.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3 font-medium">{row.cliente}</td><td className="px-4 py-3 tabular-nums">{formatBRL(row.valor)}</td><td className="hidden px-4 py-3 text-text-secondary sm:table-cell">{new Date(`${row.vencimento}T12:00:00`).toLocaleDateString('pt-BR')}</td><td className="px-4 py-3"><Badge variant={row.status === 'pago' ? 'success' : row.status === 'atrasado' ? 'danger' : 'warning'}>{row.status}</Badge></td>{canManage && <td className="px-4 py-3 text-right">{row.comprovante_path && <span className="mr-2 text-xs text-text-secondary">Comprovante salvo</span>}{row.status !== 'pago' && <Button size="sm" variant="ghost" onClick={() => void marcarPago(row)}>Marcar pago</Button>}</td>}</tr>)}</tbody></table></div>}</Card>
-    {canWrite && <Modal open={open} onClose={() => setOpen(false)} title="Novo lançamento" size="lg" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>Salvar lançamento</Button></>}>
+    <Card padding="none" className="overflow-hidden">{!loading && displayRows.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-color p-4"><p className="text-xs text-text-secondary">Os itens ocultos permanecem no financeiro e podem ser reexibidos.</p><Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir ativos' : `Exibir ocultos (${hiddenCount})`}</Button></div>}{loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando lançamentos…</p> : visibleRows.length === 0 ? <div className="p-8"><EmptyState title="Sem lançamentos" description="Registre recebimentos e anexe comprovantes." icon={<Wallet className="h-6 w-6" />} /></div> : <AdminAccordionList items={visibleRows.map((row) => ({ id: row.id, title: row.cliente, subtitle: `${formatBRL(row.valor)} · ${row.status}`, details: [{ label: 'Vencimento', value: new Date(`${row.vencimento}T12:00:00`).toLocaleDateString('pt-BR') }, { label: 'Comprovante', value: row.comprovante_path ? 'Anexado' : 'Não anexado' }], actions: <><Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(row)}>Visualizar</Button><Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(row.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>{canManage && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => abrirEdicao(row)}>Editar</Button>{row.status !== 'pago' && <Button variant="outline" size="sm" onClick={() => void marcarPago(row)}>Marcar pago</Button>}<Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void excluir(row)}>Excluir</Button></>}</> }))} />}</Card>
+    {canWrite && <Modal open={open} onClose={() => { setOpen(false); setEditing(null); }} title={editing ? 'Editar lançamento' : 'Novo lançamento'} size="lg" footer={<><Button variant="outline" onClick={() => { setOpen(false); setEditing(null); }}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>{editing ? 'Salvar alterações' : 'Salvar lançamento'}</Button></>}>
       <div className="grid gap-4 sm:grid-cols-2"><Input label="Cliente" value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} required /><Input label="Valor (R$)" type="number" min="0.01" step="0.01" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} required /><Input label="Vencimento" type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} required /><div className="sm:col-span-2"><p className="mb-2 text-sm font-medium">Comprovante</p><FileUpload accept="image/*,.pdf" categoria="arquivos" onUploaded={(files) => setComprovantePath(files[0]?.caminho || null)} /></div>{error && <p className="text-sm text-erro sm:col-span-2" role="alert">{error}</p>}</div>
     </Modal>}
+    <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar lançamento" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>{viewing && <dl className="grid gap-3 sm:grid-cols-2">{[['Cliente', viewing.cliente], ['Valor', formatBRL(viewing.valor)], ['Vencimento', new Date(`${viewing.vencimento}T12:00:00`).toLocaleDateString('pt-BR')], ['Status', viewing.status], ['Comprovante', viewing.comprovante_path || 'Não anexado']].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-all text-sm text-text-primary">{value}</dd></div>)}</dl>}</Modal>
   </div>;
 }

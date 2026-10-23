@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Briefcase, Pencil, Plus, Search, Trash2 } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
+import { Briefcase, Eye, EyeOff, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 import { formatValorCobranca, type ServicoCatalogo } from '@/lib/contratos-store';
 import { deleteServicoEmpresa, loadServicosEmpresa, saveServicoEmpresa } from '@/services/servico-catalogo-persistente';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,10 +18,12 @@ export default function Servicos() {
   const [busca, setBusca] = useState('');
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<ServicoCatalogo | null>(null);
+  const [viewing, setViewing] = useState<ServicoCatalogo | null>(null);
   const [form, setForm] = useState(blank);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords('servicos-operacional');
 
   const reload = useCallback(async () => {
     if (!empresaAtiva?.id) { setRows([]); setLoading(false); return; }
@@ -32,8 +36,9 @@ export default function Servicos() {
 
   const filtered = useMemo(() => {
     const query = busca.trim().toLocaleLowerCase('pt-BR');
-    return rows.filter((row) => !query || `${row.nome} ${row.categoria} ${row.descricao || ''}`.toLocaleLowerCase('pt-BR').includes(query));
-  }, [rows, busca]);
+    return rows.filter((row) => (showHidden ? hiddenIds.has(row.id) : !hiddenIds.has(row.id))
+      && (!query || `${row.nome} ${row.categoria} ${row.descricao || ''}`.toLocaleLowerCase('pt-BR').includes(query)));
+  }, [rows, busca, showHidden, hiddenIds]);
 
   const openNew = () => { setEditing(null); setForm({ ...blank, ordem: rows.length + 1 }); setError(''); setOpen(true); };
   const openEdit = (service: ServicoCatalogo) => {
@@ -71,9 +76,9 @@ export default function Servicos() {
     <PageHeader title="Serviços" description="O catálogo fica salvo na empresa e é usado na criação de contratos." actions={canWrite && <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={openNew}>Novo serviço</Button>} />
     {error && !open && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</p>}
     <Card padding="none" className="overflow-hidden">
-      <div className="border-b border-border-color p-4"><div className="relative max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input className="pl-9" placeholder="Buscar serviço ou categoria..." value={busca} onChange={(e) => setBusca(e.target.value)} /></div></div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-color p-4"><div className="relative w-full max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input className="pl-9" placeholder="Buscar serviço ou categoria..." value={busca} onChange={(e) => setBusca(e.target.value)} /></div><Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir ativos' : `Exibir ocultos (${hiddenCount})`}</Button></div>
       {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando catálogo…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState icon={<Briefcase className="h-8 w-8" />} title="Nenhum serviço" description="Cadastre os serviços que serão oferecidos nos contratos." action={canWrite && <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openNew}>Novo serviço</Button>} /></div> :
-        <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border-color text-left text-text-secondary"><th className="px-4 py-3 font-medium">Serviço</th><th className="hidden px-4 py-3 font-medium sm:table-cell">Categoria</th><th className="px-4 py-3 font-medium">Valor</th><th className="px-4 py-3 font-medium">Status</th>{canManage && <th className="px-4 py-3 text-right font-medium">Ações</th>}</tr></thead><tbody>{filtered.map((service) => <tr key={service.id} className="border-b border-border-color/60 hover:bg-bg-tertiary/40"><td className="px-4 py-3"><div className="font-medium">{service.nome}</div><p className="line-clamp-1 max-w-md text-xs text-text-secondary">{service.texto_contrato || service.descricao || '—'}</p>{service.bonus_automatico && <span className="mt-1 inline-block rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">Bônus automático</span>}</td><td className="hidden px-4 py-3 sm:table-cell">{service.categoria || '—'}</td><td className="whitespace-nowrap px-4 py-3 tabular-nums">{service.valor > 0 ? formatValorCobranca(service.valor, service.tipo_cobranca || service.tipo) : '—'}</td><td className="px-4 py-3"><Badge variant={service.ativo ? 'success' : 'neutral'}>{service.ativo ? 'Ativo' : 'Inativo'}</Badge></td>{canManage && <td className="whitespace-nowrap px-4 py-3 text-right"><button type="button" aria-label={`Editar ${service.nome}`} className="rounded-lg p-2 hover:bg-bg-tertiary" onClick={() => openEdit(service)}><Pencil className="h-4 w-4 text-text-secondary" /></button><button type="button" aria-label={`Excluir ${service.nome}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(service.id)}><Trash2 className="h-4 w-4 text-erro" /></button></td>}</tr>)}</tbody></table></div>}
+        <AdminAccordionList items={filtered.map((service) => ({ id: service.id, title: service.nome, subtitle: `${service.valor > 0 ? formatValorCobranca(service.valor, service.tipo_cobranca || service.tipo) : 'Sem valor'} · ${service.ativo ? 'Ativo' : 'Inativo'}`, details: [{ label: 'Categoria', value: service.categoria }, { label: 'Descrição', value: service.descricao }, { label: 'Texto no contrato', value: service.texto_contrato }, { label: 'Cobrança', value: service.tipo_cobranca || service.tipo }, { label: 'Bônus automático', value: service.bonus_automatico ? `Sim${service.bonus_gatilhos?.length ? ` · gatilhos: ${service.bonus_gatilhos.join(', ')}` : ''}` : 'Não' }], actions: <><Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(service)}>Visualizar</Button><Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(service.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>{canManage && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => openEdit(service)}>Editar</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void excluir(service.id)}>Excluir</Button></>}</> }))} />}
     </Card>
     {(canManage || (canWrite && open && !editing)) && <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Editar serviço' : 'Novo serviço'} size="lg" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>{editing ? 'Salvar alterações' : 'Cadastrar serviço'}</Button></>}>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -90,5 +95,6 @@ export default function Servicos() {
         {error && <p className="text-sm text-erro sm:col-span-2" role="alert">{error}</p>}
       </div>
     </Modal>}
+    <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar serviço" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>{viewing && <dl className="grid gap-3 sm:grid-cols-2">{[['Nome', viewing.nome], ['Categoria', viewing.categoria], ['Valor', viewing.valor > 0 ? formatValorCobranca(viewing.valor, viewing.tipo_cobranca || viewing.tipo) : '—'], ['Descrição', viewing.descricao], ['Texto no contrato', viewing.texto_contrato], ['Status', viewing.ativo ? 'Ativo' : 'Inativo']].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-words text-sm text-text-primary">{value || '—'}</dd></div>)}</dl>}</Modal>
   </div>;
 }

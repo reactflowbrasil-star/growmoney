@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:58:56.110Z",
+  "generated_at": "2026-10-23T05:12:39.743Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -108,6 +108,11 @@
       "id": "file:src/components/brand/BrandLogo.tsx",
       "type": "file",
       "label": "src/components/brand/BrandLogo.tsx"
+    },
+    {
+      "id": "file:src/components/chat/LiveChat.tsx",
+      "type": "file",
+      "label": "src/components/chat/LiveChat.tsx"
     },
     {
       "id": "file:src/components/dashboard/ChartContainer.tsx",
@@ -288,6 +293,11 @@
       "id": "file:src/design-system/tokens.css",
       "type": "file",
       "label": "src/design-system/tokens.css"
+    },
+    {
+      "id": "file:src/hooks/useAdminHiddenRecords.ts",
+      "type": "file",
+      "label": "src/hooks/useAdminHiddenRecords.ts"
     },
     {
       "id": "file:src/index.css",
@@ -710,6 +720,11 @@
       "label": "src/services/vendedor-service.ts"
     },
     {
+      "id": "file:src/services/vendor-chat-service.ts",
+      "type": "file",
+      "label": "src/services/vendor-chat-service.ts"
+    },
+    {
       "id": "file:src/test/InstallPwaButton.test.tsx",
       "type": "file",
       "label": "src/test/InstallPwaButton.test.tsx"
@@ -743,6 +758,11 @@
       "id": "file:supabase/functions/smtp-mailer/index.ts",
       "type": "file",
       "label": "supabase/functions/smtp-mailer/index.ts"
+    },
+    {
+      "id": "file:supabase/functions/vendor-chat/index.ts",
+      "type": "file",
+      "label": "supabase/functions/vendor-chat/index.ts"
     },
     {
       "id": "file:supabase/migrations/20261021000000_init_schema.sql",
@@ -853,6 +873,11 @@
       "id": "file:supabase/migrations/20261023045635_vendedor_dados_pessoais.sql",
       "type": "migration",
       "label": "supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023050243_vendedor_empresa_chat.sql"
     },
     {
       "id": "file:tailwind.config.ts",
@@ -1065,6 +1090,11 @@
       "label": "gm_smtp_mail_log"
     },
     {
+      "id": "table:gm_chat_messages",
+      "type": "database-table",
+      "label": "gm_chat_messages"
+    },
+    {
       "id": "table:assinaturas",
       "type": "database-table",
       "label": "assinaturas"
@@ -1183,6 +1213,30 @@
     {
       "from": "file:src/components/brand/BrandLogo.tsx",
       "to": "file:src/contexts/ThemeContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/chat/LiveChat.tsx",
+      "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/chat/LiveChat.tsx",
+      "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/chat/LiveChat.tsx",
+      "to": "file:src/services/file-storage.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/chat/LiveChat.tsx",
+      "to": "file:src/services/vendor-chat-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -1403,6 +1457,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/components/layout/AppLayout.tsx",
+      "to": "file:src/components/chat/LiveChat.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/lib/utils.ts",
       "type": "imports",
@@ -1423,6 +1483,12 @@
     {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/layout/Header.tsx",
+      "to": "file:src/components/chat/LiveChat.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2237,6 +2303,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminArquivos.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminAuditoria.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2327,6 +2399,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminRecursos.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminSeguranca.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2389,6 +2467,12 @@
     {
       "from": "file:src/pages/admin/AdminUsuarios.tsx",
       "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminUsuarios.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2646,6 +2730,18 @@
     },
     {
       "from": "file:src/pages/dashboard/Clientes.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Clientes.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Clientes.tsx",
       "to": "file:src/lib/export.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -2725,6 +2821,18 @@
     {
       "from": "file:src/pages/dashboard/Contratos.tsx",
       "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Contratos.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Contratos.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2838,6 +2946,18 @@
     },
     {
       "from": "file:src/pages/dashboard/Financeiro.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Financeiro.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Financeiro.tsx",
       "to": "file:src/lib/export.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -2898,6 +3018,18 @@
     },
     {
       "from": "file:src/pages/dashboard/Servicos.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Servicos.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Servicos.tsx",
       "to": "file:src/lib/contratos-store.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -2923,6 +3055,18 @@
     {
       "from": "file:src/pages/dashboard/Vendedores.tsx",
       "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Vendedores.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Vendedores.tsx",
+      "to": "file:src/hooks/useAdminHiddenRecords.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3509,6 +3653,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/services/vendor-chat-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/test/InstallPwaButton.test.tsx",
       "to": "file:src/components/pwa/InstallPwaButton.tsx",
       "type": "imports",
@@ -3632,6 +3782,30 @@
       "from": "file:supabase/functions/smtp-mailer/index.ts",
       "to": "rpc:admin_log_event",
       "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/vendor-chat/index.ts",
+      "to": "table:empresa_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/vendor-chat/index.ts",
+      "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/vendor-chat/index.ts",
+      "to": "table:gm_files",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/vendor-chat/index.ts",
+      "to": "table:gm_chat_messages",
+      "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
     {
@@ -3823,6 +3997,12 @@
     {
       "from": "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql",
       "to": "table:gm_vendor_activation_events",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql",
+      "to": "table:gm_chat_messages",
       "type": "defines-table",
       "confidence": "EXTRACTED"
     }

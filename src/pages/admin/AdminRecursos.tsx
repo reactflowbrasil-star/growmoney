@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, RefreshCw, Pencil, Trash2, Search, ShieldAlert } from 'lucide-react';
+import { Plus, RefreshCw, Pencil, Trash2, Search, ShieldAlert, Eye, EyeOff } from 'lucide-react';
 import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { AdminResourceService, type AdminResourceRecord, type AdminResourceTable } from '@/services/admin-resource-service';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { criarLinkArquivo, uploadArquivo } from '@/services/file-storage';
 import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 
 type Field = {
   name: string;
@@ -109,6 +110,8 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
   const [error, setError] = useState('');
   const [pdfBusy, setPdfBusy] = useState(false);
   const [contractPdfUrl, setContractPdfUrl] = useState('');
+  const [viewing, setViewing] = useState<AdminResourceRecord | null>(null);
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords(resource);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -127,8 +130,9 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return rows;
-    return rows.filter((row) => definition.visible.some((key) => displayValue(row[key]).toLowerCase().includes(term)));
-  }, [definition, rows, search]);
+    return rows.filter((row) => (showHidden ? hiddenIds.has(row.id) : !hiddenIds.has(row.id))
+      && definition.visible.some((key) => displayValue(row[key]).toLowerCase().includes(term)));
+  }, [definition, rows, search, showHidden, hiddenIds]);
 
   const openCreate = () => {
     setEditing(null);
@@ -260,7 +264,7 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
       } />
       {error && !open && <div className="rounded-xl border border-erro/30 bg-erro/10 p-4 text-sm text-erro" role="alert"><div className="flex items-start gap-2"><ShieldAlert className="h-4 w-4 mt-0.5" />{error}</div></div>}
       <Card padding="none" className="overflow-hidden">
-        <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label={`Buscar ${definition.title.toLowerCase()}`} placeholder="Buscar..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-color p-4"><div className="relative w-full max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label={`Buscar ${definition.title.toLowerCase()}`} placeholder="Buscar..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div><Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir itens ativos' : `Exibir ocultos (${hiddenCount})`}</Button><p className="w-full text-xs text-text-secondary">Ocultar afeta somente esta lista neste navegador; o registro continua salvo.</p></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum registro" description="Os registros disponíveis aparecerão aqui." /></div> : (
           <>
             <AdminAccordionList items={filtered.map((row) => ({
@@ -271,14 +275,12 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
                 label: definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' '),
                 value: displayValue(row[key]),
               })),
-              actions: isAdmin && !definition.readOnly ? <>
-                <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label="Editar registro" onClick={() => openEdit(row)}>Editar</Button>
-                <Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label="Excluir registro" onClick={() => void remove(row)}>Excluir</Button>
-              </> : undefined,
+              actions: <>
+                <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} aria-label="Visualizar registro" onClick={() => setViewing(row)}>Visualizar</Button>
+                <Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} aria-label={showHidden ? 'Reexibir registro' : 'Ocultar registro'} onClick={() => toggleHidden(row.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>
+                {isAdmin && !definition.readOnly && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label="Editar registro" onClick={() => openEdit(row)}>Editar</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label="Excluir registro" onClick={() => void remove(row)}>Excluir</Button></>}
+              </>,
             }))} />
-            <div className="hidden overflow-x-hidden lg:block"><table className="w-full table-fixed text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary">{definition.visible.map((key) => <th key={key} className="px-4 py-3 font-medium">{definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' ')}</th>)}<th className="w-28 px-2 py-3 text-right font-medium">Ações</th></tr></thead>
-              <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40">{definition.visible.map((key) => <td key={key} className="break-all px-4 py-3" title={displayValue(row[key])}>{displayValue(row[key])}</td>)}<td className="whitespace-nowrap px-2 py-3 text-right">{isAdmin && !definition.readOnly && <><Button variant="ghost" size="sm" aria-label="Editar registro" onClick={() => openEdit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Excluir registro" onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}</tbody>
-            </table></div>
           </>
         )}
       </Card>
@@ -288,6 +290,9 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
           {resource === 'contratos' && <div className="space-y-2 sm:col-span-2"><label htmlFor="contract-pdf-upload" className="block text-sm font-medium">PDF do contrato</label><input id="contract-pdf-upload" type="file" accept="application/pdf,.pdf" disabled={pdfBusy} onChange={(event) => { void uploadContractPdf(event.target.files?.[0]); event.target.value = ''; }} className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand/10 file:px-3 file:py-2 file:font-medium file:text-brand" />{pdfBusy && <p className="text-xs text-text-secondary">Enviando PDF ao armazenamento privado…</p>}{form.pdf_path && <p className="break-all text-xs text-text-secondary">Arquivo vinculado: {form.pdf_path}</p>}{contractPdfUrl && <a href={contractPdfUrl} target="_blank" rel="noreferrer" className="text-sm text-brand underline">Visualizar PDF enviado</a>}<p className="text-xs text-text-secondary">O PDF é enviado ao armazenamento privado e seu caminho fica no registro do contrato.</p></div>}
         </form>
       </Modal>}
+      <Modal open={!!viewing} onClose={() => setViewing(null)} title={`Visualizar · ${definition.title.toLowerCase()}`} footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>
+        {viewing && <dl className="grid gap-3 sm:grid-cols-2">{[...new Set(['id', ...definition.visible, ...Object.keys(viewing).filter((key) => key !== 'id')])].map((key) => <div key={key} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' ')}</dt><dd className="mt-1 break-all text-sm text-text-primary">{displayValue(viewing[key])}</dd></div>)}</dl>}
+      </Modal>
     </div>
   );
 }

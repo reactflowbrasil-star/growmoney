@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Camera, Download, ImagePlus, Plus, Search, Trash2, Users } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
+import { Camera, Download, Eye, EyeOff, ImagePlus, Pencil, Plus, Search, Trash2, Users } from 'lucide-react';
+import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
+import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 import { exportCsv, formatBRL } from '@/lib/export';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,6 +28,9 @@ export default function Vendedores() {
   const [cepStatus, setCepStatus] = useState('');
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState('');
+  const [editing, setEditing] = useState<Vendedor | null>(null);
+  const [viewing, setViewing] = useState<Vendedor | null>(null);
+  const { hiddenIds, hiddenCount, showHidden, setShowHidden, toggleHidden } = useAdminHiddenRecords('vendedores-operacional');
   const uploadRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
@@ -74,11 +79,11 @@ export default function Vendedores() {
     setLoading(false);
   }, [empresaAtiva?.id]);
   useEffect(() => { void load(); }, [load]);
-  const filtered = useMemo(() => rows.filter((row) => `${row.nome} ${row.email}`.toLocaleLowerCase('pt-BR').includes(busca.trim().toLocaleLowerCase('pt-BR'))), [rows, busca]);
+  const filtered = useMemo(() => rows.filter((row) => (showHidden ? hiddenIds.has(row.id) : !hiddenIds.has(row.id)) && `${row.nome} ${row.email}`.toLocaleLowerCase('pt-BR').includes(busca.trim().toLocaleLowerCase('pt-BR'))), [rows, busca, showHidden, hiddenIds]);
 
   const salvar = async () => {
     if (!empresaAtiva?.id || !user?.id) { setError('Selecione uma empresa para cadastrar vendedores.'); return; }
-    if (!form.nome.trim() || !form.email.trim() || form.password.length < 8) { setError('Informe nome, e-mail e uma senha inicial com pelo menos 8 caracteres.'); return; }
+    if (!form.nome.trim() || (!editing && (!form.email.trim() || form.password.length < 8))) { setError('Informe nome, e-mail e uma senha inicial com pelo menos 8 caracteres.'); return; }
     if (form.cpf && !cpfValido(form.cpf)) { setCpfStatus('CPF inválido. Confira os números digitados.'); setError('Corrija o CPF antes de continuar.'); return; }
     if (foto && (!foto.type.match(/^image\/(jpeg|png|webp)$/) || foto.size > 5 * 1024 * 1024)) { setError('A foto deve ser JPG, PNG ou WebP e ter até 5 MB.'); return; }
     setSaving(true); setError('');
@@ -87,6 +92,12 @@ export default function Vendedores() {
       if (foto) fotoPath = (await uploadArquivo(foto, 'fotos')).caminho;
     } catch (uploadError) {
       setSaving(false); setError(uploadError instanceof Error ? uploadError.message : 'Não foi possível enviar a foto.'); return;
+    }
+    if (editing) {
+      const { error: updateError } = await supabase.from('vendedores').update({ nome: form.nome.trim(), meta_mensal: Number(form.meta) || 0 }).eq('id', editing.id).eq('empresa_id', empresaAtiva.id);
+      setSaving(false);
+      if (updateError) { setError(`Não foi possível atualizar o vendedor: ${updateError.message}`); return; }
+      setOpen(false); setEditing(null); setForm(emptyForm); await load(); return;
     }
     const { data, error: saveError } = await supabase.functions.invoke('admin-users', {
       body: {
@@ -120,32 +131,32 @@ export default function Vendedores() {
   };
   const fecharModal = () => {
     if (saving) return;
-    setOpen(false); setFoto(null); setForm(emptyForm); setError(''); setCpfStatus(''); setCepStatus('');
+    setOpen(false); setEditing(null); setFoto(null); setForm(emptyForm); setError(''); setCpfStatus(''); setCepStatus('');
   };
+  const editar = (row: Vendedor) => { setEditing(row); setFoto(null); setForm({ ...emptyForm, nome: row.nome, email: row.email, meta: String(row.meta_mensal || 0) }); setError(''); setOpen(true); };
 
   return <div className="max-w-7xl space-y-4">
     <PageHeader title="Vendedores" description="Equipe comercial e metas" actions={<>
       <Button variant="outline" size="sm" leftIcon={<Download className="h-4 w-4" />} onClick={() => exportCsv('vendedores', filtered.map((r) => ({ Nome: r.nome, Email: r.email, Meta: r.meta_mensal || 0 })))}>CSV</Button>
-      {canManage && hasPermission('vendedores:write') && <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => { setError(''); setOpen(true); }}>Novo</Button>}
+      {canManage && hasPermission('vendedores:write') && <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={() => { setEditing(null); setForm(emptyForm); setError(''); setOpen(true); }}>Novo</Button>}
     </>} />
     {error && !open && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</p>}
     <Card padding="none" className="overflow-hidden">
-      <div className="border-b border-border-color p-4"><div className="relative max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input placeholder="Buscar vendedor..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-10" /></div></div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-color p-4"><div className="relative w-full max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input placeholder="Buscar vendedor..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-10" /></div><Button type="button" variant="outline" size="sm" onClick={() => setShowHidden((value) => !value)}>{showHidden ? 'Exibir ativos' : `Exibir ocultos (${hiddenCount})`}</Button></div>
       {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando equipe…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum vendedor" description="Adicione sua equipe comercial." icon={<Users className="h-6 w-6" />} /></div> :
-        <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="px-4 py-3 font-medium">Nome</th><th className="hidden px-4 py-3 font-medium sm:table-cell">E-mail</th><th className="px-4 py-3 font-medium">Meta mensal</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead>
-          <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3 font-medium"><span className="flex items-center gap-3">{row.foto_url ? <img src={row.foto_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded-full bg-bg-secondary"><Users className="h-4 w-4 text-text-secondary" /></span>}{row.nome}</span></td><td className="hidden px-4 py-3 text-text-secondary sm:table-cell">{row.email}</td><td className="px-4 py-3 tabular-nums">{formatBRL(row.meta_mensal || 0)}</td><td className="px-4 py-3"><Badge variant={row.status === 'ativo' ? 'success' : 'neutral'}>{row.status === 'inativo' ? 'Aguardando ativação' : row.status}</Badge></td>{canManage && <td className="px-4 py-3 text-right"><button type="button" aria-label={`Excluir ${row.nome}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(row)}><Trash2 className="h-4 w-4 text-erro" /></button></td>}</tr>)}</tbody>
-        </table></div>}
+        <AdminAccordionList items={filtered.map((row) => ({ id: row.id, title: row.nome, subtitle: row.email, details: [{ label: 'Meta mensal', value: formatBRL(row.meta_mensal || 0) }, { label: 'Status', value: row.status === 'inativo' ? 'Aguardando ativação' : row.status }, { label: 'Identificador interno', value: row.identificador_interno }, { label: 'Foto', value: row.foto_path ? 'Cadastrada' : 'Não cadastrada' }], actions: <><Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(row)}>Visualizar</Button><Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(row.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>{canManage && hasPermission('vendedores:write') && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => editar(row)}>Editar</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void excluir(row)}>Excluir</Button></>}</> }))} />}
     </Card>
-    {canManage && hasPermission('vendedores:write') && <Modal open={open} onClose={fecharModal} title="Novo vendedor" size="xl" footer={<><Button variant="outline" disabled={saving} onClick={fecharModal}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>Salvar vendedor</Button></>}>
+    {canManage && hasPermission('vendedores:write') && <Modal open={open} onClose={fecharModal} title={editing ? 'Editar vendedor' : 'Novo vendedor'} size="xl" footer={<><Button variant="outline" disabled={saving} onClick={fecharModal}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>{editing ? 'Salvar alterações' : 'Salvar vendedor'}</Button></>}>
       <div className="mx-auto max-w-4xl space-y-6">
-        <section className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+        {!editing && <section className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
           <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border-color bg-bg-secondary">{fotoPreview ? <img src={fotoPreview} alt="Prévia da foto do vendedor" className="h-full w-full object-cover" /> : <Users className="h-9 w-9 text-text-secondary" />}</div>
           <div className="space-y-2"><p className="font-medium">Foto do vendedor</p><p className="text-sm text-text-secondary">JPG, PNG ou WebP, até 5 MB.</p><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" size="sm" leftIcon={<Camera className="h-4 w-4" />} onClick={() => cameraRef.current?.click()}>Fotografar</Button><Button type="button" variant="outline" size="sm" leftIcon={<ImagePlus className="h-4 w-4" />} onClick={() => uploadRef.current?.click()}>Enviar foto</Button></div><input ref={cameraRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" capture="user" onChange={(e) => setFoto(e.target.files?.[0] || null)} /><input ref={uploadRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFoto(e.target.files?.[0] || null)} /></div>
-        </section>
-        <section className="space-y-3"><h3 className="font-semibold">Dados pessoais</h3><div className="grid gap-4 sm:grid-cols-2"><Input label="Nome completo" autoComplete="name" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required /><Input label="CPF" inputMode="numeric" autoComplete="off" value={form.cpf} onChange={(e) => { const cpf = formatarCpf(e.target.value); setForm({ ...form, cpf }); setCpfStatus(cpf.replace(/\D/g, '').length === 11 ? (cpfValido(cpf) ? 'CPF válido.' : 'CPF inválido.') : ''); }} onBlur={() => form.cpf && setCpfStatus(cpfValido(form.cpf) ? 'CPF válido.' : 'CPF inválido.')} hint="Validação local dos dígitos verificadores. O CPF não revela nome ou nascimento; preencha esses dados manualmente." />{cpfStatus && <p className={`text-sm ${cpfStatus.includes('inválido') ? 'text-erro' : 'text-text-secondary'}`} role="status">{cpfStatus}</p>}<Input label="Data de nascimento" type="date" autoComplete="bday" value={form.dataNascimento} onChange={(e) => setForm({ ...form, dataNascimento: e.target.value })} /><Input label="E-mail" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /><Input label="Senha inicial" type="password" minLength={8} hint="O vendedor poderá entrar após confirmar o e-mail enviado." value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /><Input label="Meta mensal (R$)" type="number" min="0" step="0.01" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} /></div></section>
-        <section className="space-y-3"><h3 className="font-semibold">Endereço</h3><div className="grid gap-4 sm:grid-cols-2"><Input label="CEP" inputMode="numeric" autoComplete="postal-code" maxLength={9} value={form.cep} onChange={(e) => setForm({ ...form, cep: somenteDigitos(e.target.value).slice(0, 8) })} hint="Ao informar os 8 dígitos, consultamos o endereço automaticamente." /><Input label="Logradouro" autoComplete="street-address" value={form.logradouro} onChange={(e) => setForm({ ...form, logradouro: e.target.value })} /><Input label="Número" value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} /><Input label="Complemento" value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} /><Input label="Bairro" value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} /><Input label="Cidade" autoComplete="address-level2" value={form.cidade} onChange={(e) => setForm({ ...form, cidade: e.target.value })} /><Input label="UF" autoComplete="address-level1" maxLength={2} value={form.uf} onChange={(e) => setForm({ ...form, uf: e.target.value.toUpperCase().slice(0, 2) })} />{cepStatus && <p className="text-sm text-text-secondary sm:col-span-2" role="status">{cepStatus}</p>}</div></section>
+        </section>}
+        <section className="space-y-3"><h3 className="font-semibold">{editing ? 'Dados do vendedor' : 'Dados pessoais'}</h3><div className="grid gap-4 sm:grid-cols-2"><Input label="Nome completo" autoComplete="name" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />{editing ? <Input label="Meta mensal (R$)" type="number" min="0" step="0.01" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} /> : <><Input label="CPF" inputMode="numeric" autoComplete="off" value={form.cpf} onChange={(e) => { const cpf = formatarCpf(e.target.value); setForm({ ...form, cpf }); setCpfStatus(cpf.replace(/\D/g, '').length === 11 ? (cpfValido(cpf) ? 'CPF válido.' : 'CPF inválido.') : ''); }} onBlur={() => form.cpf && setCpfStatus(cpfValido(form.cpf) ? 'CPF válido.' : 'CPF inválido.')} hint="Validação local dos dígitos verificadores. O CPF não revela nome ou nascimento; preencha esses dados manualmente." />{cpfStatus && <p className={`text-sm ${cpfStatus.includes('inválido') ? 'text-erro' : 'text-text-secondary'}`} role="status">{cpfStatus}</p>}<Input label="Data de nascimento" type="date" autoComplete="bday" value={form.dataNascimento} onChange={(e) => setForm({ ...form, dataNascimento: e.target.value })} /><Input label="E-mail" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /><Input label="Senha inicial" type="password" minLength={8} hint="O vendedor poderá entrar após confirmar o e-mail enviado." value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /><Input label="Meta mensal (R$)" type="number" min="0" step="0.01" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} /></>}</div></section>
+        {!editing && <section className="space-y-3"><h3 className="font-semibold">Endereço</h3><div className="grid gap-4 sm:grid-cols-2"><Input label="CEP" inputMode="numeric" autoComplete="postal-code" maxLength={9} value={form.cep} onChange={(e) => setForm({ ...form, cep: somenteDigitos(e.target.value).slice(0, 8) })} hint="Ao informar os 8 dígitos, consultamos o endereço automaticamente." /><Input label="Logradouro" autoComplete="street-address" value={form.logradouro} onChange={(e) => setForm({ ...form, logradouro: e.target.value })} /><Input label="Número" value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} /><Input label="Complemento" value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} /><Input label="Bairro" value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} /><Input label="Cidade" autoComplete="address-level2" value={form.cidade} onChange={(e) => setForm({ ...form, cidade: e.target.value })} /><Input label="UF" autoComplete="address-level1" maxLength={2} value={form.uf} onChange={(e) => setForm({ ...form, uf: e.target.value.toUpperCase().slice(0, 2) })} />{cepStatus && <p className="text-sm text-text-secondary sm:col-span-2" role="status">{cepStatus}</p>}</div></section>}
         {error && <p className="text-sm text-erro" role="alert">{error}</p>}
       </div>
     </Modal>}
+    <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar vendedor" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>{viewing && <dl className="grid gap-3 sm:grid-cols-2">{[['Nome', viewing.nome], ['E-mail', viewing.email], ['Meta mensal', formatBRL(viewing.meta_mensal || 0)], ['Status', viewing.status === 'inativo' ? 'Aguardando ativação' : viewing.status], ['Identificador', viewing.identificador_interno]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-all text-sm text-text-primary">{value}</dd></div>)}{viewing.foto_url && <img src={viewing.foto_url} alt={`Foto de ${viewing.nome}`} className="h-24 w-24 rounded-full object-cover" />}</dl>}</Modal>
   </div>;
 }

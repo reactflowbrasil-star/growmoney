@@ -9,6 +9,7 @@ import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
 import { getRecentDashboardActivity, subscribeToDashboardActivity } from '@/services/dashboard-activity-service';
 import { navItems } from '@/config/nav';
+import { LiveChat } from '@/components/chat/LiveChat';
 
 export function AppLayout() {
   const { user, logout, empresaAtiva } = useAuth();
@@ -20,6 +21,9 @@ export function AppLayout() {
   const [notifications, setNotifications] = useState<Array<{ id: string; title: string; time: string; read: boolean }>>([]);
   const [soundEnabled, setSoundEnabled] = useState(() => typeof window === 'undefined' || localStorage.getItem('growmoney-alert-sound-enabled') !== 'false');
   const [liveAlert, setLiveAlert] = useState<{ id: string; title: string; time: string } | null>(null);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const chatAvailable = Boolean(empresaAtiva?.id && user?.id && ['admin', 'gestor', 'vendedor'].includes(user.role));
   const audioContextRef = useRef<AudioContext | null>(null);
   const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const seenNotificationIds = useRef(new Set<string>());
@@ -56,6 +60,15 @@ export function AppLayout() {
       oscillator.stop(start + 0.23);
     });
   }, [enableAudioFromGesture, soundEnabled]);
+
+  const alertIncomingChatMessage = useCallback(() => {
+    playLoudAlert();
+    const now = new Date();
+    const time = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium', timeZone: 'America/Sao_Paulo' }).format(now);
+    setLiveAlert({ id: `chat-${now.getTime()}`, title: 'Nova mensagem no chat ao vivo', time });
+    if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    alertTimerRef.current = setTimeout(() => setLiveAlert(null), 5000);
+  }, [playLoudAlert]);
 
   useEffect(() => {
     const unlockAudio = () => enableAudioFromGesture();
@@ -205,6 +218,8 @@ export function AppLayout() {
           onNotificationRead={markNotificationRead}
           soundEnabled={soundEnabled}
           onToggleSound={toggleNotificationSound}
+          chatUnreadCount={chatUnreadCount}
+          onOpenChat={chatAvailable ? () => setChatOpen(true) : undefined}
           onLogout={handleLogout}
         />
         <main className="p-4 md:p-6 lg:p-8 mobile-nav-pad animate-in" role="main">
@@ -213,6 +228,7 @@ export function AppLayout() {
       </div>
 
       <MobileBottomNav isAdmin={isAdmin} />
+      <LiveChat open={chatOpen} onOpenChange={setChatOpen} onUnreadCount={setChatUnreadCount} onIncomingMessage={alertIncomingChatMessage} />
       {liveAlert && (
         <div
           key={liveAlert.id}
