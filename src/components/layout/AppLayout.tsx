@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -21,6 +21,7 @@ import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
+import { getRecentDashboardActivity } from '@/services/dashboard-activity-service';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -40,12 +41,42 @@ const navItems = [
 ];
 
 export function AppLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, empresaAtiva } = useAuth();
   const { isAdmin } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{ id: string; title: string; time: string; read: boolean }>>([]);
+
+  const loadNotifications = useCallback(async () => {
+    if (!user) return;
+    try {
+      const activity = await getRecentDashboardActivity(empresaAtiva?.id || null, 8);
+      const readIds = new Set<string>(JSON.parse(localStorage.getItem(`growmoney-read-notifications:${user.id}`) || '[]'));
+      setNotifications(activity.map((item) => ({
+        id: item.id,
+        title: `${item.actorName} ${item.action === 'created' ? 'criou' : item.action === 'updated' ? 'alterou' : 'excluiu'} ${item.entity.replace(/[_-]+/g, ' ')}`,
+        time: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(item.occurredAt)),
+        read: readIds.has(item.id),
+      })));
+    } catch {
+      setNotifications([]);
+    }
+  }, [empresaAtiva?.id, user]);
+
+  useEffect(() => { void loadNotifications(); }, [loadNotifications]);
+
+  const markNotificationRead = (id: string) => {
+    if (!user?.id) return;
+    setNotifications((current) => {
+      const storageKey = `growmoney-read-notifications:${user.id}`;
+      const readIds = new Set<string>(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+      readIds.add(id);
+      localStorage.setItem(storageKey, JSON.stringify([...readIds].slice(-100)));
+      return current.map((notification) => notification.id === id ? { ...notification, read: true } : notification);
+    });
+  };
 
   // Fecha drawer mobile ao mudar de rota
   useEffect(() => {
@@ -118,6 +149,8 @@ export function AppLayout() {
             }
           }}
           user={layoutUser}
+          notifications={notifications}
+          onNotificationRead={markNotificationRead}
           onLogout={handleLogout}
         />
         <main className="p-4 md:p-6 lg:p-8 mobile-nav-pad animate-in" role="main">

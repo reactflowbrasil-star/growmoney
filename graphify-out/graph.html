@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>207 nós · 426 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>208 nós · 434 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -130,6 +130,7 @@
   "file:src/services/client-service.ts"["src/services/client-service.ts"]
   "file:src/services/contrato-wizard-data.ts"["src/services/contrato-wizard-data.ts"]
   "file:src/services/dashboard-activity-service.ts"["src/services/dashboard-activity-service.ts"]
+  "file:src/services/dashboard-overview-service.ts"["src/services/dashboard-overview-service.ts"]
   "file:src/services/empresa-service.ts"["src/services/empresa-service.ts"]
   "file:src/services/file-storage.ts"["src/services/file-storage.ts"]
   "file:src/services/servico-catalogo-persistente.ts"["src/services/servico-catalogo-persistente.ts"]
@@ -193,15 +194,15 @@
   "rpc:admin_restore_system_backup"["admin_restore_system_backup"]
   "rpc:admin_clear_operational_data"["admin_clear_operational_data"]
   "table:auditoria"["auditoria"]
+  "table:contratos"["contratos"]
+  "table:parcelas"["parcelas"]
   "table:platform_admins"["platform_admins"]
   "table:gm_admin_audit"["gm_admin_audit"]
   "rpc:get_signature_attachment_by_token"["get_signature_attachment_by_token"]
   "table:gm_smtp_settings"["gm_smtp_settings"]
   "table:gm_smtp_mail_log"["gm_smtp_mail_log"]
-  "table:contratos"["contratos"]
   "table:assinaturas"["assinaturas"]
   "table:contrato_historico"["contrato_historico"]
-  "table:parcelas"["parcelas"]
   "table:lancamentos"["lancamentos"]
   "table:estornos"["estornos"]
   "table:signature_signers"["signature_signers"]
@@ -255,6 +256,7 @@
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/lib/utils.ts"
+  "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -475,6 +477,8 @@
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
+  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-overview-service.ts"
+  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Empresas.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -573,6 +577,11 @@
   "file:src/services/dashboard-activity-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/dashboard-activity-service.ts" -->|reads-or-writes| "table:auditoria"
   "file:src/services/dashboard-activity-service.ts" -->|reads-or-writes| "table:profiles"
+  "file:src/services/dashboard-overview-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/dashboard-overview-service.ts" -->|reads-or-writes| "table:clients"
+  "file:src/services/dashboard-overview-service.ts" -->|reads-or-writes| "table:contratos"
+  "file:src/services/dashboard-overview-service.ts" -->|reads-or-writes| "table:parcelas"
+  "file:src/services/dashboard-overview-service.ts" -->|reads-or-writes| "table:gm_financial_entries"
   "file:src/services/empresa-service.ts" -->|imports| "file:src/repositories/empresa-repository.ts"
   "file:src/services/empresa-service.ts" -->|imports| "file:src/lib/empresa-types.ts"
   "file:src/services/empresa-service.ts" -->|imports| "file:src/lib/permissions.ts"

@@ -80,6 +80,8 @@ export function Header({
             }}
             className="p-2.5 rounded-xl hover:bg-bg-tertiary relative pressable"
             aria-label="Notificações"
+            aria-haspopup="menu"
+            aria-expanded={notifOpen}
           >
             <Bell className="w-5 h-5 text-text-primary" />
             {unreadCount > 0 && (
@@ -88,18 +90,22 @@ export function Header({
           </button>
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-bg-primary border border-border-color rounded-2xl shadow-lg py-2 z-50 animate-in">
-              <h3 className="px-4 py-2 text-sm font-semibold border-b border-border-color">Notificações</h3>
+              <div className="flex items-center justify-between border-b border-border-color px-4 py-2">
+                <h3 className="text-sm font-semibold">Atualizações</h3>
+                {unreadCount > 0 && <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">{unreadCount} novas</span>}
+              </div>
               {notifications.length === 0 ? (
                 <p className="px-4 py-6 text-sm text-text-secondary text-center">Sem notificações</p>
               ) : (
-                <div className="max-h-64 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto" role="menu" aria-label="Atualizações recentes">
                   {notifications.map((n) => (
                     <button
                       key={n.id}
                       onClick={() => onNotificationRead?.(n.id)}
-                      className="w-full text-left px-4 py-3 hover:bg-bg-tertiary border-b border-border-color last:border-0"
+                      role="menuitem"
+                      className={cn('w-full text-left px-4 py-3 hover:bg-bg-tertiary border-b border-border-color last:border-0', !n.read && 'bg-brand/5')}
                     >
-                      <p className="text-sm text-text-primary">{n.title}</p>
+                      <p className="flex items-start gap-2 text-sm text-text-primary"><span className={cn('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', n.read ? 'bg-transparent' : 'bg-brand')} />{n.title}</p>
                       <p className="text-xs text-text-secondary">{n.time}</p>
                     </button>
                   ))}

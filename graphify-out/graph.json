@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:21:30.167Z",
+  "generated_at": "2026-10-23T04:27:24.539Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -660,6 +660,11 @@
       "label": "src/services/dashboard-activity-service.ts"
     },
     {
+      "id": "file:src/services/dashboard-overview-service.ts",
+      "type": "file",
+      "label": "src/services/dashboard-overview-service.ts"
+    },
+    {
       "id": "file:src/services/empresa-service.ts",
       "type": "file",
       "label": "src/services/empresa-service.ts"
@@ -975,6 +980,16 @@
       "label": "auditoria"
     },
     {
+      "id": "table:contratos",
+      "type": "database-table",
+      "label": "contratos"
+    },
+    {
+      "id": "table:parcelas",
+      "type": "database-table",
+      "label": "parcelas"
+    },
+    {
       "id": "table:platform_admins",
       "type": "database-table",
       "label": "platform_admins"
@@ -1000,11 +1015,6 @@
       "label": "gm_smtp_mail_log"
     },
     {
-      "id": "table:contratos",
-      "type": "database-table",
-      "label": "contratos"
-    },
-    {
       "id": "table:assinaturas",
       "type": "database-table",
       "label": "assinaturas"
@@ -1013,11 +1023,6 @@
       "id": "table:contrato_historico",
       "type": "database-table",
       "label": "contrato_historico"
-    },
-    {
-      "id": "table:parcelas",
-      "type": "database-table",
-      "label": "parcelas"
     },
     {
       "id": "table:lancamentos",
@@ -1332,6 +1337,12 @@
     {
       "from": "file:src/components/layout/AppLayout.tsx",
       "to": "file:src/lib/utils.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/layout/AppLayout.tsx",
+      "to": "file:src/services/dashboard-activity-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2656,6 +2667,18 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/dashboard/Dashboard.tsx",
+      "to": "file:src/services/dashboard-overview-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Dashboard.tsx",
+      "to": "file:src/lib/export.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/dashboard/DashboardExecutivo.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3240,6 +3263,36 @@
     {
       "from": "file:src/services/dashboard-activity-service.ts",
       "to": "table:profiles",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-overview-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-overview-service.ts",
+      "to": "table:clients",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-overview-service.ts",
+      "to": "table:contratos",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-overview-service.ts",
+      "to": "table:parcelas",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-overview-service.ts",
+      "to": "table:gm_financial_entries",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
