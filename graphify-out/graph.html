@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>208 nós · 434 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>209 nós · 437 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -13,6 +13,7 @@
   "file:public/logo-grow-dark.svg"["public/logo-grow-dark.svg"]
   "file:public/logo-grow.svg"["public/logo-grow.svg"]
   "file:public/manifest.webmanifest"["public/manifest.webmanifest"]
+  "file:src/components/admin/AdminAccordionList.tsx"["src/components/admin/AdminAccordionList.tsx"]
   "file:src/components/admin/AdminLayout.tsx"["src/components/admin/AdminLayout.tsx"]
   "file:src/components/admin/AdminProtectedRoute.tsx"["src/components/admin/AdminProtectedRoute.tsx"]
   "file:src/components/assinatura/SignaturePad.tsx"["src/components/assinatura/SignaturePad.tsx"]
@@ -390,6 +391,7 @@
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/services/admin-file-service.ts"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/components/admin/AdminAccordionList.tsx"
   "file:src/pages/admin/AdminAuditoria.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminAuditoria.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminAuditoria.tsx" -->|imports| "file:src/services/admin-audit-service.ts"
@@ -404,6 +406,7 @@
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/services/admin-resource-service.ts"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/services/file-storage.ts"
+  "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/components/admin/AdminAccordionList.tsx"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -414,6 +417,7 @@
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/services/admin-user-service.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/components/admin/AdminAccordionList.tsx"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"

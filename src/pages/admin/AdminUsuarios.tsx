@@ -3,6 +3,7 @@ import { Pencil, Plus, RefreshCw, Search, Trash2, Users } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { AdminUserService, type AdminCompanyOption, type AdminUser } from '@/services/admin-user-service';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
 
 type UserForm = { nome: string; telefone: string; email: string; password: string; empresaId: string };
 const blankForm: UserForm = { nome: '', telefone: '', email: '', password: '', empresaId: '' };
@@ -63,9 +64,22 @@ export default function AdminUsuarios() {
       <Card padding="none" className="overflow-hidden">
         <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label="Buscar usuários" placeholder="Buscar nome, e-mail ou empresa..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando usuários…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum usuário" description="As contas disponíveis aparecerão aqui." icon={<Users className="h-6 w-6" />} /></div> : (
-          <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="px-4 py-3 font-medium">Usuário</th><th className="px-4 py-3 font-medium">Papel</th><th className="px-4 py-3 font-medium">Empresas</th>{isAdmin && <th className="px-4 py-3 text-right font-medium">Ações</th>}</tr></thead><tbody>
+          <>
+          <AdminAccordionList items={filtered.map((user) => ({
+            id: user.id,
+            title: user.nome || 'Usuário sem nome',
+            subtitle: user.email,
+            details: [
+              { label: 'Papel', value: user.role },
+              { label: 'Empresas', value: user.memberships.map((membership) => membership.empresa_nome).join(', ') || 'Sem vínculo' },
+              ...(user.telefone ? [{ label: 'Telefone', value: user.telefone }] : []),
+            ],
+            actions: isAdmin ? <UserActions user={user} canDelete={user.role === 'vendedor' && user.memberships.length === 1 && user.memberships[0]?.role === 'vendedor'} onEdit={editUser} onDelete={(selected) => void deleteUser(selected)} /> : undefined,
+          }))} />
+          <div className="hidden overflow-x-hidden lg:block"><table className="w-full table-fixed text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="w-[28%] px-4 py-3 font-medium">Usuário</th><th className="w-[16%] px-4 py-3 font-medium">Papel</th><th className="px-4 py-3 font-medium">Empresas</th>{isAdmin && <th className="w-28 px-4 py-3 text-right font-medium">Ações</th>}</tr></thead><tbody>
             {filtered.map((user) => { const canDelete = user.role === 'vendedor' && user.memberships.length === 1 && user.memberships[0]?.role === 'vendedor'; return <tr key={user.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3"><p className="font-medium">{user.nome || '—'}</p><p className="text-xs text-text-secondary">{user.email}</p>{user.telefone && <p className="text-xs text-text-secondary">{user.telefone}</p>}</td><td className="px-4 py-3"><Badge variant={user.role === 'admin' ? 'brand' : 'neutral'}>{user.role}</Badge></td><td className="max-w-64 px-4 py-3 text-text-secondary">{user.memberships.map((membership) => membership.empresa_nome).join(', ') || 'Sem vínculo'}</td>{isAdmin && <td className="whitespace-nowrap px-4 py-3 text-right"><Button variant="ghost" size="sm" aria-label={`Editar ${user.nome}`} onClick={() => editUser(user)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label={`Excluir ${user.nome}`} disabled={!canDelete} title={canDelete ? 'Excluir conta' : 'Apenas contas de vendedor vinculadas a uma única empresa podem ser excluídas por este fluxo'} onClick={() => void deleteUser(user)}><Trash2 className="h-4 w-4 text-erro" /></Button></td>}</tr>; })}
           </tbody></table></div>
+          </>
         )}
       </Card>
       {isAdmin && <Modal open={open} onClose={() => !saving && setOpen(false)} title={editing ? 'Editar usuário' : 'Criar usuário vendedor'} footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="admin-user-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Criar usuário'}</Button></>}>
@@ -80,4 +94,11 @@ export default function AdminUsuarios() {
       </Modal>}
     </div>
   );
+}
+
+function UserActions({ user, canDelete, onEdit, onDelete }: { user: AdminUser; canDelete: boolean; onEdit: (user: AdminUser) => void; onDelete: (user: AdminUser) => void }) {
+  return <>
+    <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label={`Editar ${user.nome}`} onClick={() => onEdit(user)}>Editar</Button>
+    <Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label={`Excluir ${user.nome}`} disabled={!canDelete} title={canDelete ? 'Excluir conta' : 'Apenas contas de vendedor vinculadas a uma única empresa podem ser excluídas por este fluxo'} onClick={() => onDelete(user)}>Excluir</Button>
+  </>;
 }

@@ -4,6 +4,7 @@ import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components
 import { AdminResourceService, type AdminResourceRecord, type AdminResourceTable } from '@/services/admin-resource-service';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { criarLinkArquivo, uploadArquivo } from '@/services/file-storage';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
 
 type Field = {
   name: string;
@@ -261,9 +262,24 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
       <Card padding="none" className="overflow-hidden">
         <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label={`Buscar ${definition.title.toLowerCase()}`} placeholder="Buscar..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum registro" description="Os registros disponíveis aparecerão aqui." /></div> : (
-          <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary">{definition.visible.map((key) => <th key={key} className="px-4 py-3 font-medium">{definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' ')}</th>)}<th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead>
-            <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40">{definition.visible.map((key) => <td key={key} className="max-w-64 truncate px-4 py-3" title={displayValue(row[key])}>{displayValue(row[key])}</td>)}<td className="whitespace-nowrap px-4 py-3 text-right">{isAdmin && !definition.readOnly && <><Button variant="ghost" size="sm" aria-label="Editar registro" onClick={() => openEdit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Excluir registro" onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}</tbody>
-          </table></div>
+          <>
+            <AdminAccordionList items={filtered.map((row) => ({
+              id: row.id,
+              title: displayValue(row[definition.visible[0]]),
+              subtitle: definition.visible[1] ? displayValue(row[definition.visible[1]]) : undefined,
+              details: definition.visible.slice(2).map((key) => ({
+                label: definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' '),
+                value: displayValue(row[key]),
+              })),
+              actions: isAdmin && !definition.readOnly ? <>
+                <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label="Editar registro" onClick={() => openEdit(row)}>Editar</Button>
+                <Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label="Excluir registro" onClick={() => void remove(row)}>Excluir</Button>
+              </> : undefined,
+            }))} />
+            <div className="hidden overflow-x-hidden lg:block"><table className="w-full table-fixed text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary">{definition.visible.map((key) => <th key={key} className="px-4 py-3 font-medium">{definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' ')}</th>)}<th className="w-28 px-2 py-3 text-right font-medium">Ações</th></tr></thead>
+              <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40">{definition.visible.map((key) => <td key={key} className="break-all px-4 py-3" title={displayValue(row[key])}>{displayValue(row[key])}</td>)}<td className="whitespace-nowrap px-2 py-3 text-right">{isAdmin && !definition.readOnly && <><Button variant="ghost" size="sm" aria-label="Editar registro" onClick={() => openEdit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Excluir registro" onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}</tbody>
+            </table></div>
+          </>
         )}
       </Card>
       {isAdmin && <Modal open={open} onClose={() => !saving && setOpen(false)} title={editing ? `Editar ${definition.title.toLowerCase()}` : `Novo registro · ${definition.title.toLowerCase()}`} size="xl" footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="admin-resource-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Criar registro'}</Button></>}>

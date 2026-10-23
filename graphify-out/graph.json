@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:27:24.539Z",
+  "generated_at": "2026-10-23T04:31:07.779Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -73,6 +73,11 @@
       "id": "file:public/manifest.webmanifest",
       "type": "file",
       "label": "public/manifest.webmanifest"
+    },
+    {
+      "id": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "file",
+      "label": "src/components/admin/AdminAccordionList.tsx"
     },
     {
       "id": "file:src/components/admin/AdminLayout.tsx",
@@ -2145,6 +2150,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminArquivos.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminAuditoria.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2229,6 +2240,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminRecursos.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminSeguranca.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2285,6 +2302,12 @@
     {
       "from": "file:src/pages/admin/AdminUsuarios.tsx",
       "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminUsuarios.tsx",
+      "to": "file:src/components/admin/AdminAccordionList.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },

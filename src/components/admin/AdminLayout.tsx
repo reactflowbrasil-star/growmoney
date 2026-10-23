@@ -152,7 +152,7 @@ export function AdminLayout() {
             </button>
           </div>
         </header>
-        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-auto">
+        <main className="min-w-0 flex-1 overflow-x-hidden p-3 sm:p-4 md:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

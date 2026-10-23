@@ -3,6 +3,7 @@ import { Download, File, FolderOpen, Pencil, Plus, RefreshCw, Search, Trash2 } f
 import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { AdminFileService, ADMIN_FILE_MAX_BYTES, type AdminFile } from '@/services/admin-file-service';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
 
 const formatSize = (size: number) => size < 1024 * 1024 ? `${Math.max(1, Math.round(size / 1024))} KB` : `${(size / (1024 * 1024)).toFixed(1)} MB`;
 
@@ -67,9 +68,24 @@ export default function AdminArquivos() {
       <Card padding="none" className="overflow-hidden">
         <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label="Buscar arquivos" placeholder="Buscar arquivo ou categoria..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando arquivos…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum arquivo" description="Arquivos enviados aparecerão aqui." icon={<FolderOpen className="h-6 w-6" />} /></div> : (
-          <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="px-4 py-3 font-medium">Arquivo</th><th className="px-4 py-3 font-medium">Categoria</th><th className="px-4 py-3 font-medium">Tipo</th><th className="px-4 py-3 font-medium">Tamanho</th><th className="px-4 py-3 font-medium">Enviado em</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead><tbody>
-            {filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3"><div className="flex items-center gap-2"><File className="h-4 w-4 shrink-0 text-text-secondary" /><span className="max-w-64 truncate font-medium" title={row.original_name}>{row.original_name}</span></div></td><td className="px-4 py-3">{row.categoria}</td><td className="px-4 py-3 text-text-secondary">{row.content_type || '—'}</td><td className="px-4 py-3 tabular-nums">{formatSize(row.size_bytes)}</td><td className="px-4 py-3 text-text-secondary">{row.created_at ? new Date(row.created_at).toLocaleDateString('pt-BR') : '—'}</td><td className="whitespace-nowrap px-4 py-3 text-right"><Button variant="ghost" size="sm" aria-label={`Baixar ${row.original_name}`} loading={busyId === row.id} onClick={() => void download(row)}><Download className="h-4 w-4" /></Button>{isAdmin && <><Button variant="ghost" size="sm" aria-label={`Editar ${row.original_name}`} disabled={!!busyId} onClick={() => edit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label={`Excluir ${row.original_name}`} disabled={!!busyId} onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}
-          </tbody></table></div>
+          <>
+            <AdminAccordionList items={filtered.map((row) => ({
+              id: row.id,
+              title: row.original_name,
+              subtitle: `${row.categoria} · ${formatSize(row.size_bytes)}`,
+              details: [
+                { label: 'Tipo', value: row.content_type || '—' },
+                { label: 'Enviado em', value: row.created_at ? new Date(row.created_at).toLocaleString('pt-BR') : '—' },
+              ],
+              actions: <>
+                <Button variant="outline" size="sm" leftIcon={<Download className="h-4 w-4" />} aria-label={`Baixar ${row.original_name}`} loading={busyId === row.id} onClick={() => void download(row)}>Baixar</Button>
+                {isAdmin && <><Button variant="ghost" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label={`Editar ${row.original_name}`} disabled={!!busyId} onClick={() => edit(row)}>Editar</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label={`Excluir ${row.original_name}`} disabled={!!busyId} onClick={() => void remove(row)}>Excluir</Button></>}
+              </>,
+            }))} />
+            <div className="hidden overflow-x-hidden lg:block"><table className="w-full table-fixed text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="w-[30%] px-4 py-3 font-medium">Arquivo</th><th className="px-4 py-3 font-medium">Categoria</th><th className="px-4 py-3 font-medium">Tipo</th><th className="px-4 py-3 font-medium">Tamanho</th><th className="px-4 py-3 font-medium">Enviado em</th><th className="w-32 px-4 py-3 text-right font-medium">Ações</th></tr></thead><tbody>
+              {filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="break-all px-4 py-3"><div className="flex items-center gap-2"><File className="h-4 w-4 shrink-0 text-text-secondary" /><span className="font-medium">{row.original_name}</span></div></td><td className="break-words px-4 py-3">{row.categoria}</td><td className="break-all px-4 py-3 text-text-secondary">{row.content_type || '—'}</td><td className="px-4 py-3 tabular-nums">{formatSize(row.size_bytes)}</td><td className="px-4 py-3 text-text-secondary">{row.created_at ? new Date(row.created_at).toLocaleDateString('pt-BR') : '—'}</td><td className="whitespace-nowrap px-2 py-3 text-right"><Button variant="ghost" size="sm" aria-label={`Baixar ${row.original_name}`} loading={busyId === row.id} onClick={() => void download(row)}><Download className="h-4 w-4" /></Button>{isAdmin && <><Button variant="ghost" size="sm" aria-label={`Editar ${row.original_name}`} disabled={!!busyId} onClick={() => edit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label={`Excluir ${row.original_name}`} disabled={!!busyId} onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}
+            </tbody></table></div>
+          </>
         )}
       </Card>
       {isAdmin && <Modal open={open} onClose={() => !saving && setOpen(false)} title={editing ? 'Editar arquivo' : 'Enviar arquivo'} footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="admin-file-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Enviar'}</Button></>}>
