@@ -118,6 +118,7 @@ function App() {
 
                   <Route element={<ProtectedRoute />}>
                     <Route path="/vendedor" element={<VendedorWorkspace />} />
+                    <Route path="/vendedor/contrato" element={<SellerContractRoute />} />
                     <Route element={<WorkspaceRoleRoute />}>
                     <Route element={<AppLayout />}>
                       <Route path="/dashboard" element={<Dashboard />} />
@@ -165,10 +166,18 @@ function WorkspaceRoleRoute() {
   return <Outlet />;
 }
 
+function SellerContractRoute() {
+  const { user, empresaAtiva, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (user?.role !== 'vendedor' && empresaAtiva?.role !== 'vendedor') return <Navigate to="/dashboard" replace />;
+  return <ContratoNovo vendedorMode />;
+}
+
 const rootEl = document.getElementById('root');
 if (!rootEl) {
   throw new Error('Elemento #root nao encontrado no HTML');
 }
 
 createRoot(rootEl).render(<App />);
+
 

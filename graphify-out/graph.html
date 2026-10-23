@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>244 nós · 530 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>244 nós · 532 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -588,10 +588,12 @@
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/services/vendor-visit-service.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:vendedores"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:agenda"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/admin/AdminAccordionList.tsx"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/hooks/useAdminHiddenRecords.ts"

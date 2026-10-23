@@ -20,7 +20,7 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function ContratoNovo() {
+export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: boolean }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [clientes, setClientes] = useState<ClienteLocal[]>(() => listClientes());
@@ -178,7 +178,7 @@ export default function ContratoNovo() {
         observacoes: obsInternas || undefined,
         status: 'rascunho',
       });
-      navigate(`/contratos?criado=${contrato.id}`);
+      navigate(vendedorMode ? '/vendedor?contrato=criado' : `/contratos?criado=${contrato.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Não foi possível criar o contrato.');
     } finally {
@@ -192,7 +192,7 @@ export default function ContratoNovo() {
         title="Novo contrato"
         description={`Passo ${step} de 4`}
         actions={
-          <Button variant="outline" size="sm" leftIcon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate('/contratos')}>
+          <Button variant="outline" size="sm" leftIcon={<ArrowLeft className="w-4 h-4" />} onClick={() => navigate(vendedorMode ? '/vendedor' : '/contratos')}>
             Voltar
           </Button>
         }
@@ -570,3 +570,4 @@ export default function ContratoNovo() {
     </div>
   );
 }
+

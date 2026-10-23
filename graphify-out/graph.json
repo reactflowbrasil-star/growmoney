@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T12:02:45.101Z",
+  "generated_at": "2026-10-23T12:21:27.247Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -3298,6 +3298,12 @@
     },
     {
       "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/lib/contratos-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
       "to": "file:src/lib/vendor-visit-types.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -3317,6 +3323,12 @@
     {
       "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
       "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "table:agenda",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -4408,3 +4420,4 @@
     }
   ]
 }
+
