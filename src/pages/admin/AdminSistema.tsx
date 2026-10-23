@@ -1,5 +1,6 @@
 import { Card, PageHeader, Badge } from '@/components/ui';
 import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export default function AdminSistema() {
   const envOk = Boolean(import.meta.env.VITE_SUPABASE_URL);
@@ -10,7 +11,7 @@ export default function AdminSistema() {
       <Card className="p-5 space-y-4">
         <h2 className="font-semibold">Identidade</h2>
         <div className="flex flex-col xs:flex-row xs:items-center gap-3 sm:gap-4">
-          <img src={BRAND.logo} alt={BRAND.name} className="h-14 w-auto max-w-[180px] object-contain self-start" />
+          <BrandLogo linkTo={false} heightClass="h-14" className="max-w-[180px] self-start" />
           <div className="text-sm min-w-0 break-words">
             <p className="font-medium">{BRAND.name}</p>
             <p className="text-text-secondary">{BRAND.product}</p>

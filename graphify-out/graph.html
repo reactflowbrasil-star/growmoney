@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>192 nós · 385 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>193 nós · 391 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -154,6 +154,7 @@
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
   "asset:public/assets/canal360-logo.png"["public/assets/canal360-logo.png"]
+  "asset:public/assets/grow-logo-black.png"["public/assets/grow-logo-black.png"]
   "asset:public/assets/logo.png"["public/assets/logo.png"]
   "asset:public/sw.js"["public/sw.js"]
   "asset:public/_redirects"["public/_redirects"]
@@ -194,6 +195,7 @@
   "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/components/admin/AdminProtectedRoute.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/components/admin/AdminProtectedRoute.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/components/assinatura/SignaturePad.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -204,6 +206,7 @@
   "file:src/components/auth/ProtectedRoute.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
   "file:src/components/dashboard/ChartContainer.tsx" -->|imports| "file:src/components/ui/Card.tsx"
   "file:src/components/dashboard/ChartContainer.tsx" -->|imports| "file:src/components/ui/Loading.tsx"
   "file:src/components/dashboard/ChartContainer.tsx" -->|imports| "file:src/components/ui/EmptyState.tsx"
@@ -236,13 +239,13 @@
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/components/layout/Header.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/components/layout/MobileBottomNav.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
-  "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/components/layout/Header.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/components/layout/MobileBottomNav.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/lib/utils.ts"
-  "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/components/pwa/InstallPwaButton.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/components/pwa/InstallPwaButton.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/ui/Badge.tsx" -->|imports| "file:src/lib/utils.ts"
@@ -377,29 +380,32 @@
   "file:src/pages/admin/AdminEmpresas.tsx" -->|imports| "file:src/pages/admin/AdminRecursos.tsx"
   "file:src/pages/admin/AdminLogin.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminLogin.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
-  "file:src/pages/admin/AdminLogin.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/pages/admin/AdminLogin.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/services/admin-resource-service.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/services/admin-user-service.ts"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/components/ui/index.ts"
-  "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/auth/Cadastre.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/auth/Cadastro.tsx" -->|imports| "file:src/components/ui/Input.tsx"
   "file:src/pages/auth/Cadastro.tsx" -->|imports| "file:src/components/ui/Button.tsx"
   "file:src/pages/auth/Cadastro.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/auth/Cadastro.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/pages/auth/Cadastro.tsx" -->|imports| "file:src/components/auth/GoogleButton.tsx"
+  "file:src/pages/auth/Cadastro.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/auth/Login.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/auth/Login.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/auth/Login.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/pages/auth/Login.tsx" -->|imports| "file:src/components/auth/GoogleButton.tsx"
   "file:src/pages/auth/Login.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
+  "file:src/pages/auth/Login.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/auth/Privacidade.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/auth/Privacidade.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/pages/auth/RecuperacaoSenha.tsx" -->|imports| "file:src/components/ui/Button.tsx"
@@ -467,11 +473,12 @@
   "file:src/pages/dashboard/Vendedores.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/assinatura/SignaturePad.tsx"
-  "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/lib/assinatura-store.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/lib/assinatura-types.ts"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/lib/brand.ts"
+  "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:src/repositories/admin-audit-repository.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/repositories/admin-audit-repository.ts" -->|calls-rpc| "rpc:admin_list_audit"

@@ -6,6 +6,7 @@ export const BRAND = {
   tagline: 'Gestão financeira inteligente para empresas que crescem',
   logo: 'https://canal360.run.place/grow/assets/logo.png',
   logoUrl: 'https://canal360.run.place/grow/assets/logo.png',
+  logoLight: `${import.meta.env.BASE_URL}assets/grow-logo-black.png`,
   site: 'https://growmoneydigital.com.br',
   colors: {
     primary: '#87a913',

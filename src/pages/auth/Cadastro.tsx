@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 import { BRAND } from '@/lib/brand';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export default function Cadastro() {
   const [form, setForm] = useState({
@@ -91,11 +92,7 @@ export default function Cadastro() {
     <main className="auth-screen w-full flex items-center justify-center bg-transparent overflow-x-clip px-3 py-[max(.5rem,env(safe-area-inset-top))] pb-[max(.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-3">
       <div className="auth-card w-full max-w-xl bg-bg-primary/90 backdrop-blur-xl border border-border-color rounded-2xl p-3 sm:p-5 shadow-lg">
         <div className="auth-brand text-center mb-3 space-y-1.5">
-          <img
-            src={BRAND.logo}
-            alt={BRAND.name}
-            className="auth-logo mx-auto h-auto max-h-[min(11svh,68px)] w-full max-w-[min(100%,250px)] object-contain"
-          />
+          <BrandLogo linkTo={false} heightClass="h-auto max-h-[min(11svh,68px)]" className="auth-logo mx-auto w-full max-w-[min(100%,250px)]" />
           <h1 className="text-xl font-bold text-text-primary">Criar conta</h1>
           <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
         </div>

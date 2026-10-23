@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bell, Search, Menu, LogOut, Settings, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -41,11 +42,7 @@ export function Header({
       </button>
 
       <Link to="/dashboard" className="flex items-center shrink-0 md:hidden" aria-label={BRAND.name}>
-        <img
-          src={BRAND.logo}
-          alt={BRAND.name}
-          className="h-9 w-auto max-w-[min(26vw,120px)] object-contain"
-        />
+        <BrandLogo linkTo={false} heightClass="h-9" className="max-w-[min(26vw,120px)]" />
       </Link>
 
       <div className="flex-1 max-w-md mx-auto hidden sm:block">

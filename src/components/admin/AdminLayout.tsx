@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 const nav = [
   { to: '/admin', label: 'Visão geral', icon: LayoutDashboard, end: true },
@@ -49,11 +50,7 @@ export function AdminLayout() {
     <>
       <div className="h-24 sm:h-28 px-4 flex items-center border-b border-border-color shrink-0">
         <Link to="/admin" onClick={closeMenu} className="flex flex-col gap-0.5">
-          <img
-            src={BRAND.logo}
-            alt={BRAND.name}
-            className="h-14 sm:h-[60px] w-auto max-w-[220px] object-contain"
-          />
+          <BrandLogo linkTo={false} heightClass="h-14 sm:h-[60px]" className="max-w-[220px]" />
           <span className="text-[10px] uppercase tracking-widest text-brand font-semibold">
             Painel Admin
           </span>

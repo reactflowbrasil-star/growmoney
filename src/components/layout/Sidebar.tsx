@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 interface NavItem {
   label: string;
@@ -12,7 +12,6 @@ interface NavItem {
 
 interface SidebarProps {
   items: NavItem[];
-  logo?: string;
   user?: { name: string; email: string; avatar?: string };
   collapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
@@ -22,7 +21,6 @@ interface SidebarProps {
 
 export function Sidebar({
   items,
-  logo = BRAND.logo,
   user,
   collapsed = false,
   onCollapse,
@@ -62,13 +60,10 @@ export function Sidebar({
           isCollapsed ? 'h-16 px-2 justify-center' : 'h-20 px-4'
         )}
       >
-        <img
-          src={logo}
-          alt={BRAND.name}
-          className={cn(
-            'object-contain transition-all',
-            isCollapsed ? 'h-10 w-10' : 'h-14 w-auto max-w-full object-left'
-          )}
+        <BrandLogo
+          linkTo={false}
+          heightClass={isCollapsed ? 'h-10 w-10' : 'h-14'}
+          className={cn('transition-all', isCollapsed ? 'max-w-10' : 'max-w-full object-left')}
         />
         {!isCollapsed && !embedded && (
           <button

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T03:33:19.393Z",
+  "generated_at": "2026-10-23T03:40:31.425Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -780,6 +780,11 @@
       "label": "public/assets/canal360-logo.png"
     },
     {
+      "id": "asset:public/assets/grow-logo-black.png",
+      "type": "static-asset",
+      "label": "public/assets/grow-logo-black.png"
+    },
+    {
       "id": "asset:public/assets/logo.png",
       "type": "static-asset",
       "label": "public/assets/logo.png"
@@ -985,6 +990,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/components/admin/AdminLayout.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/components/admin/AdminProtectedRoute.tsx",
       "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
@@ -1041,6 +1052,12 @@
     {
       "from": "file:src/components/brand/BrandLogo.tsx",
       "to": "file:src/lib/brand.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/brand/BrandLogo.tsx",
+      "to": "file:src/contexts/ThemeContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -1238,12 +1255,6 @@
     },
     {
       "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/lib/brand.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
       "to": "file:src/lib/utils.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -1257,6 +1268,12 @@
     {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/lib/brand.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/layout/Header.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -1274,7 +1291,7 @@
     },
     {
       "from": "file:src/components/layout/Sidebar.tsx",
-      "to": "file:src/lib/brand.ts",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2084,7 +2101,7 @@
     },
     {
       "from": "file:src/pages/admin/AdminLogin.tsx",
-      "to": "file:src/lib/brand.ts",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2125,6 +2142,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminSistema.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminUsuarios.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2150,7 +2173,7 @@
     },
     {
       "from": "file:src/pages/auth/AuthCallback.tsx",
-      "to": "file:src/lib/brand.ts",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2191,6 +2214,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/auth/Cadastro.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/auth/Login.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2217,6 +2246,12 @@
     {
       "from": "file:src/pages/auth/Login.tsx",
       "to": "file:src/components/pwa/InstallPwaButton.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/auth/Login.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2624,7 +2659,7 @@
     },
     {
       "from": "file:src/pages/public/AssinarDocumento.tsx",
-      "to": "file:src/lib/brand.ts",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2649,6 +2684,12 @@
     {
       "from": "file:src/pages/public/LandingPage.tsx",
       "to": "file:src/lib/brand.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/public/LandingPage.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Card } from '@/components/ui';
 import { Lock, User } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
-import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -35,11 +35,7 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-bg-secondary p-4">
       <Card className="w-full max-w-md p-6 md:p-8">
         <div className="text-center mb-8 space-y-3">
-          <img
-            src={BRAND.logo}
-            alt={BRAND.name}
-            className="h-[96px] md:h-[120px] w-auto max-w-[360px] mx-auto object-contain"
-          />
+          <BrandLogo linkTo={false} heightClass="h-[96px] md:h-[120px]" className="max-w-[360px] mx-auto" />
           <div>
             <p className="text-xs uppercase tracking-widest text-brand font-semibold">Painel Admin</p>
             <p className="text-sm text-text-secondary mt-1">

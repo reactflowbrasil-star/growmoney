@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { LoadingSpinner } from '@/components/ui';
-import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-transparent p-4">
-      <img src={BRAND.logo} alt="" className="h-16 w-auto object-contain opacity-90" />
+      <BrandLogo linkTo={false} heightClass="h-16" className="opacity-90" />
       {error ? (
         <div className="text-center space-y-3">
           <p className="text-sm text-erro max-w-sm">{error}</p>

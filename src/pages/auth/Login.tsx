@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { BRAND } from '@/lib/brand';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { InstallPwaButton } from '@/components/pwa/InstallPwaButton';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -45,11 +46,7 @@ export default function Login() {
     <main className="auth-screen w-full flex items-center justify-center bg-transparent overflow-x-clip px-3 py-[max(.5rem,env(safe-area-inset-top))] pb-[max(.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-3">
       <Card className="auth-card w-full max-w-md !border-border-color !bg-bg-primary/90 !shadow-lg backdrop-blur-xl p-4 sm:p-6 md:p-7">
         <div className="auth-brand text-center mb-4 sm:mb-5 space-y-2">
-          <img
-            src={BRAND.logo}
-            alt={BRAND.name}
-            className="auth-logo mx-auto h-auto max-h-[min(14svh,88px)] w-full max-w-[min(100%,260px)] object-contain"
-          />
+          <BrandLogo linkTo={false} heightClass="h-auto max-h-[min(14svh,88px)]" className="auth-logo mx-auto w-full max-w-[min(100%,260px)]" />
           <p className="auth-tagline text-text-secondary text-xs leading-4">{BRAND.tagline}</p>
         </div>
 

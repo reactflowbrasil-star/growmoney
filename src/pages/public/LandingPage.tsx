@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 import { InstallPwaButton } from '@/components/pwa/InstallPwaButton';
 
 const heroPhrases = [
@@ -164,7 +165,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-border-color/70 bg-bg-primary/80 backdrop-blur-2xl">
         <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-3 px-4 sm:h-20 sm:px-6 lg:px-8">
           <Link to="/" className="flex min-w-0 items-center" aria-label={`${BRAND.name} — início`}>
-            <img src={BRAND.logo} alt={BRAND.name} className="h-11 w-auto max-w-[min(44vw,210px)] object-contain object-left sm:h-14 sm:max-w-[250px]" />
+            <BrandLogo linkTo={false} heightClass="h-11 sm:h-14" className="max-w-[min(44vw,210px)] object-left sm:max-w-[250px]" />
           </Link>
           <nav aria-label="Acesso" className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <Link to="/auth"><Button variant="ghost" size="sm" className="px-3 sm:px-4">Entrar</Button></Link>
@@ -247,7 +248,7 @@ export default function LandingPage() {
       <footer className="border-t border-border-color/80 bg-bg-primary/50 py-7">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-sm text-text-secondary sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <img src={BRAND.logo} alt="" className="h-9 w-auto max-w-[170px] object-contain object-left opacity-90" />
+            <BrandLogo linkTo={false} heightClass="h-9" className="max-w-[170px] object-left opacity-90" />
             <span className="text-xs sm:text-sm">© {new Date().getFullYear()} {BRAND.name}</span>
           </div>
           <nav aria-label="Informações legais" className="flex items-center gap-5 text-xs sm:text-sm">

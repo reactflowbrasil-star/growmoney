@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button, Card, Input, Badge } from '@/components/ui';
 import { SignaturePad } from '@/components/assinatura/SignaturePad';
-import { BRAND } from '@/lib/brand';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 import {
   getEnvelopeBySignerToken,
   markViewed,
@@ -139,7 +139,7 @@ export default function AssinarDocumento() {
     <div className="min-h-screen bg-transparent">
       <header className="border-b border-border-color bg-bg-primary/90 backdrop-blur sticky top-0 z-20">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <img src={BRAND.logo} alt={BRAND.name} className="h-10 w-auto max-w-[140px] object-contain" />
+          <BrandLogo linkTo={false} heightClass="h-10" className="max-w-[140px]" />
           <Badge variant="info">Assinatura segura</Badge>
         </div>
       </header>

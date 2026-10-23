@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type BrandLogoProps = {
   heightClass?: string;
@@ -15,9 +16,10 @@ export function BrandLogo({
   linkTo = '/',
   compact = false,
 }: BrandLogoProps) {
+  const { theme } = useTheme();
   const img = (
     <img
-      src={BRAND.logo}
+      src={theme === 'light' ? BRAND.logoLight : BRAND.logo}
       alt={BRAND.name}
       className={cn(
         heightClass,

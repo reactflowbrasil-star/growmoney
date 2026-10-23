@@ -18,7 +18,6 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '@/contexts/AuthContext';
-import { BRAND } from '@/lib/brand';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -69,7 +68,6 @@ export function AppLayout() {
       <div className="hidden md:block">
         <Sidebar
           items={navItems}
-          logo={BRAND.logo}
           user={layoutUser}
           collapsed={sidebarCollapsed}
           onCollapse={setSidebarCollapsed}
@@ -91,7 +89,6 @@ export function AppLayout() {
         >
           <Sidebar
             items={navItems}
-            logo={BRAND.logo}
             user={layoutUser}
             embedded
             onCollapse={() => setMobileOpen(false)}
