@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:36:49.180Z",
+  "generated_at": "2026-10-23T04:39:22.950Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -2691,6 +2691,12 @@
     {
       "from": "file:src/pages/dashboard/Dashboard.tsx",
       "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Dashboard.tsx",
+      "to": "file:src/components/pwa/InstallPwaButton.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },

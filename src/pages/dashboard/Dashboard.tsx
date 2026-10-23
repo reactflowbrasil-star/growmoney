@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Activity, AlertTriangle, FileText, RefreshCw, TrendingUp, Users, Wallet } from 'lucide-react';
 import { Cell, CartesianGrid, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Button, Card, PageHeader } from '@/components/ui';
+import { InstallPwaButton } from '@/components/pwa/InstallPwaButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRecentDashboardActivity, type DashboardActivity } from '@/services/dashboard-activity-service';
 import { getDashboardOverview, type DashboardOverview } from '@/services/dashboard-overview-service';
@@ -53,7 +54,7 @@ export default function Dashboard() {
   return (
     <div className="max-w-7xl space-y-5">
       <PageHeader title="Dashboard" description={empresaAtiva ? `Indicadores e atualizações de ${empresaAtiva.nome}.` : 'Indicadores pessoais e atualizações recentes.'}
-        actions={<Button variant="outline" size="sm" leftIcon={<RefreshCw className="h-4 w-4" />} disabled={loading} onClick={() => void loadDashboard()}>Atualizar</Button>} />
+        actions={<div className="flex flex-wrap items-center gap-2"><InstallPwaButton className="min-h-9 px-3 py-2 text-xs sm:text-sm" /><Button variant="outline" size="sm" leftIcon={<RefreshCw className="h-4 w-4" />} disabled={loading} onClick={() => void loadDashboard()}>Atualizar</Button></div>} />
 
       {error && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</p>}
       {!empresaAtiva && <p className="rounded-lg border border-border-color bg-bg-secondary p-3 text-sm text-text-secondary">Selecione ou cadastre uma empresa para visualizar indicadores detalhados.</p>}
