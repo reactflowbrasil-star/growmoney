@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Download, FileJson, Mail, RefreshCw, Server, Upload } from 'lucide-react';
+import { Download, FileJson, Mail, PackageOpen, RefreshCw, Server, Upload } from 'lucide-react';
 import { Button, Card, Input, PageHeader, Badge } from '@/components/ui';
 import { BRAND } from '@/lib/brand';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { AdminSystemBackupService, type ImportPreview } from '@/services/admin-system-backup-service';
+import { AdminHostingMigrationService } from '@/services/admin-hosting-migration-service';
 import { AdminSmtpService, type SmtpSettings } from '@/services/admin-smtp-service';
 import { DEFAULT_EMAIL_TEMPLATES, EMAIL_TEMPLATE_INFO, EMAIL_TEMPLATE_KEYS, EMAIL_TEMPLATE_PREVIEW_VALUES, renderEmailTemplate, type EmailTemplate, type EmailTemplateKey } from '@/lib/email-templates';
 
@@ -16,10 +17,16 @@ function escapePreviewHtml(value: string) {
 
 export default function AdminSistema() {
   const envOk = Boolean(import.meta.env.VITE_SUPABASE_URL);
+  const migrationBase = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '/';
+  const migrationTarget = migrationBase === '/' ? 'public_html' : `public_html${migrationBase}`;
   const [exporting, setExporting] = useState(false);
   const [preview, setPreview] = useState<{ name: string; result: ImportPreview; input: unknown } | null>(null);
   const [transferError, setTransferError] = useState('');
   const [transferBusy, setTransferBusy] = useState(false);
+  const [migrationBusy, setMigrationBusy] = useState(false);
+  const [migrationProgress, setMigrationProgress] = useState('');
+  const [migrationNotice, setMigrationNotice] = useState('');
+  const [migrationError, setMigrationError] = useState('');
   const [smtp, setSmtp] = useState<SmtpForm>(emptySmtp);
   const [passwordConfigured, setPasswordConfigured] = useState(false);
   const [smtpLoading, setSmtpLoading] = useState(true);
@@ -157,6 +164,29 @@ export default function AdminSistema() {
       setTransferError(error instanceof Error ? error.message : 'Não foi possível exportar os dados.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const downloadCpanelPackage = async () => {
+    setMigrationBusy(true);
+    setMigrationProgress('Gerando backup operacional seguro…');
+    setMigrationNotice('');
+    setMigrationError('');
+    try {
+      const backup = await AdminSystemBackupService.exportFullSystemBackup();
+      const result = await AdminHostingMigrationService.createCpanelPackage(backup, setMigrationProgress);
+      const url = URL.createObjectURL(result.blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `growmoney-migracao-cpanel-${result.createdAt.slice(0, 10)}.zip`;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      setMigrationNotice(`Pacote pronto com ${result.fileCount.toLocaleString('pt-BR')} arquivos. Consulte o README incluído antes de instalar.`);
+    } catch (error) {
+      setMigrationError(error instanceof Error ? error.message : 'Não foi possível gerar o pacote de migração.');
+    } finally {
+      setMigrationBusy(false);
+      setMigrationProgress('');
     }
   };
 
@@ -306,6 +336,22 @@ export default function AdminSistema() {
           <span>Ambiente</span>
           <Badge variant="info">{import.meta.env.MODE}</Badge>
         </div>
+      </Card>
+      <Card className="space-y-4 border border-brand/30 p-5">
+        <div>
+          <div className="flex items-center gap-2"><PackageOpen className="h-5 w-5 text-brand" /><h2 className="font-semibold">Migração para cPanel</h2></div>
+          <p className="mt-1 text-sm text-text-secondary">Gere um ZIP pronto para enviar pelo Gerenciador de Arquivos do cPanel. O pacote inclui a aplicação publicada, regras de rota, ponte SMTP sem credenciais e backup operacional.</p>
+        </div>
+        <ul className="grid gap-2 rounded-xl border border-border-color bg-bg-secondary/40 p-4 text-sm text-text-secondary">
+          <li>Envie os arquivos extraídos para <code className="rounded bg-bg-primary px-1.5 py-0.5">{migrationTarget}</code> e mantenha o caminho <code className="rounded bg-bg-primary px-1.5 py-0.5">{migrationBase}</code>.</li>
+          <li>Autenticação, banco, Storage e funções continuam no Supabase configurado nesta build.</li>
+          <li>O backup operacional não leva usuários, permissões, auditoria, segredos, tokens privados ou arquivos binários do Storage.</li>
+          <li>O SMTP exige configurar a chave privada no novo cPanel e atualizar os segredos da função no Supabase; as instruções estão no ZIP.</li>
+        </ul>
+        <Button leftIcon={<PackageOpen className="h-4 w-4" />} loading={migrationBusy} onClick={() => void downloadCpanelPackage()}>Gerar pacote para cPanel</Button>
+        {migrationProgress && <p className="text-sm text-text-secondary" role="status">{migrationProgress}</p>}
+        {migrationNotice && <p className="rounded-lg border border-brand/30 bg-brand/10 p-3 text-sm" role="status">{migrationNotice}</p>}
+        {migrationError && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{migrationError}</p>}
       </Card>
       <Card className="space-y-4 p-5">
         <div>

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T09:40:28.683Z",
+  "generated_at": "2026-10-23T09:58:00.832Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -693,6 +693,16 @@
       "id": "file:src/services/admin-file-service.ts",
       "type": "file",
       "label": "src/services/admin-file-service.ts"
+    },
+    {
+      "id": "file:src/services/admin-hosting-migration-service.test.ts",
+      "type": "file",
+      "label": "src/services/admin-hosting-migration-service.test.ts"
+    },
+    {
+      "id": "file:src/services/admin-hosting-migration-service.ts",
+      "type": "file",
+      "label": "src/services/admin-hosting-migration-service.ts"
     },
     {
       "id": "file:src/services/admin-resource-service.ts",
@@ -2599,6 +2609,12 @@
     },
     {
       "from": "file:src/pages/admin/AdminSistema.tsx",
+      "to": "file:src/services/admin-hosting-migration-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminSistema.tsx",
       "to": "file:src/services/admin-smtp-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -3657,6 +3673,24 @@
       "from": "file:src/services/admin-file-service.ts",
       "to": "rpc:admin_log_event",
       "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-hosting-migration-service.test.ts",
+      "to": "file:src/services/admin-hosting-migration-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-hosting-migration-service.ts",
+      "to": "file:src/services/admin-resource-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-hosting-migration-service.ts",
+      "to": "file:src/services/admin-system-backup-service.ts",
+      "type": "imports",
       "confidence": "EXTRACTED"
     },
     {
