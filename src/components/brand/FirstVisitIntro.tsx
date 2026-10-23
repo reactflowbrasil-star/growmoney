@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { BRAND } from '@/lib/brand';
 
-const INTRO_STORAGE_KEY = 'growmoney-first-visit-intro-v1';
+// A persistent localStorage flag suppresses the intro on every future visit.
+// Keep completion scoped to this tab session so a fresh app entry can show it.
+const INTRO_STORAGE_KEY = 'growmoney-first-visit-intro-session-v2';
 
 function wasIntroCompleted() {
   try {
-    return window.localStorage.getItem(INTRO_STORAGE_KEY) === 'complete';
+    return window.sessionStorage.getItem(INTRO_STORAGE_KEY) === 'complete';
   } catch {
     return false;
   }
@@ -35,7 +37,7 @@ export function FirstVisitIntro() {
     const timeline = gsap.timeline({
       onComplete: () => {
         try {
-          window.localStorage.setItem(INTRO_STORAGE_KEY, 'complete');
+          window.sessionStorage.setItem(INTRO_STORAGE_KEY, 'complete');
         } catch {
           // Keep the introduction usable when browser storage is unavailable.
         }
@@ -95,3 +97,4 @@ export function FirstVisitIntro() {
     </div>
   );
 }
+

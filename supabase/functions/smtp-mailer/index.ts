@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { EMAIL_TEMPLATE_KEYS, mergeEmailTemplates, renderEmailTemplate, validateEmailTemplate, type EmailTemplateKey } from "../../../src/lib/email-templates.ts";
+import { EMAIL_TEMPLATE_KEYS, ensureEmailLink, mergeEmailTemplates, renderEmailTemplate, validateEmailTemplate, type EmailTemplateKey } from "../../../src/lib/email-templates.ts";
 
 type Settings = {
   host: string;
@@ -273,12 +273,18 @@ Deno.serve(async (request: Request) => {
         nome, empresa: company?.nome || "a empresa", link: activationLink,
         appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
       };
+      const activationHtml = ensureEmailLink(
+        renderEmailTemplate(template.html, templateVariables, escapeHtml),
+        activationLink,
+        escapeHtml,
+        "Ativar e definir senha",
+      );
       await transport.sendMail({
         from: { name: settings.from_name, address: settings.from_email },
         to: email,
         subject: renderSubject(template.subject, templateVariables, "Ative seu acesso ao GrowMoney"),
         text: `Olá ${nome},\n\nSeu cadastro de vendedor para ${company?.nome || "a empresa"} foi criado. Confirme seu e-mail e defina sua senha para ativar o acesso pelo link abaixo:\n\n${activationLink}\n\nSe você não esperava este convite, ignore esta mensagem.`,
-        html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
+        html: activationHtml,
       });
       await logMail(clients.serviceClient, actorId, "vendor_activation_email", email, true, { empresaId, vendedorId: seller.id });
       return respond({ sent: true }, 200, origin);
@@ -572,3 +578,4 @@ Deno.serve(async (request: Request) => {
     return respond({ error: failure.message }, 502, origin);
   }
 });
+

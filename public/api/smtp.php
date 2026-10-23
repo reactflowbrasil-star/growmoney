@@ -54,6 +54,37 @@ function mime_header(string $value): string {
     return function_exists('mb_encode_mimeheader') ? mb_encode_mimeheader($value, 'UTF-8', 'B', "\r\n") : '=?UTF-8?B?' . base64_encode($value) . '?=';
 }
 
+function build_mime_message(string $from, string $fromName, array $recipients, string $subject, string $text, string $html, string $messageIdDomain): string {
+    $boundary = '=_GrowMoney_' . bin2hex(random_bytes(18));
+    $toHeader = implode(', ', array_map(static fn($address) => '<' . $address . '>', $recipients));
+    $messageIdDomain = preg_replace('/[^a-z0-9.-]/i', '', $messageIdDomain) ?: 'growmoney.local';
+
+    $headers = [
+        'From: ' . mime_header($fromName) . ' <' . $from . '>',
+        'To: ' . $toHeader,
+        'Subject: ' . mime_header($subject),
+        'Date: ' . date(DATE_RFC2822),
+        'Message-ID: <' . bin2hex(random_bytes(16)) . '@' . $messageIdDomain . '>',
+        'MIME-Version: 1.0',
+        'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
+        'X-Mailer: GrowMoney SMTP',
+    ];
+
+    $parts = [
+        '--' . $boundary . "\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode($text), 76, "\r\n"),
+        '--' . $boundary . "\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode($html), 76, "\r\n"),
+        '--' . $boundary . "--\r\n",
+    ];
+
+    return implode("\r\n", $headers) . "\r\n\r\n" . implode('', $parts);
+}
+
 function smtp_send(array $settings, string $action, ?array $mail): void {
     $host = strtolower(trim((string)($settings['host'] ?? '')));
     $port = (int)($settings['port'] ?? 0);
@@ -107,22 +138,13 @@ function smtp_send(array $settings, string $action, ?array $mail): void {
         foreach ($recipients as $recipient) smtp_command($socket, 'RCPT TO:<' . $recipient . '>', [250, 251]);
         smtp_command($socket, 'DATA', [354]);
 
-        $boundary = '=_GrowMoney_' . bin2hex(random_bytes(18));
-        $toHeader = implode(', ', array_map(static fn($address) => '<' . $address . '>', $recipients));
-        $subject = mime_header((string)$mail['subject']);
+        $subject = clean_header((string)$mail['subject'], 240);
         $text = (string)($mail['text'] ?? '');
         $html = (string)($mail['html'] ?? '');
         if (strlen($text) > 500000 || strlen($html) > 1000000) smtp_fail('MESSAGE_TOO_LARGE', 'A mensagem excede o tamanho permitido.');
-        $body = "From: " . mime_header($fromName) . " <{$from}>\r\n"
-            . "To: {$toHeader}\r\nSubject: {$subject}\r\nDate: " . date(DATE_RFC2822) . "\r\n"
-            . "MIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=\"{$boundary}\"\r\n\r\n"
-            . "--{$boundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
-            . chunk_split(base64_encode($text), 76, "\r\n")
-            . "--{$boundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n"
-            . chunk_split(base64_encode($html), 76, "\r\n")
-            . "--{$boundary}--\r\n";
-        $body = preg_replace('/(?m)^\./', '..', str_replace(["\r\n", "\r", "\n"], "\r\n", $body));
-        smtp_write($socket, $body . ".\r\n");
+        $message = build_mime_message($from, $fromName, $recipients, $subject, $text, $html, (string)substr(strrchr($from, '@') ?: '', 1));
+        $message = preg_replace('/(?m)^\./', '..', str_replace(["\r\n", "\r", "\n"], "\r\n", $message)) ?? $message;
+        smtp_write($socket, $message . ".\r\n");
         smtp_read($socket, [250]);
         smtp_command($socket, 'QUIT', [221]);
     } finally {
@@ -158,4 +180,5 @@ try {
     error_log('GrowMoney SMTP bridge failure: ' . get_class($error));
     reply(502, ['error' => 'O servidor SMTP recusou a conexão ou a mensagem.', 'code' => 'SMTP_BRIDGE_FAILURE']);
 }
+
 

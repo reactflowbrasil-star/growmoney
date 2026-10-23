@@ -144,3 +144,14 @@ export function mergeEmailTemplates(value: unknown): Record<EmailTemplateKey, Em
     return [key, validateEmailTemplate(candidate) ? DEFAULT_EMAIL_TEMPLATES[key] : candidate as EmailTemplate];
   })) as Record<EmailTemplateKey, EmailTemplate>;
 }
+
+export function ensureEmailLink(html: string, url: string, escapeHtml: (text: string) => string, label = 'Abrir link'): string {
+  const safeUrl = escapeHtml(url);
+  if (html.includes(safeUrl) || html.includes(url)) return html;
+
+  const fallback = `<p style="margin:24px 0 8px"><a href="${safeUrl}" style="color:#c65300;text-decoration:underline">${escapeHtml(label)}</a></p>
+    <p style="font-size:12px;line-height:1.5;color:#68717d;margin:0">Se o botão não abrir, copie este endereço para o navegador:<br><a href="${safeUrl}" style="color:#c65300;word-break:break-all">${safeUrl}</a></p>`;
+  const bodyEnd = html.search(/<\/body\s*>/i);
+  return bodyEnd >= 0 ? `${html.slice(0, bodyEnd)}${fallback}${html.slice(bodyEnd)}` : `${html}${fallback}`;
+}
+

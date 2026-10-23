@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>243 nós · 526 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>244 nós · 530 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -20,6 +20,7 @@
   "file:src/components/auth/GoogleButton.tsx"["src/components/auth/GoogleButton.tsx"]
   "file:src/components/auth/ProtectedRoute.tsx"["src/components/auth/ProtectedRoute.tsx"]
   "file:src/components/brand/BrandLogo.tsx"["src/components/brand/BrandLogo.tsx"]
+  "file:src/components/brand/FirstVisitIntro.tsx"["src/components/brand/FirstVisitIntro.tsx"]
   "file:src/components/chat/LiveChat.tsx"["src/components/chat/LiveChat.tsx"]
   "file:src/components/dashboard/ChartContainer.tsx"["src/components/dashboard/ChartContainer.tsx"]
   "file:src/components/dashboard/ContratosStatusChart.tsx"["src/components/dashboard/ContratosStatusChart.tsx"]
@@ -257,6 +258,7 @@
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
+  "file:src/components/brand/FirstVisitIntro.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/chat/LiveChat.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/components/chat/LiveChat.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/components/chat/LiveChat.tsx" -->|imports| "file:src/services/file-storage.ts"
@@ -370,6 +372,7 @@
   "file:src/main.tsx" -->|imports| "file:src/components/admin/AdminLayout.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/ui/sonar-grid.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/ui/FloatingThemeSwitcher.tsx"
+  "file:src/main.tsx" -->|imports| "file:src/components/brand/FirstVisitIntro.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/VendedorWorkspace.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Visitas.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/layout/GlobalFooter.tsx"
@@ -467,6 +470,8 @@
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/services/file-storage.ts"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/components/admin/AdminAccordionList.tsx"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/hooks/useAdminHiddenRecords.ts"
+  "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/lib/contrato-template.ts"
+  "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/ui/index.ts"

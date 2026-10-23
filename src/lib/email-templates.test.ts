@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_EMAIL_TEMPLATES,
   EMAIL_TEMPLATE_KEYS,
+  ensureEmailLink,
   mergeEmailTemplates,
   renderEmailTemplate,
   validateEmailTemplate,
@@ -29,6 +30,22 @@ describe('modelos de e-mail', () => {
     expect(activation).toContain('Ativar e definir senha');
   });
 
+  it('mantém o link de ativação visível mesmo se o modelo editável não tiver o botão', () => {
+    const link = 'https://project.supabase.co/auth/v1/verify?token=abc&redirect_to=https%3A%2F%2Fcanal360.run.place';
+    const html = ensureEmailLink('<html><body><p>Convite</p></body></html>', link, escapeHtml, 'Ativar cadastro');
+
+    expect(html).toContain(`href="${link.replace(/&/g, '&amp;')}"`);
+    expect(html).toContain('Ativar cadastro');
+    expect(html).toContain('Se o botão não abrir, copie este endereço');
+    expect(html.indexOf('href=')).toBeLessThan(html.indexOf('</body>'));
+  });
+
+  it('não duplica o link quando o modelo já o inclui', () => {
+    const link = 'https://project.supabase.co/auth/v1/verify?token=abc';
+    const html = ensureEmailLink(`<a href="${link}">${link}</a>`, link, escapeHtml);
+    expect(html.match(/Abrir link/g)).toBeNull();
+  });
+
   it('substitui variáveis escapando valores fornecidos pelo usuário', () => {
     expect(renderEmailTemplate('<p>{{nome}}</p>', { nome: '<script>alert(1)</script>' }, escapeHtml))
       .toBe('<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>');
@@ -47,3 +64,4 @@ describe('modelos de e-mail', () => {
     expect(templates.test_email).toEqual(DEFAULT_EMAIL_TEMPLATES.test_email);
   });
 });
+
