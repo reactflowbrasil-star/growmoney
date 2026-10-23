@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
-import nodemailer from "npm:nodemailer@6.9.16";
 
 type Settings = {
   host: string;
@@ -99,19 +98,36 @@ async function loadSettings(client: SupabaseClient): Promise<Settings | null> {
 }
 
 function makeTransport(settings: Settings, password: string) {
-  if (settings.port !== 465 || settings.secure !== true) {
-    throw new Error("SMTP neste ambiente requer porta 465 com TLS seguro.");
+  if (settings.port !== 587 || settings.secure !== false) {
+    throw new Error("O SMTP da hospedagem requer porta 587 com STARTTLS.");
   }
-  return nodemailer.createTransport({
-    host: settings.host,
-    port: settings.port,
-    secure: settings.secure,
-    auth: { user: settings.username, pass: password },
-    connectionTimeout: 12_000,
-    greetingTimeout: 12_000,
-    socketTimeout: 20_000,
-    tls: { minVersion: "TLSv1.2" },
-  });
+  const endpoint = Deno.env.get("SMTP_HOSTING_API_URL");
+  const bridgeKey = Deno.env.get("SMTP_HOSTING_API_KEY");
+  if (!endpoint || !bridgeKey || !endpoint.startsWith("https://") || bridgeKey.length < 32) {
+    throw new Error("SMTP_HOSTING_API_URL ou SMTP_HOSTING_API_KEY não configurado.");
+  }
+  const call = async (payload: Record<string, unknown>) => {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${bridgeKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ settings: {
+        host: settings.host, port: settings.port, username: settings.username,
+        fromEmail: settings.from_email, fromName: settings.from_name, password,
+      }, ...payload }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const result = await response.json().catch(() => ({})) as { error?: string; code?: string };
+    if (!response.ok) {
+      const error = new Error(result.error || "O servidor de hospedagem recusou a operação SMTP.") as Error & { code?: string };
+      error.code = result.code || `HOSTING_${response.status}`;
+      throw error;
+    }
+    return result;
+  };
+  return {
+    verify: () => call({ action: "verify" }),
+    sendMail: (mail: Record<string, unknown>) => call({ action: "send", mail }),
+  };
 }
 
 function escapeHtml(value: string) {
@@ -128,16 +144,19 @@ function safeSmtpFailure(error: unknown) {
   if (originalMessage.includes("SMTP_ENCRYPTION_KEY")) {
     return { message: "Configure o segredo SMTP_ENCRYPTION_KEY nas Edge Function Secrets.", code: "ENCRYPTION_KEY_MISSING" };
   }
-  if (originalMessage.includes("SMTP neste ambiente requer")) {
+  if (originalMessage.includes("SMTP da hospedagem requer")) {
     return { message: originalMessage, code: "SMTP_PORT_UNSUPPORTED" };
+  }
+  if (originalMessage.includes("SMTP_HOSTING_API_URL") || originalMessage.includes("SMTP_HOSTING_API_KEY")) {
+    return { message: "Configure o endereço e a chave segura da ponte SMTP da hospedagem.", code: "SMTP_HOSTING_NOT_CONFIGURED" };
   }
   const code = error && typeof error === "object" && "code" in error && typeof error.code === "string"
     ? error.code.replace(/[^A-Z0-9_]/gi, "").slice(0, 32)
     : "";
   return {
     message: code
-      ? `Falha na comunicação SMTP (${code}). Verifique servidor, porta 465 com TLS e credenciais.`
-      : "Falha na comunicação SMTP. Verifique servidor, porta 465 com TLS e credenciais.",
+      ? `Falha no envio SMTP (${code}). Verifique o servidor, porta 587 com STARTTLS e as credenciais.`
+      : "Falha no envio SMTP. Verifique o servidor, porta 587 com STARTTLS e as credenciais.",
     code: code || "SMTP_ERROR",
   };
 }
@@ -362,8 +381,8 @@ Deno.serve(async (request: Request) => {
     const password = typeof input.password === "string" ? input.password : "";
     const secure = input.secure === true;
     const enabled = input.enabled !== false;
-    if (port !== 465 || secure !== true) {
-      return respond({ error: "Use a porta 465 com TLS seguro. As portas SMTP 25 e 587 são bloqueadas neste ambiente." }, 400, origin);
+    if (port !== 587 || secure !== false) {
+      return respond({ error: "Use a porta 587 com TLS direto desativado para conectar por STARTTLS na hospedagem." }, 400, origin);
     }
     if (!/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(host)
       || !username || username.length > 254 || !emailIsValid(fromEmail) || !fromName || fromName.length > 120
@@ -507,3 +526,4 @@ Deno.serve(async (request: Request) => {
     return respond({ error: failure.message }, 502, origin);
   }
 });
+
