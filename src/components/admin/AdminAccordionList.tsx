@@ -15,7 +15,7 @@ export function AdminAccordionList({ items, emptyMessage = 'Nenhum item para exi
   return (
     <div className="space-y-2 p-3" aria-label="Registros em lista expansível">
       {items.map((item) => (
-        <details key={item.id} className="group min-w-0 overflow-hidden rounded-xl border border-border-color bg-bg-primary">
+        <details key={item.id} className="admin-accordion-card group min-w-0 overflow-hidden rounded-xl border border-border-color bg-bg-primary transition-[border-color,box-shadow] duration-200">
           <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
             <span className="min-w-0 flex-1">
               <span className="block break-words text-sm font-semibold text-text-primary">{item.title}</span>
@@ -39,3 +39,4 @@ export function AdminAccordionList({ items, emptyMessage = 'Nenhum item para exi
     </div>
   );
 }
+

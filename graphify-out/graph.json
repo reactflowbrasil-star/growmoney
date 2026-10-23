@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T05:23:56.312Z",
+  "generated_at": "2026-10-23T05:26:15.232Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -4008,3 +4008,4 @@
     }
   ]
 }
+
