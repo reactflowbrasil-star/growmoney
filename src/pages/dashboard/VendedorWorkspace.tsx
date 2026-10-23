@@ -16,7 +16,6 @@ export default function VendedorWorkspace() {
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [visits, setVisits] = useState<VendorVisit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [intro, setIntro] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busyVisit, setBusyVisit] = useState<string | null>(null);
@@ -46,10 +45,6 @@ export default function VendedorWorkspace() {
   }, [user?.id]);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIntro(false), 2200);
-    return () => window.clearTimeout(timer);
-  }, []);
   useEffect(() => () => { if (gpsWatch.current !== null) navigator.geolocation?.clearWatch(gpsWatch.current); if (noticeTimer.current) window.clearTimeout(noticeTimer.current); }, []);
   useEffect(() => {
     if (!sellerId || !user?.empresa_id) return;
@@ -105,7 +100,6 @@ export default function VendedorWorkspace() {
 
   return (
     <main className="vendor-shell min-h-dvh bg-bg-secondary text-text-primary">
-      {intro && <div className="vendor-intro" aria-hidden="true"><div className="vendor-intro-logo"><BrandLogo linkTo={false} heightClass="h-20 sm:h-28" className="max-w-[min(70vw,320px)]" /></div><p>Área do vendedor</p></div>}
       <header className="sticky top-0 z-20 border-b border-border-color bg-bg-primary/95 px-4 py-3 backdrop-blur sm:px-6">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4"><BrandLogo linkTo={false} heightClass="h-10" className="max-w-[140px]"/><div className="flex items-center gap-3"><span className="hidden text-sm text-text-secondary sm:block">Olá, {user?.nome}</span><InstallPwaButton className="min-h-9 px-3 py-2 text-xs"/><Button variant="ghost" size="sm" aria-label="Sair" onClick={() => void logout()}><LogOut className="h-4 w-4"/></Button></div></div>
       </header>

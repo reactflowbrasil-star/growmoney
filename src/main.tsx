@@ -12,6 +12,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { SonarGrid } from '@/components/ui/sonar-grid';
 import { FloatingThemeSwitcher } from '@/components/ui/FloatingThemeSwitcher';
+import { FirstVisitIntro } from '@/components/brand/FirstVisitIntro';
 import VendedorWorkspace from '@/pages/dashboard/VendedorWorkspace';
 import Visitas from '@/pages/dashboard/Visitas';
 import { GlobalFooter } from '@/components/layout/GlobalFooter';
@@ -143,6 +144,7 @@ function App() {
 
                   <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
+                    <FirstVisitIntro />
                     <GlobalFooter />
                     <FloatingThemeSwitcher />
                   </BrowserRouter>
