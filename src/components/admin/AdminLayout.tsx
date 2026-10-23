@@ -13,6 +13,7 @@ import {
   FileSignature,
   FolderOpen,
   Wallet,
+  ArrowLeft,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -137,8 +138,14 @@ export function AdminLayout() {
             <p className="hidden sm:block text-xs text-text-secondary">Gestão global · {BRAND.name}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/dashboard" className="hidden sm:inline text-xs text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded">
-              Ir ao app →
+            <Link
+              to="/dashboard"
+              aria-label="Voltar ao sistema"
+              title="Voltar ao sistema"
+              className="min-h-11 min-w-11 flex items-center justify-center gap-2 rounded-lg text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-3"
+            >
+              <ArrowLeft aria-hidden="true" className="h-5 w-5" />
+              <span className="hidden text-xs font-semibold sm:inline">Voltar ao sistema</span>
             </Link>
             <button
               type="button"
@@ -159,3 +166,4 @@ export function AdminLayout() {
     </div>
   );
 }
+
