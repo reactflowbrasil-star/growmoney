@@ -143,7 +143,12 @@ function smtp_send(array $settings, string $action, ?array $mail): void {
         $html = (string)($mail['html'] ?? '');
         if (strlen($text) > 500000 || strlen($html) > 1000000) smtp_fail('MESSAGE_TOO_LARGE', 'A mensagem excede o tamanho permitido.');
         $message = build_mime_message($from, $fromName, $recipients, $subject, $text, $html, (string)substr(strrchr($from, '@') ?: '', 1));
-        $message = preg_replace('/(?m)^\./', '..', str_replace(["\r\n", "\r", "\n"], "\r\n", $message)) ?? $message;
+        // Replace CRLF, CR, and LF in one pass. Sequential str_replace calls
+        // reprocess the CR and LF inserted by the first replacement, adding
+        // blank lines between every header and causing SMTP to treat headers
+        // as message body text.
+        $message = preg_replace('/\r\n|\r|\n/', "\r\n", $message) ?? $message;
+        $message = preg_replace('/(?m)^\./', '..', $message) ?? $message;
         smtp_write($socket, $message . ".\r\n");
         smtp_read($socket, [250]);
         smtp_command($socket, 'QUIT', [221]);
@@ -180,5 +185,4 @@ try {
     error_log('GrowMoney SMTP bridge failure: ' . get_class($error));
     reply(502, ['error' => 'O servidor SMTP recusou a conexão ou a mensagem.', 'code' => 'SMTP_BRIDGE_FAILURE']);
 }
-
 

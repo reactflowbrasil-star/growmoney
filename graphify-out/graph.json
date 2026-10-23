@@ -1,10 +1,7 @@
-Warning: truncated output (original token count: 31726)
-Total output lines: 4411
-
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T10:54:11.238Z",
+  "generated_at": "2026-10-23T11:17:29.620Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -2131,7 +2128,259 @@ Total output lines: 4411
     },
     {
       "from": "file:src/main.tsx",
-      "to": "file:src/pages/das…1726 tokens truncated…/Contratos.tsx",
+      "to": "file:src/pages/dashboard/Auditoria.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Configuracoes.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Perfil.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Empresas.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Assinaturas.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/public/AssinarDocumento.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminLogin.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminDashboard.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminEmpresas.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminUsuarios.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminArquivos.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminSistema.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminAuditoria.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminSeguranca.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/public/LandingPage.tsx",
+      "type": "route:/",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/Login.tsx",
+      "type": "route:/auth",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/Login.tsx",
+      "type": "route:/login",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/Cadastro.tsx",
+      "type": "route:/cadastro",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/AuthCallback.tsx",
+      "type": "route:/auth/callback",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/RecuperacaoSenha.tsx",
+      "type": "route:/recuperar-senha",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/TermosUso.tsx",
+      "type": "route:/termos",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/auth/Privacidade.tsx",
+      "type": "route:/privacidade",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/public/AssinarDocumento.tsx",
+      "type": "route:/assinar/:token",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminLogin.tsx",
+      "type": "route:/admin/login",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/components/admin/AdminLayout.tsx",
+      "type": "route:/admin",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminEmpresas.tsx",
+      "type": "route:empresas",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminUsuarios.tsx",
+      "type": "route:usuarios",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:clientes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:contratos",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:assinaturas",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminArquivos.tsx",
+      "type": "route:arquivos",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:financeiro",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminSistema.tsx",
+      "type": "route:sistema",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminAuditoria.tsx",
+      "type": "route:auditoria",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminSeguranca.tsx",
+      "type": "route:seguranca",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "type": "route:/vendedor",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Dashboard.tsx",
+      "type": "route:/dashboard",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/DashboardExecutivo.tsx",
+      "type": "route:/dashboard/executivo",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Clientes.tsx",
+      "type": "route:/clientes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Clientes.tsx",
+      "type": "route:/clients",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/dashboard/Contratos.tsx",
       "type": "route:/contratos",
       "confidence": "EXTRACTED"
     },
@@ -4159,4 +4408,3 @@ Total output lines: 4411
     }
   ]
 }
-
