@@ -192,7 +192,22 @@ body.auth-layout-active [role='group'][aria-label='Seletor de tema'] { display: 
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
   .mobile-nav-pad {
-    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-nav-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand) var(--bg-secondary);
+    -webkit-overflow-scrolling: touch;
+  }
+  .mobile-nav-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+  .mobile-nav-scroll::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+  .mobile-nav-scroll::-webkit-scrollbar-thumb {
+    background: var(--brand);
+    border-radius: 9999px;
   }
   @media (min-width: 768px) {
     .mobile-nav-pad { padding-bottom: 0; }

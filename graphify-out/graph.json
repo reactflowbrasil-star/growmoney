@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:31:07.779Z",
+  "generated_at": "2026-10-23T04:33:04.122Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -1352,6 +1352,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/components/layout/AppLayout.tsx",
+      "to": "file:src/config/nav.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/lib/utils.ts",
       "type": "imports",
@@ -1372,6 +1378,12 @@
     {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/layout/MobileBottomNav.tsx",
+      "to": "file:src/config/nav.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },

@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>209 nós · 437 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>209 nós · 439 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -258,10 +258,12 @@
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
+  "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/config/nav.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/components/layout/MobileBottomNav.tsx" -->|imports| "file:src/config/nav.ts"
   "file:src/components/layout/MobileBottomNav.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
