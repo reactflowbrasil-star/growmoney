@@ -124,7 +124,7 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
   </article>
   <style>
     .contract-document{max-width:860px;margin:0 auto;color:#1f2937;font-family:Arial,sans-serif;font-size:11pt;line-height:1.55}
-    .contract-brand{display:flex;justify-content:space-between;border-bottom:2px solid #0f766e;padding-bottom:12px;margin-bottom:20px;color:#0f766e}
+    .contract-brand{display:flex;justify-content:space-between;border-bottom:2px solid #ff6a00;padding-bottom:12px;margin-bottom:20px;color:#c2410c}
     .contract-document h1{font-size:20pt;text-align:center;margin:12px 0 2px}
     .contract-document h2{font-size:12pt;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #cbd5e1;color:#0f172a}
     .contract-document p{margin:8px 0;text-align:justify}

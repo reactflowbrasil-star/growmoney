@@ -1,13 +1,13 @@
 :root {
-  --brand: #87a913;
-  --brand-light: #b5d64b;
-  --brand-dark: #526b0b;
-  --brand-contrast: #526b0b;
-  --brand-hover: #526b0b;
-  --brand-glow: rgba(135, 169, 19, 0.38);
+  --brand: #ff6a00;
+  --brand-light: #ff9a52;
+  --brand-dark: #c2410c;
+  --brand-contrast: #a33b05;
+  --brand-hover: #e85d04;
+  --brand-glow: rgba(255, 106, 0, 0.38);
   --color-erro: #ef4444;
   --color-aviso: #f59e0b;
-  --color-sucesso: #87a913;
+  --color-sucesso: #ff6a00;
   --color-informacao: #3b82f6;
   --bg-primary: #ffffff;
   --bg-secondary: #f4f6f9;
@@ -37,8 +37,8 @@
   --header-height: 4.5rem;
 }
 [data-theme="dark"] {
-  --brand-contrast: #b5d64b;
-  --brand-hover: #526b0b;
+  --brand-contrast: #ff9a52;
+  --brand-hover: #e85d04;
   --bg-primary: #0b1220;
   --bg-secondary: #080d16;
   --bg-tertiary: #151c2c;

@@ -176,7 +176,7 @@ export default function LandingPage() {
 
       <main>
         <section className="gradient-hero relative isolate overflow-hidden">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_42%_50%_at_85%_42%,rgba(135,169,19,0.12),transparent_75%)]" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_42%_50%_at_85%_42%,rgba(255,106,0,0.12),transparent_75%)]" />
           <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:grid-cols-[1.02fr_.98fr] lg:gap-10 lg:px-8 lg:py-24">
             <div className="mx-auto w-full max-w-2xl text-center lg:mx-0 lg:text-left">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-brand-dark dark:text-brand-light">
@@ -234,7 +234,7 @@ export default function LandingPage() {
 
         <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
           <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-brand/20 bg-bg-primary px-6 py-12 text-center shadow-lg sm:px-10 sm:py-16">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_100%_at_50%_100%,rgba(135,169,19,0.16),transparent_80%)]" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_100%_at_50%_100%,rgba(255,106,0,0.16),transparent_80%)]" />
             <div className="relative mx-auto max-w-2xl">
               <span className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/12 text-brand"><FileText aria-hidden="true" className="h-5 w-5" /></span>
               <h2 className="font-display text-3xl font-light leading-tight tracking-[-0.045em] text-text-primary sm:text-4xl">Pronto para ter <span className="font-bold">mais clareza?</span></h2>

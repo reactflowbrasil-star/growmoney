@@ -24,14 +24,14 @@ const config: Config = {
           DEFAULT: '#ffffff',
         },
         verde: {
-          DEFAULT: '#2e7d4f',
-          light: '#4caf6b',
-          dark: '#1b5e3a',
+          DEFAULT: '#ff6a00',
+          light: '#ff9a52',
+          dark: '#c2410c',
         },
         'verde-discreto': {
-          DEFAULT: '#2e7d4f',
-          light: '#4caf6b',
-          dark: '#1b5e3a',
+          DEFAULT: '#ff6a00',
+          light: '#ff9a52',
+          dark: '#c2410c',
         },
         bg: {
           primary: 'var(--bg-primary)',

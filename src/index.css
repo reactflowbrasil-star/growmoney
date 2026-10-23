@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* Brand text uses a theme-specific high-contrast shade; brand fills stay #87a913. */
+  /* Brand text uses a theme-specific high-contrast shade for the orange brand fill. */
   .text-brand { color: var(--brand-contrast); }
 }
 
@@ -24,7 +24,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
   #root { min-height: 100dvh; }
-  ::selection { background: rgba(135, 169, 19, 0.3); color: inherit; }
+  ::selection { background: rgba(255, 106, 0, 0.3); color: inherit; }
   h1, h2, h3, h4 {
     letter-spacing: -0.025em;
     font-weight: 700;
@@ -142,22 +142,22 @@ body.auth-layout-active [role='group'][aria-label='Seletor de tema'] { display: 
   }
   .card-premium:hover {
     box-shadow: var(--shadow-md);
-    border-color: rgba(135, 169, 19, 0.32);
+    border-color: rgba(255, 106, 0, 0.32);
     transform: translateY(-1px);
   }
   .card-premium:active { transform: translateY(0); }
   .gradient-brand {
-    background: linear-gradient(135deg, #526b0b 0%, #87a913 55%, #b5d64b 100%);
+    background: linear-gradient(135deg, #c2410c 0%, #ff6a00 55%, #ff9a52 100%);
   }
   .gradient-hero {
     background:
-      radial-gradient(ellipse 90% 55% at 50% -25%, rgba(135, 169, 19, 0.22), transparent),
+      radial-gradient(ellipse 90% 55% at 50% -25%, rgba(255, 106, 0, 0.22), transparent),
       radial-gradient(ellipse 50% 40% at 100% 0%, rgba(59, 130, 246, 0.1), transparent),
-      radial-gradient(ellipse 40% 30% at 0% 50%, rgba(135, 169, 19, 0.08), transparent),
+      radial-gradient(ellipse 40% 30% at 0% 50%, rgba(255, 106, 0, 0.08), transparent),
       transparent;
   }
   .text-gradient {
-    background: linear-gradient(135deg, #526b0b, #87a913 58%, #b5d64b);
+    background: linear-gradient(135deg, #c2410c, #ff6a00 58%, #ff9a52);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
