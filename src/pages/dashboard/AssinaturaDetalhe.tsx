@@ -3,7 +3,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Copy, CheckCircle2, Ban, ExternalLink, Mail } from 'lucide-react';
 import { Button, Card, Badge, PageHeader } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { getEnvelope, sendEnvelope, cancelEnvelope, signingUrl, signingEmailHref, copySigningLink } from '@/lib/assinatura-store';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { getEnvelope, sendEnvelope, cancelEnvelope, signingUrl, copySigningLink } from '@/lib/assinatura-store';
 import { criarLinkArquivo } from '@/services/file-storage';
 import type { Envelope, EnvelopeStatus } from '@/lib/assinatura-types';
 
@@ -21,7 +22,9 @@ const statusMap: Record<
 
 export default function AssinaturaDetalhe() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, empresaAtiva } = useAuth();
+  const { isAdmin } = useAdminAuth();
+  const canManage = isAdmin || empresaAtiva?.role === 'admin';
   const navigate = useNavigate();
   const [env, setEnv] = useState<Envelope | null>(null);
   const [arquivoUrl, setArquivoUrl] = useState('');
@@ -86,7 +89,7 @@ export default function AssinaturaDetalhe() {
         actions={
           <>
             <Badge variant={st.variant}>{st.label}</Badge>
-            {env.status === 'rascunho' && (
+            {canManage && env.status === 'rascunho' && (
               <Button
                 size="sm"
                 leftIcon={<Send className="w-4 h-4" />}
@@ -94,10 +97,10 @@ export default function AssinaturaDetalhe() {
                   void sendEnvelope(env.id, user?.email || 'sistema').then(reload).catch((error) => window.alert(error.message));
                 }}
               >
-                Ativar links de assinatura
+                Enviar convites por e-mail
               </Button>
             )}
-            {env.status !== 'concluido' && env.status !== 'cancelado' && (
+            {canManage && env.status !== 'concluido' && env.status !== 'cancelado' && (
               <Button
                 size="sm"
                 variant="outline"
@@ -115,7 +118,7 @@ export default function AssinaturaDetalhe() {
 
       {(env.status === 'enviado' || env.status === 'parcial') && (
         <p className="rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-text-secondary">
-          Links pessoais ativos. Compartilhe cada convite abaixo. O e-mail só será enviado quando você confirmar o envio no seu aplicativo de e-mail.
+          Os convites foram enviados por e-mail pelo servidor SMTP configurado. Os links individuais permanecem disponíveis abaixo para consulta.
         </p>
       )}
 
@@ -141,9 +144,9 @@ export default function AssinaturaDetalhe() {
                     <Button size="sm" variant="outline" leftIcon={<Copy className="w-3.5 h-3.5" />} onClick={() => copy(s.token)}>
                       {copied === s.token ? 'Copiado' : 'Link'}
                     </Button>
-                    <a href={signingEmailHref(env, s)} className="text-[10px] text-brand inline-flex items-center gap-0.5 justify-center">
-                      <Mail className="w-3 h-3" /> E-mail
-                    </a>
+                    <span className="text-[10px] text-text-secondary inline-flex items-center gap-0.5 justify-center">
+                      <Mail className="w-3 h-3" /> {s.emailSentAt ? `SMTP · ${new Date(s.emailSentAt).toLocaleString('pt-BR')}` : 'Envio SMTP pendente'}
+                    </span>
                     <a href={signingUrl(s.token)} target="_blank" rel="noreferrer" className="text-[10px] text-brand inline-flex items-center gap-0.5 justify-center">
                       Abrir <ExternalLink className="w-3 h-3" />
                     </a>

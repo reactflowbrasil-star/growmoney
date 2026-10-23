@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>193 nós · 391 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>204 nós · 424 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -122,10 +122,14 @@
   "file:src/services/admin-audit-service.ts"["src/services/admin-audit-service.ts"]
   "file:src/services/admin-file-service.ts"["src/services/admin-file-service.ts"]
   "file:src/services/admin-resource-service.ts"["src/services/admin-resource-service.ts"]
+  "file:src/services/admin-smtp-service.ts"["src/services/admin-smtp-service.ts"]
+  "file:src/services/admin-system-backup-service.test.ts"["src/services/admin-system-backup-service.test.ts"]
+  "file:src/services/admin-system-backup-service.ts"["src/services/admin-system-backup-service.ts"]
   "file:src/services/admin-user-service.ts"["src/services/admin-user-service.ts"]
   "file:src/services/client-service.test.ts"["src/services/client-service.test.ts"]
   "file:src/services/client-service.ts"["src/services/client-service.ts"]
   "file:src/services/contrato-wizard-data.ts"["src/services/contrato-wizard-data.ts"]
+  "file:src/services/dashboard-activity-service.ts"["src/services/dashboard-activity-service.ts"]
   "file:src/services/empresa-service.ts"["src/services/empresa-service.ts"]
   "file:src/services/file-storage.ts"["src/services/file-storage.ts"]
   "file:src/services/servico-catalogo-persistente.ts"["src/services/servico-catalogo-persistente.ts"]
@@ -137,6 +141,7 @@
   "file:supabase/README.md"["supabase/README.md"]
   "file:supabase/functions/admin-users/index.ts"["supabase/functions/admin-users/index.ts"]
   "file:supabase/functions/get-signature-attachment/index.ts"["supabase/functions/get-signature-attachment/index.ts"]
+  "file:supabase/functions/smtp-mailer/index.ts"["supabase/functions/smtp-mailer/index.ts"]
   "file:supabase/migrations/20261021000000_init_schema.sql"["supabase/migrations/20261021000000_init_schema.sql"]
   "file:supabase/migrations/20261021010000_assinaturas.sql"["supabase/migrations/20261021010000_assinaturas.sql"]
   "file:supabase/migrations/20261021130000_security_hardening.sql"["supabase/migrations/20261021130000_security_hardening.sql"]
@@ -149,7 +154,11 @@
   "file:supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"["supabase/migrations/20261021185725_restrict_helper_rpc_access.sql"]
   "file:supabase/migrations/20261021193000_signature_public_access.sql"["supabase/migrations/20261021193000_signature_public_access.sql"]
   "file:supabase/migrations/20261022010000_harden_profile_roles.sql"["supabase/migrations/20261022010000_harden_profile_roles.sql"]
+  "file:supabase/migrations/20261023010000_admin_only_tenant_updates.sql"["supabase/migrations/20261023010000_admin_only_tenant_updates.sql"]
   "file:supabase/migrations/20261023024224_empresa_endereco.sql"["supabase/migrations/20261023024224_empresa_endereco.sql"]
+  "file:supabase/migrations/20261023035141_grant_admin_file_metadata_update.sql"["supabase/migrations/20261023035141_grant_admin_file_metadata_update.sql"]
+  "file:supabase/migrations/20261023035510_add_dashboard_activity_audit.sql"["supabase/migrations/20261023035510_add_dashboard_activity_audit.sql"]
+  "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql"["supabase/migrations/20261023040000_smtp_mailer_settings.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -180,10 +189,12 @@
   "table:comissoes"["comissoes"]
   "table:gm_files"["gm_files"]
   "rpc:admin_log_event"["admin_log_event"]
+  "table:auditoria"["auditoria"]
   "table:platform_admins"["platform_admins"]
   "table:gm_admin_audit"["gm_admin_audit"]
-  "table:auditoria"["auditoria"]
   "rpc:get_signature_attachment_by_token"["get_signature_attachment_by_token"]
+  "table:gm_smtp_settings"["gm_smtp_settings"]
+  "table:gm_smtp_mail_log"["gm_smtp_mail_log"]
   "table:contratos"["contratos"]
   "table:assinaturas"["assinaturas"]
   "table:contrato_historico"["contrato_historico"]
@@ -239,10 +250,12 @@
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/components/layout/Header.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/components/layout/MobileBottomNav.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
+  "file:src/components/layout/Header.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/components/layout/MobileBottomNav.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Sidebar.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -371,6 +384,7 @@
   "file:src/main.tsx" -->|route:/empresas| "file:src/pages/dashboard/Empresas.tsx"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/services/admin-file-service.ts"
+  "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminAuditoria.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminAuditoria.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminAuditoria.tsx" -->|imports| "file:src/services/admin-audit-service.ts"
@@ -383,13 +397,18 @@
   "file:src/pages/admin/AdminLogin.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/services/admin-resource-service.ts"
+  "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/pages/admin/AdminRecursos.tsx" -->|imports| "file:src/services/file-storage.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSeguranca.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
+  "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/services/admin-system-backup-service.ts"
+  "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/services/admin-smtp-service.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/services/admin-user-service.ts"
+  "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/auth/AuthCallback.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -417,14 +436,17 @@
   "file:src/pages/dashboard/Agenda.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Agenda.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/dashboard/Agenda.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Agenda.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Agenda.tsx" -->|reads-or-writes| "table:agenda"
   "file:src/pages/dashboard/AssinaturaDetalhe.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/AssinaturaDetalhe.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/AssinaturaDetalhe.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/AssinaturaDetalhe.tsx" -->|imports| "file:src/lib/assinatura-store.ts"
   "file:src/pages/dashboard/AssinaturaDetalhe.tsx" -->|imports| "file:src/services/file-storage.ts"
   "file:src/pages/dashboard/AssinaturaDetalhe.tsx" -->|imports| "file:src/lib/assinatura-types.ts"
   "file:src/pages/dashboard/Assinaturas.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Assinaturas.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Assinaturas.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Assinaturas.tsx" -->|imports| "file:src/lib/assinatura-store.ts"
   "file:src/pages/dashboard/Assinaturas.tsx" -->|imports| "file:src/lib/assinatura-types.ts"
   "file:src/pages/dashboard/Auditoria.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -432,10 +454,12 @@
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/services/client-service.ts"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/lib/client-types.ts"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|reads-or-writes| "table:empresas"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/lib/utils.ts"
@@ -443,9 +467,11 @@
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/lib/contratos-store.ts"
+  "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/ui/index.ts"
-  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/utils.ts"
+  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Empresas.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -457,6 +483,7 @@
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Financeiro.tsx" -->|reads-or-writes| "table:gm_financial_entries"
   "file:src/pages/dashboard/Perfil.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Perfil.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
@@ -466,10 +493,12 @@
   "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/services/servico-catalogo-persistente.ts"
   "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Vendedores.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/assinatura/SignaturePad.tsx"
@@ -514,8 +543,14 @@
   "file:src/services/admin-file-service.ts" -->|reads-or-writes| "table:gm_files"
   "file:src/services/admin-file-service.ts" -->|calls-rpc| "rpc:admin_log_event"
   "file:src/services/admin-resource-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:empresas"
+  "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:empresa_members"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:admin_log_event"
+  "file:src/services/admin-smtp-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/admin-system-backup-service.test.ts" -->|imports| "file:src/services/admin-system-backup-service.ts"
+  "file:src/services/admin-system-backup-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/admin-system-backup-service.ts" -->|imports| "file:src/services/admin-resource-service.ts"
   "file:src/services/admin-user-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/admin-user-service.ts" -->|reads-or-writes| "table:profiles"
   "file:src/services/admin-user-service.ts" -->|reads-or-writes| "table:empresa_members"
@@ -530,6 +565,9 @@
   "file:src/services/contrato-wizard-data.ts" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/services/contrato-wizard-data.ts" -->|imports| "file:src/services/servico-catalogo-persistente.ts"
   "file:src/services/contrato-wizard-data.ts" -->|reads-or-writes| "table:clients"
+  "file:src/services/dashboard-activity-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/dashboard-activity-service.ts" -->|reads-or-writes| "table:auditoria"
+  "file:src/services/dashboard-activity-service.ts" -->|reads-or-writes| "table:profiles"
   "file:src/services/empresa-service.ts" -->|imports| "file:src/repositories/empresa-repository.ts"
   "file:src/services/empresa-service.ts" -->|imports| "file:src/lib/empresa-types.ts"
   "file:src/services/empresa-service.ts" -->|imports| "file:src/lib/permissions.ts"
@@ -547,13 +585,17 @@
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/permissions.ts"
   "file:src/test/InstallPwaButton.test.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:platform_admins"
-  "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresa_members"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:profiles"
+  "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresa_members"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:gm_admin_audit"
-  "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:auditoria"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresas"
   "file:supabase/functions/get-signature-attachment/index.ts" -->|reads-or-writes| "table:gm_files"
   "file:supabase/functions/get-signature-attachment/index.ts" -->|calls-rpc| "rpc:get_signature_attachment_by_token"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_smtp_settings"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_smtp_mail_log"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:signature_envelopes"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|calls-rpc| "rpc:is_platform_admin"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|calls-rpc| "rpc:admin_log_event"
   "file:supabase/migrations/20261021000000_init_schema.sql" -->|defines-table| "table:profiles"
   "file:supabase/migrations/20261021000000_init_schema.sql" -->|defines-table| "table:empresas"
   "file:supabase/migrations/20261021000000_init_schema.sql" -->|defines-table| "table:empresa_members"
@@ -582,4 +624,6 @@
   "file:supabase/migrations/20261021170000_persistent_signature_envelopes.sql" -->|defines-table| "table:signature_envelopes"
   "file:supabase/migrations/20261021170529_persistent_workspace_data.sql" -->|defines-table| "table:gm_financial_entries"
   "file:supabase/migrations/20261021171000_admin_console_and_audit.sql" -->|defines-table| "table:gm_admin_audit"
-  "file:supabase/migrations/20261022010000_harden_profile_roles.sql" -->|defines-table| "table:platform_admins"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>
+  "file:supabase/migrations/20261022010000_harden_profile_roles.sql" -->|defines-table| "table:platform_admins"
+  "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql" -->|defines-table| "table:gm_smtp_settings"
+  "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql" -->|defines-table| "table:gm_smtp_mail_log"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>

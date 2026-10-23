@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Plus, FileSignature, Send, Eye, Trash2, Bell, Copy, CheckCircle2, Clock3, CircleDashed } from 'lucide-react';
 import { Button, Input, Card, EmptyState, Modal, Badge, PageHeader, FileUpload } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import {
   listEnvelopes,
   createEnvelope,
@@ -29,7 +30,9 @@ const statusMap: Record<
 };
 
 export default function Assinaturas() {
-  const { user } = useAuth();
+  const { user, empresaAtiva } = useAuth();
+  const { isAdmin } = useAdminAuth();
+  const canManage = isAdmin || empresaAtiva?.role === 'admin';
   const navigate = useNavigate();
   const [rows, setRows] = useState<Envelope[]>([]);
   const [alerts, setAlerts] = useState<SignatureAlert[]>([]);
@@ -186,11 +189,11 @@ export default function Assinaturas() {
           title="Nenhum envelope"
           description="Crie um documento, adicione signatários e envie para assinatura."
           icon={<FileSignature className="w-6 h-6" />}
-          action={
+          action={(
             <Button leftIcon={<Plus className="w-4 h-4" />} onClick={() => setOpen(true)}>
               Criar envelope
             </Button>
-          }
+          )}
         />
       ) : (
         <div className="space-y-3">
@@ -219,7 +222,7 @@ export default function Assinaturas() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 shrink-0">
-                    {e.status === 'rascunho' && (
+                    {canManage && e.status === 'rascunho' && (
                       <Button size="sm" leftIcon={<Send className="w-3.5 h-3.5" />} onClick={() => enviar(e.id)}>
                         Ativar links
                       </Button>
@@ -245,14 +248,14 @@ export default function Assinaturas() {
                         Detalhe
                       </Button>
                     </Link>
-                    <Button
+                    {canManage && <Button
                       size="sm"
                       variant="ghost"
                       leftIcon={<Trash2 className="w-3.5 h-3.5" />}
                       onClick={() => {
                         void deleteEnvelope(e.id).then(reload).catch((error) => window.alert(error.message));
                       }}
-                    />
+                    />}
                   </div>
                 </div>
               </Card>
@@ -264,7 +267,7 @@ export default function Assinaturas() {
       <Modal open={open} onClose={() => setOpen(false)} title="Novo envelope de assinatura" size="lg">
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <p className="text-xs text-text-secondary rounded-xl bg-bg-secondary border border-border-color p-3">
-            Os links são pessoais e ficam prontos ao ativar o envelope. O sistema não envia e-mails automaticamente; você poderá abrir um convite pré-preenchido no seu e-mail.
+            Os convites serão enviados por e-mail pelo servidor SMTP configurado quando você confirmar o envio do envelope.
           </p>
           <Input label="Título do documento" value={titulo} onChange={(e) => setTitulo(e.target.value)} required />
           <Input label="Descrição (opcional)" value={descricao} onChange={(e) => setDescricao(e.target.value)} />

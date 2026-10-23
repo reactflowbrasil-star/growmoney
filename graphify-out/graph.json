@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T03:44:53.479Z",
+  "generated_at": "2026-10-23T04:16:11.322Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -620,6 +620,21 @@
       "label": "src/services/admin-resource-service.ts"
     },
     {
+      "id": "file:src/services/admin-smtp-service.ts",
+      "type": "file",
+      "label": "src/services/admin-smtp-service.ts"
+    },
+    {
+      "id": "file:src/services/admin-system-backup-service.test.ts",
+      "type": "file",
+      "label": "src/services/admin-system-backup-service.test.ts"
+    },
+    {
+      "id": "file:src/services/admin-system-backup-service.ts",
+      "type": "file",
+      "label": "src/services/admin-system-backup-service.ts"
+    },
+    {
       "id": "file:src/services/admin-user-service.ts",
       "type": "file",
       "label": "src/services/admin-user-service.ts"
@@ -638,6 +653,11 @@
       "id": "file:src/services/contrato-wizard-data.ts",
       "type": "file",
       "label": "src/services/contrato-wizard-data.ts"
+    },
+    {
+      "id": "file:src/services/dashboard-activity-service.ts",
+      "type": "file",
+      "label": "src/services/dashboard-activity-service.ts"
     },
     {
       "id": "file:src/services/empresa-service.ts",
@@ -693,6 +713,11 @@
       "id": "file:supabase/functions/get-signature-attachment/index.ts",
       "type": "file",
       "label": "supabase/functions/get-signature-attachment/index.ts"
+    },
+    {
+      "id": "file:supabase/functions/smtp-mailer/index.ts",
+      "type": "file",
+      "label": "supabase/functions/smtp-mailer/index.ts"
     },
     {
       "id": "file:supabase/migrations/20261021000000_init_schema.sql",
@@ -755,9 +780,29 @@
       "label": "supabase/migrations/20261022010000_harden_profile_roles.sql"
     },
     {
+      "id": "file:supabase/migrations/20261023010000_admin_only_tenant_updates.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023010000_admin_only_tenant_updates.sql"
+    },
+    {
       "id": "file:supabase/migrations/20261023024224_empresa_endereco.sql",
       "type": "migration",
       "label": "supabase/migrations/20261023024224_empresa_endereco.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261023035141_grant_admin_file_metadata_update.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023035141_grant_admin_file_metadata_update.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261023035510_add_dashboard_activity_audit.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023035510_add_dashboard_activity_audit.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023040000_smtp_mailer_settings.sql"
     },
     {
       "id": "file:tailwind.config.ts",
@@ -910,6 +955,11 @@
       "label": "admin_log_event"
     },
     {
+      "id": "table:auditoria",
+      "type": "database-table",
+      "label": "auditoria"
+    },
+    {
       "id": "table:platform_admins",
       "type": "database-table",
       "label": "platform_admins"
@@ -920,14 +970,19 @@
       "label": "gm_admin_audit"
     },
     {
-      "id": "table:auditoria",
-      "type": "database-table",
-      "label": "auditoria"
-    },
-    {
       "id": "rpc:get_signature_attachment_by_token",
       "type": "database-rpc",
       "label": "get_signature_attachment_by_token"
+    },
+    {
+      "id": "table:gm_smtp_settings",
+      "type": "database-table",
+      "label": "gm_smtp_settings"
+    },
+    {
+      "id": "table:gm_smtp_mail_log",
+      "type": "database-table",
+      "label": "gm_smtp_mail_log"
     },
     {
       "id": "table:contratos",
@@ -1255,6 +1310,12 @@
     },
     {
       "from": "file:src/components/layout/AppLayout.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/layout/AppLayout.tsx",
       "to": "file:src/lib/utils.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -1274,6 +1335,12 @@
     {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/components/brand/BrandLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/layout/Header.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2046,6 +2113,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminArquivos.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminAuditoria.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2118,6 +2191,18 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminRecursos.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminRecursos.tsx",
+      "to": "file:src/services/file-storage.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminSeguranca.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2148,6 +2233,18 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/admin/AdminSistema.tsx",
+      "to": "file:src/services/admin-system-backup-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminSistema.tsx",
+      "to": "file:src/services/admin-smtp-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/admin/AdminUsuarios.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2156,6 +2253,12 @@
     {
       "from": "file:src/pages/admin/AdminUsuarios.tsx",
       "to": "file:src/services/admin-user-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/admin/AdminUsuarios.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2323,6 +2426,12 @@
     },
     {
       "from": "file:src/pages/dashboard/Agenda.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Agenda.tsx",
       "to": "table:agenda",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
@@ -2336,6 +2445,12 @@
     {
       "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
       "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2366,6 +2481,12 @@
     {
       "from": "file:src/pages/dashboard/Assinaturas.tsx",
       "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Assinaturas.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2413,6 +2534,12 @@
     },
     {
       "from": "file:src/pages/dashboard/Clientes.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Clientes.tsx",
       "to": "file:src/lib/client-types.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -2432,6 +2559,12 @@
     {
       "from": "file:src/pages/dashboard/Configuracoes.tsx",
       "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Configuracoes.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2479,6 +2612,12 @@
     },
     {
       "from": "file:src/pages/dashboard/Contratos.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Contratos.tsx",
       "to": "file:src/contexts/AuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -2491,7 +2630,13 @@
     },
     {
       "from": "file:src/pages/dashboard/Dashboard.tsx",
-      "to": "file:src/lib/utils.ts",
+      "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Dashboard.tsx",
+      "to": "file:src/services/dashboard-activity-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2563,6 +2708,12 @@
     },
     {
       "from": "file:src/pages/dashboard/Financeiro.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Financeiro.tsx",
       "to": "table:gm_financial_entries",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
@@ -2616,6 +2767,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/dashboard/Servicos.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/dashboard/Vendedores.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -2636,6 +2793,12 @@
     {
       "from": "file:src/pages/dashboard/Vendedores.tsx",
       "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Vendedores.tsx",
+      "to": "file:src/contexts/AdminAuthContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2905,6 +3068,18 @@
     },
     {
       "from": "file:src/services/admin-resource-service.ts",
+      "to": "table:empresas",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-resource-service.ts",
+      "to": "table:empresa_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-resource-service.ts",
       "to": "rpc:is_platform_admin",
       "type": "calls-rpc",
       "confidence": "EXTRACTED"
@@ -2913,6 +3088,30 @@
       "from": "file:src/services/admin-resource-service.ts",
       "to": "rpc:admin_log_event",
       "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-smtp-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-system-backup-service.test.ts",
+      "to": "file:src/services/admin-system-backup-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-system-backup-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-system-backup-service.ts",
+      "to": "file:src/services/admin-resource-service.ts",
+      "type": "imports",
       "confidence": "EXTRACTED"
     },
     {
@@ -2996,6 +3195,24 @@
     {
       "from": "file:src/services/contrato-wizard-data.ts",
       "to": "table:clients",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-activity-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-activity-service.ts",
+      "to": "table:auditoria",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/dashboard-activity-service.ts",
+      "to": "table:profiles",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -3103,25 +3320,19 @@
     },
     {
       "from": "file:supabase/functions/admin-users/index.ts",
-      "to": "table:empresa_members",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:supabase/functions/admin-users/index.ts",
       "to": "table:profiles",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
     {
       "from": "file:supabase/functions/admin-users/index.ts",
-      "to": "table:gm_admin_audit",
+      "to": "table:empresa_members",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
     {
       "from": "file:supabase/functions/admin-users/index.ts",
-      "to": "table:auditoria",
+      "to": "table:gm_admin_audit",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -3140,6 +3351,36 @@
     {
       "from": "file:supabase/functions/get-signature-attachment/index.ts",
       "to": "rpc:get_signature_attachment_by_token",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:gm_smtp_settings",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:gm_smtp_mail_log",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:signature_envelopes",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "rpc:is_platform_admin",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "rpc:admin_log_event",
       "type": "calls-rpc",
       "confidence": "EXTRACTED"
     },
@@ -3314,6 +3555,18 @@
     {
       "from": "file:supabase/migrations/20261022010000_harden_profile_roles.sql",
       "to": "table:platform_admins",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql",
+      "to": "table:gm_smtp_settings",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql",
+      "to": "table:gm_smtp_mail_log",
       "type": "defines-table",
       "confidence": "EXTRACTED"
     }

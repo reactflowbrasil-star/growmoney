@@ -60,19 +60,7 @@ Deno.serve(async (request) => {
     .eq('user_id', actor.id)
     .maybeSingle();
   if (platformAdminError) return json(500, { error: 'Falha ao verificar permissões administrativas.' });
-  const isPlatformAdmin = !!platformAdminRecord;
-  if (!isPlatformAdmin) {
-    const { data: membership, error: membershipError } = await serviceClient
-      .from('empresa_members')
-      .select('role')
-      .eq('empresa_id', body.empresaId)
-      .eq('usuario_id', actor.id)
-      .eq('status', 'aceito')
-      .maybeSingle();
-
-    if (membershipError) return json(500, { error: 'Falha ao verificar permissões.' });
-    if (membership?.role !== 'admin') return json(403, { error: 'Apenas administradores da empresa podem gerenciar usuários.' });
-  }
+  if (!platformAdminRecord) return json(403, { error: 'Apenas administradores da plataforma podem gerenciar contas.' });
 
   if (body.action === 'create') {
     if (typeof body.email !== 'string' || typeof body.nome !== 'string' || typeof body.password !== 'string') {
@@ -115,20 +103,11 @@ Deno.serve(async (request) => {
       return json(500, { error: 'Não foi possível concluir a vinculação; a conta criada foi revertida.' });
     }
 
-    const { error: auditError } = isPlatformAdmin
-      ? await serviceClient.from('gm_admin_audit').insert({
-          admin_user_id: actor.id,
-          action: 'usuario.criado',
-          details: { email, role: 'vendedor', empresa_id: body.empresaId },
-        })
-      : await serviceClient.from('auditoria').insert({
-          empresa_id: body.empresaId,
-          usuario_id: actor.id,
-          acao: 'usuario.criado',
-          entidade: 'profiles',
-          entidade_id: created.user.id,
-          detalhes: { email, role: 'vendedor' },
-        });
+    const { error: auditError } = await serviceClient.from('gm_admin_audit').insert({
+      admin_user_id: actor.id,
+      action: 'usuario.criado',
+      details: { email, role: 'vendedor', empresa_id: body.empresaId },
+    });
     if (auditError) {
       await serviceClient.auth.admin.deleteUser(created.user.id);
       return json(500, { error: 'Não foi possível registrar auditoria; a conta criada foi revertida.' });
@@ -177,58 +156,27 @@ Deno.serve(async (request) => {
   if (ownedCompaniesError) return json(500, { error: 'Falha ao verificar titularidade.' });
   if (ownedCompanies?.length) return json(409, { error: 'Esta conta é responsável por uma empresa e não pode ser excluída.' });
 
-  const { error: auditError } = isPlatformAdmin
-    ? await serviceClient.from('gm_admin_audit').insert({
-        admin_user_id: actor.id,
-        action: 'usuario.exclusao_solicitada',
-        details: { email: target.user.email, role: 'vendedor', empresa_id: body.empresaId },
-      })
-    : await serviceClient.from('auditoria').insert({
-        empresa_id: body.empresaId,
-        usuario_id: actor.id,
-        acao: 'usuario.exclusao_solicitada',
-        entidade: 'profiles',
-        entidade_id: body.userId,
-        detalhes: { email: target.user.email, role: 'vendedor' },
-      });
+  const { error: auditError } = await serviceClient.from('gm_admin_audit').insert({
+    admin_user_id: actor.id,
+    action: 'usuario.exclusao_solicitada',
+    details: { email: target.user.email, role: 'vendedor', empresa_id: body.empresaId },
+  });
   if (auditError) return json(500, { error: 'Não foi possível registrar a auditoria da exclusão.' });
 
   const { error: deleteError } = await serviceClient.auth.admin.deleteUser(body.userId);
   if (deleteError) {
-    if (isPlatformAdmin) {
-      await serviceClient.from('gm_admin_audit').insert({
-        admin_user_id: actor.id,
-        action: 'usuario.exclusao_falhou',
-        details: { email: target.user.email, role: 'vendedor', empresa_id: body.empresaId },
-      });
-    } else {
-      await serviceClient.from('auditoria').insert({
-        empresa_id: body.empresaId,
-        usuario_id: actor.id,
-        acao: 'usuario.exclusao_falhou',
-        entidade: 'profiles',
-        entidade_id: body.userId,
-        detalhes: { email: target.user.email, role: 'vendedor' },
-      });
-    }
+    await serviceClient.from('gm_admin_audit').insert({
+      admin_user_id: actor.id,
+      action: 'usuario.exclusao_falhou',
+      details: { email: target.user.email, role: 'vendedor', empresa_id: body.empresaId },
+    });
     return json(500, { error: 'Não foi possível excluir a conta. Verifique dependências de armazenamento ou vínculos.' });
   }
 
-  if (isPlatformAdmin) {
-    await serviceClient.from('gm_admin_audit').insert({
-      admin_user_id: actor.id,
-      action: 'usuario.excluido',
-      details: { email: target.user.email, role: 'vendedor', empresa_id: body.empresaId },
-    });
-  } else {
-    await serviceClient.from('auditoria').insert({
-      empresa_id: body.empresaId,
-      usuario_id: actor.id,
-      acao: 'usuario.excluido',
-      entidade: 'profiles',
-      entidade_id: body.userId,
-      detalhes: { email: target.user.email, role: 'vendedor' },
-    });
-  }
+  await serviceClient.from('gm_admin_audit').insert({
+    admin_user_id: actor.id,
+    action: 'usuario.excluido',
+    details: { email: target.user.email, role: 'vendedor', empresa_id: body.empresaId },
+  });
   return json(200, { userId: body.userId, deleted: true });
 });

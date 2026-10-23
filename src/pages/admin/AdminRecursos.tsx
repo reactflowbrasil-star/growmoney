@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Pencil, Trash2, Search, ShieldAlert } from 'lucide-react';
 import { Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { AdminResourceService, type AdminResourceRecord, type AdminResourceTable } from '@/services/admin-resource-service';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { criarLinkArquivo, uploadArquivo } from '@/services/file-storage';
 
 type Field = {
   name: string;
@@ -55,9 +57,15 @@ const definitions: Record<string, ResourceDefinition> = {
     columns: 'id,user_id,numero,status,payload,created_at,updated_at', orderBy: 'created_at',
     visible: ['numero', 'user_id', 'status', 'created_at'],
     fields: [
-      { name: 'user_id', label: 'ID do usuário proprietário', required: true }, { name: 'numero', label: 'Número', required: true },
-      { name: 'status', label: 'Status', type: 'text', required: true },
-      { name: 'payload', label: 'Dados do contrato (JSON)', type: 'json', required: true },
+      { name: 'user_id', label: 'ID do usuário proprietário', required: true }, { name: 'numero', label: 'Número', type: 'number' },
+      { name: 'status', label: 'Status', type: 'select', required: true, options: ['rascunho', 'enviado', 'assinado', 'cancelado'].map((value) => ({ value, label: value })) },
+      { name: 'cliente_nome', label: 'Nome do cliente', required: true }, { name: 'cliente_documento', label: 'CPF/CNPJ do cliente' },
+      { name: 'cliente_email', label: 'E-mail do cliente', type: 'email' }, { name: 'cliente_telefone', label: 'Telefone do cliente' },
+      { name: 'valor', label: 'Valor total (R$)', type: 'number', required: true }, { name: 'entrada_valor', label: 'Entrada (R$)', type: 'number' },
+      { name: 'parcelas', label: 'Quantidade de parcelas', type: 'number' }, { name: 'valor_parcela', label: 'Valor da parcela (R$)', type: 'number' },
+      { name: 'forma_pagamento', label: 'Forma de pagamento', required: true }, { name: 'data_inicio', label: 'Início da vigência', type: 'date', required: true },
+      { name: 'data_termino', label: 'Término da vigência', type: 'date' }, { name: 'pdf_path', label: 'Caminho PDF' },
+      { name: 'observacoes', label: 'Observações do contrato', type: 'textarea' },
     ],
   },
   assinaturas: {
@@ -88,6 +96,7 @@ const displayValue = (value: unknown) => {
 };
 
 export default function AdminRecursos({ resource }: { resource: keyof typeof definitions }) {
+  const { isAdmin } = useAdminAuth();
   const definition = definitions[resource];
   const [rows, setRows] = useState<AdminResourceRecord[]>([]);
   const [search, setSearch] = useState('');
@@ -97,6 +106,8 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [contractPdfUrl, setContractPdfUrl] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -120,14 +131,55 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
 
   const openCreate = () => {
     setEditing(null);
-    setForm(Object.fromEntries(definition.fields.map((field) => [field.name, ''])));
+    const initial = Object.fromEntries(definition.fields.map((field) => [field.name, '']));
+    if (resource === 'contratos') {
+      initial.status = 'rascunho';
+      initial.parcelas = '1';
+      initial.entrada_valor = '0';
+      initial.data_inicio = new Date().toISOString().slice(0, 10);
+    }
+    setForm(initial);
     setError(''); setOpen(true);
+    setContractPdfUrl('');
   };
 
   const openEdit = (row: AdminResourceRecord) => {
     setEditing(row);
-    setForm(Object.fromEntries(definition.fields.map((field) => [field.name, displayValue(row[field.name]) === '—' ? '' : displayValue(row[field.name])])));
+    const valueFor = (field: Field) => {
+      const value = resource === 'contratos' && ['cliente_nome', 'cliente_documento', 'cliente_email', 'cliente_telefone', 'valor', 'entrada_valor', 'parcelas', 'valor_parcela', 'forma_pagamento', 'data_inicio', 'data_termino', 'pdf_path', 'observacoes'].includes(field.name)
+        ? (row.payload as Record<string, unknown> | null)?.[field.name]
+        : row[field.name];
+      return displayValue(value) === '—' ? '' : displayValue(value);
+    };
+    setForm(Object.fromEntries(definition.fields.map((field) => [field.name, valueFor(field)])));
+    setContractPdfUrl('');
     setError(''); setOpen(true);
+    if (resource === 'contratos' && typeof (row.payload as Record<string, unknown> | null)?.pdf_path === 'string') {
+      void criarLinkArquivo(String((row.payload as Record<string, unknown>).pdf_path), 60 * 60)
+        .then(setContractPdfUrl)
+        .catch((cause) => setError(cause instanceof Error ? cause.message : 'Não foi possível abrir o PDF vinculado.'));
+    }
+  };
+
+  const uploadContractPdf = async (file?: File) => {
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      setError('Selecione um arquivo PDF.');
+      return;
+    }
+    const header = new TextDecoder().decode(await file.slice(0, 5).arrayBuffer());
+    if (header !== '%PDF-') {
+      setError('O arquivo não contém um cabeçalho PDF válido.');
+      return;
+    }
+    setPdfBusy(true); setError('');
+    try {
+      const uploaded = await uploadArquivo(file, 'contratos');
+      setForm((current) => ({ ...current, pdf_path: uploaded.caminho }));
+      setContractPdfUrl(uploaded.url);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível salvar o PDF.');
+    } finally { setPdfBusy(false); }
   };
 
   const save = async (event: React.FormEvent) => {
@@ -146,6 +198,38 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
         setSaving(false);
         return;
       }
+    }
+    if (resource === 'contratos') {
+      const previousPayload = (editing?.payload as Record<string, unknown> | undefined) || {};
+      const contractFields = ['cliente_nome', 'cliente_documento', 'cliente_email', 'cliente_telefone', 'valor', 'entrada_valor', 'parcelas', 'valor_parcela', 'forma_pagamento', 'data_inicio', 'data_termino', 'pdf_path', 'observacoes'];
+      const contractPayload: Record<string, unknown> = editing ? { ...previousPayload } : {
+        client_id: '', itens: [], unidades: 1, desconto_valor: 0, desconto_percentual: 0,
+        bonus_total: 0, economia_total: 0, prazo_meses: 12, periodicidade: null,
+        plano_recorrente: false, created_at: new Date().toISOString(),
+      };
+      contractFields.forEach((field) => {
+        const value = form[field]?.trim() || '';
+        if (['valor', 'entrada_valor', 'parcelas', 'valor_parcela'].includes(field)) contractPayload[field] = value ? Number(value) : 0;
+        else if (value) contractPayload[field] = value;
+        else if (editing && Object.prototype.hasOwnProperty.call(contractPayload, field)) delete contractPayload[field];
+      });
+      if (!editing) {
+        const total = Number(form.valor || 0);
+        const entrada = Number(form.entrada_valor || 0);
+        const parcelas = Math.max(1, Number(form.parcelas || 1));
+        contractPayload.valor_bruto = total;
+        contractPayload.valor = total;
+        contractPayload.valor_parcela = form.valor_parcela ? Number(form.valor_parcela) : Math.round(((total - entrada) / parcelas) * 100) / 100;
+        contractPayload.entrada_valor = entrada;
+        contractPayload.parcelas = parcelas;
+        contractPayload.status = form.status;
+        contractPayload.numero = form.numero ? Number(form.numero) : 0;
+      }
+      payload.payload = contractPayload;
+      delete payload.cliente_nome; delete payload.cliente_documento; delete payload.cliente_email;
+      delete payload.cliente_telefone; delete payload.valor; delete payload.entrada_valor;
+      delete payload.parcelas; delete payload.valor_parcela; delete payload.forma_pagamento;
+      delete payload.data_inicio; delete payload.data_termino; delete payload.pdf_path; delete payload.observacoes;
     }
     try {
       if (editing) await AdminResourceService.update(definition.table, editing.id, payload);
@@ -170,7 +254,7 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
       <PageHeader title={definition.title} description={definition.description} actions={
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={() => void load()}>Atualizar</Button>
-          {!definition.readOnly && <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>Novo</Button>}
+          {isAdmin && !definition.readOnly && <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} onClick={openCreate}>Novo</Button>}
         </div>
       } />
       {error && !open && <div className="rounded-xl border border-erro/30 bg-erro/10 p-4 text-sm text-erro" role="alert"><div className="flex items-start gap-2"><ShieldAlert className="h-4 w-4 mt-0.5" />{error}</div></div>}
@@ -178,15 +262,16 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
         <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label={`Buscar ${definition.title.toLowerCase()}`} placeholder="Buscar..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum registro" description="Os registros disponíveis aparecerão aqui." /></div> : (
           <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary">{definition.visible.map((key) => <th key={key} className="px-4 py-3 font-medium">{definition.fields.find((field) => field.name === key)?.label || key.replace(/_/g, ' ')}</th>)}<th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead>
-            <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40">{definition.visible.map((key) => <td key={key} className="max-w-64 truncate px-4 py-3" title={displayValue(row[key])}>{displayValue(row[key])}</td>)}<td className="whitespace-nowrap px-4 py-3 text-right">{!definition.readOnly && <><Button variant="ghost" size="sm" aria-label="Editar registro" onClick={() => openEdit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Excluir registro" onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}</tbody>
+            <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40">{definition.visible.map((key) => <td key={key} className="max-w-64 truncate px-4 py-3" title={displayValue(row[key])}>{displayValue(row[key])}</td>)}<td className="whitespace-nowrap px-4 py-3 text-right">{isAdmin && !definition.readOnly && <><Button variant="ghost" size="sm" aria-label="Editar registro" onClick={() => openEdit(row)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="sm" aria-label="Excluir registro" onClick={() => void remove(row)}><Trash2 className="h-4 w-4 text-erro" /></Button></>}</td></tr>)}</tbody>
           </table></div>
         )}
       </Card>
-      <Modal open={open} onClose={() => !saving && setOpen(false)} title={editing ? `Editar ${definition.title.toLowerCase()}` : `Novo registro · ${definition.title.toLowerCase()}`} size="xl" footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="admin-resource-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Criar registro'}</Button></>}>
+      {isAdmin && <Modal open={open} onClose={() => !saving && setOpen(false)} title={editing ? `Editar ${definition.title.toLowerCase()}` : `Novo registro · ${definition.title.toLowerCase()}`} size="xl" footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="admin-resource-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Criar registro'}</Button></>}>
         <form id="admin-resource-form" onSubmit={save} className="grid gap-4 sm:grid-cols-2">{error && <div className="sm:col-span-2 rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</div>}
-          {definition.fields.map((field) => <div key={field.name} className={field.type === 'textarea' || field.type === 'json' ? 'sm:col-span-2' : ''}>{field.type === 'select' ? <div><label htmlFor={`admin-${field.name}`} className="mb-1.5 block text-sm font-medium">{field.label}</label><select id={`admin-${field.name}`} required={field.required} className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 text-sm" value={form[field.name] || ''} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}><option value="">Selecione…</option>{field.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div> : field.type === 'textarea' || field.type === 'json' ? <div><label htmlFor={`admin-${field.name}`} className="mb-1.5 block text-sm font-medium">{field.label}</label><textarea id={`admin-${field.name}`} rows={field.type === 'json' ? 10 : 3} required={field.required} spellCheck={field.type !== 'json'} className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 font-mono text-sm" value={form[field.name] || ''} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} /></div> : <Input id={`admin-${field.name}`} label={field.label} type={field.type || 'text'} required={field.required} hint={field.hint} value={form[field.name] || ''} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} />}</div>)}
+          {definition.fields.filter((field) => !(resource === 'contratos' && field.name === 'pdf_path')).map((field) => <div key={field.name} className={field.type === 'textarea' || field.type === 'json' ? 'sm:col-span-2' : ''}>{field.type === 'select' ? <div><label htmlFor={`admin-${field.name}`} className="mb-1.5 block text-sm font-medium">{field.label}</label><select id={`admin-${field.name}`} required={field.required} className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 text-sm" value={form[field.name] || ''} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))}><option value="">Selecione…</option>{field.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div> : field.type === 'textarea' || field.type === 'json' ? <div><label htmlFor={`admin-${field.name}`} className="mb-1.5 block text-sm font-medium">{field.label}</label><textarea id={`admin-${field.name}`} rows={field.type === 'json' ? 10 : 3} required={field.required} spellCheck={field.type !== 'json'} className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 font-mono text-sm" value={form[field.name] || ''} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} /></div> : <Input id={`admin-${field.name}`} label={field.label} type={field.type || 'text'} required={field.required} hint={field.hint} value={form[field.name] || ''} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} />}</div>)}
+          {resource === 'contratos' && <div className="space-y-2 sm:col-span-2"><label htmlFor="contract-pdf-upload" className="block text-sm font-medium">PDF do contrato</label><input id="contract-pdf-upload" type="file" accept="application/pdf,.pdf" disabled={pdfBusy} onChange={(event) => { void uploadContractPdf(event.target.files?.[0]); event.target.value = ''; }} className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand/10 file:px-3 file:py-2 file:font-medium file:text-brand" />{pdfBusy && <p className="text-xs text-text-secondary">Enviando PDF ao armazenamento privado…</p>}{form.pdf_path && <p className="break-all text-xs text-text-secondary">Arquivo vinculado: {form.pdf_path}</p>}{contractPdfUrl && <a href={contractPdfUrl} target="_blank" rel="noreferrer" className="text-sm text-brand underline">Visualizar PDF enviado</a>}<p className="text-xs text-text-secondary">O PDF é enviado ao armazenamento privado e seu caminho fica no registro do contrato.</p></div>}
         </form>
-      </Modal>
+      </Modal>}
     </div>
   );
 }

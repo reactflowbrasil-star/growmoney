@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import { Button, Card, FileUpload, Input, PageHeader } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase/client';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 export default function Configuracoes() {
-  const { user, empresaAtiva, refreshEmpresas, hasPermission } = useAuth();
+  const { user, empresaAtiva, refreshEmpresas } = useAuth();
+  const { isAdmin } = useAdminAuth();
+  const canManage = isAdmin || empresaAtiva?.role === 'admin';
   const [nomeEmpresa, setNomeEmpresa] = useState(empresaAtiva?.nome || '');
   const [logoPath, setLogoPath] = useState<string | null>(null);
   const [saved, setSaved] = useState('');
@@ -43,9 +46,9 @@ export default function Configuracoes() {
     <PageHeader title="Configurações" description="Preferências da empresa e do workspace" />
     <Card className="space-y-4 p-5">
       <h2 className="font-semibold">Empresa</h2>
-      <Input label="Nome da empresa" value={nomeEmpresa} onChange={(e) => setNomeEmpresa(e.target.value)} disabled={!hasPermission('configuracoes:write')} />
-      <div><p className="mb-2 text-sm font-medium">Logo</p><FileUpload accept="image/*" categoria="fotos" label="Enviar logo (PNG, SVG, JPG)" onUploaded={(files) => { if (files[0]) { setLogoPath(files[0].caminho); setSaved('Logo enviada. Salve as alterações para vinculá-la à empresa.'); } }} /></div>
-      {hasPermission('configuracoes:write') && <Button loading={saving} onClick={() => void salvar()}>Salvar alterações</Button>}
+      <Input label="Nome da empresa" value={nomeEmpresa} onChange={(e) => setNomeEmpresa(e.target.value)} disabled={!canManage} />
+      {canManage && <><div><p className="mb-2 text-sm font-medium">Logo</p><FileUpload accept="image/*" categoria="fotos" label="Enviar logo (PNG, SVG, JPG)" onUploaded={(files) => { if (files[0]) { setLogoPath(files[0].caminho); setSaved('Logo enviada. Salve as alterações para vinculá-la à empresa.'); } }} /></div>
+      <Button loading={saving} onClick={() => void salvar()}>Salvar alterações</Button></>}
       {error && <p className="text-sm text-erro" role="alert">{error}</p>}
       {saved && <p className="text-sm text-brand" role="status">{saved}</p>}
     </Card>

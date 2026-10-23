@@ -4,6 +4,7 @@ import { Button, Input, Card, EmptyState, Modal, Badge, PageHeader } from '@/com
 import { exportCsv, exportPdf } from '@/lib/export';
 import { ClientService } from '@/services/client-service';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import type { Cliente, ClientStatus, ClientType, CreateClienteData } from '@/lib/client-types';
 
 type FormState = {
@@ -27,6 +28,8 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({
 
 export default function Clientes() {
   const { user, empresaAtiva } = useAuth();
+  const { isAdmin: isPlatformAdmin } = useAdminAuth();
+  const canManage = isPlatformAdmin || empresaAtiva?.role === 'admin';
   const [rows, setRows] = useState<Cliente[]>([]);
   const [busca, setBusca] = useState('');
   const [open, setOpen] = useState(false);
@@ -145,7 +148,7 @@ export default function Clientes() {
               <thead><tr className="text-text-secondary border-b border-border-color bg-bg-secondary/50 text-left">
                 <th className="px-4 py-3 font-medium">Nome</th><th className="px-4 py-3 font-medium hidden sm:table-cell">Documento</th>
                 <th className="px-4 py-3 font-medium hidden md:table-cell">E-mail</th><th className="px-4 py-3 font-medium">Tipo</th>
-                <th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium text-right">Ações</th>
+                <th className="px-4 py-3 font-medium">Status</th>{canManage && <th className="px-4 py-3 font-medium text-right">Ações</th>}
               </tr></thead>
               <tbody>
                 {filtered.map((r) => (
@@ -155,10 +158,10 @@ export default function Clientes() {
                     <td className="px-4 py-3 hidden md:table-cell text-text-secondary">{r.email || '—'}</td>
                     <td className="px-4 py-3"><Badge variant="info">{tipoLabel(r.tipo)}</Badge></td>
                     <td className="px-4 py-3"><Badge variant={statusVariant(r.status)}>{r.status}</Badge></td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                    {canManage && <td className="px-4 py-3 text-right whitespace-nowrap">
                       <button aria-label={`Editar ${r.nome}`} onClick={() => abrirEdicao(r)} className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"><Pencil className="w-4 h-4 text-text-secondary" /></button>
                       <button aria-label={`Excluir ${r.nome}`} onClick={() => void excluir(r)} className="p-2 rounded-lg hover:bg-erro/10 inline-flex"><Trash2 className="w-4 h-4 text-erro" /></button>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>
@@ -166,7 +169,7 @@ export default function Clientes() {
           </div>
         )}
       </Card>
-      <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Editar cliente' : 'Novo cliente'} size="lg" footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="cliente-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Salvar'}</Button></>}>
+      {(canManage || (!editing && open)) && <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Editar cliente' : 'Novo cliente'} size="lg" footer={<><Button variant="outline" disabled={saving} onClick={() => setOpen(false)}>Cancelar</Button><Button form="cliente-form" type="submit" loading={saving}>{editing ? 'Salvar alterações' : 'Salvar'}</Button></>}>
         <form id="cliente-form" onSubmit={salvar} className="grid sm:grid-cols-2 gap-4">
           {error && <div role="alert" className="sm:col-span-2 rounded-lg border border-erro/30 bg-erro/10 px-4 py-3 text-sm text-erro">{error}</div>}
           <Input label="Nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
@@ -188,7 +191,7 @@ export default function Clientes() {
             </select>
           </div>
         </form>
-      </Modal>
+      </Modal>}
     </div>
   );
 }

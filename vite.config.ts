@@ -22,7 +22,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // Avoid shipping browser-readable source maps to the public static host.
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {

@@ -13,11 +13,13 @@ import {
   Building2,
   TrendingUp,
   FileSignature,
+  ShieldCheck,
 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -39,6 +41,7 @@ const navItems = [
 
 export function AppLayout() {
   const { user, logout } = useAuth();
+  const { isAdmin } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -62,12 +65,15 @@ export function AppLayout() {
   };
 
   const layoutUser = user ? { name: user.nome, email: user.email, avatar: user.avatar } : undefined;
+  const visibleNavItems = isAdmin
+    ? [...navItems, { label: 'Painel Admin', href: '/admin', icon: <ShieldCheck className="w-5 h-5" />, prominent: true }]
+    : navItems;
 
   return (
     <div className="min-h-dvh bg-transparent">
       <div className="hidden md:block">
         <Sidebar
-          items={navItems}
+          items={visibleNavItems}
           user={layoutUser}
           collapsed={sidebarCollapsed}
           onCollapse={setSidebarCollapsed}
@@ -88,7 +94,7 @@ export function AppLayout() {
           )}
         >
           <Sidebar
-            items={navItems}
+            items={visibleNavItems}
             user={layoutUser}
             embedded
             onCollapse={() => setMobileOpen(false)}

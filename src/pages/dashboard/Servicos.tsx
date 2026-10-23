@@ -4,11 +4,14 @@ import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/com
 import { formatValorCobranca, type ServicoCatalogo } from '@/lib/contratos-store';
 import { deleteServicoEmpresa, loadServicosEmpresa, saveServicoEmpresa } from '@/services/servico-catalogo-persistente';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 const blank = { nome: '', categoria: '', descricao: '', texto_contrato: '', valor: 0, tipo_cobranca: 'unico' as 'unico' | 'mensal', ordem: 0, ativo: true, bonus_automatico: false, bonus_gatilhos: '' };
 
 export default function Servicos() {
   const { empresaAtiva, hasPermission } = useAuth();
+  const { isAdmin } = useAdminAuth();
+  const canManage = isAdmin || empresaAtiva?.role === 'admin';
   const [rows, setRows] = useState<ServicoCatalogo[]>([]);
   const [busca, setBusca] = useState('');
   const [open, setOpen] = useState(false);
@@ -70,9 +73,9 @@ export default function Servicos() {
     <Card padding="none" className="overflow-hidden">
       <div className="border-b border-border-color p-4"><div className="relative max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input className="pl-9" placeholder="Buscar serviço ou categoria..." value={busca} onChange={(e) => setBusca(e.target.value)} /></div></div>
       {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando catálogo…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState icon={<Briefcase className="h-8 w-8" />} title="Nenhum serviço" description="Cadastre os serviços que serão oferecidos nos contratos." action={canWrite && <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openNew}>Novo serviço</Button>} /></div> :
-        <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border-color text-left text-text-secondary"><th className="px-4 py-3 font-medium">Serviço</th><th className="hidden px-4 py-3 font-medium sm:table-cell">Categoria</th><th className="px-4 py-3 font-medium">Valor</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead><tbody>{filtered.map((service) => <tr key={service.id} className="border-b border-border-color/60 hover:bg-bg-tertiary/40"><td className="px-4 py-3"><div className="font-medium">{service.nome}</div><p className="line-clamp-1 max-w-md text-xs text-text-secondary">{service.texto_contrato || service.descricao || '—'}</p>{service.bonus_automatico && <span className="mt-1 inline-block rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">Bônus automático</span>}</td><td className="hidden px-4 py-3 sm:table-cell">{service.categoria || '—'}</td><td className="whitespace-nowrap px-4 py-3 tabular-nums">{service.valor > 0 ? formatValorCobranca(service.valor, service.tipo_cobranca || service.tipo) : '—'}</td><td className="px-4 py-3"><Badge variant={service.ativo ? 'success' : 'neutral'}>{service.ativo ? 'Ativo' : 'Inativo'}</Badge></td><td className="whitespace-nowrap px-4 py-3 text-right">{canWrite && <button type="button" aria-label={`Editar ${service.nome}`} className="rounded-lg p-2 hover:bg-bg-tertiary" onClick={() => openEdit(service)}><Pencil className="h-4 w-4 text-text-secondary" /></button>}{hasPermission('servicos:delete') && <button type="button" aria-label={`Excluir ${service.nome}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(service.id)}><Trash2 className="h-4 w-4 text-erro" /></button>}</td></tr>)}</tbody></table></div>}
+        <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border-color text-left text-text-secondary"><th className="px-4 py-3 font-medium">Serviço</th><th className="hidden px-4 py-3 font-medium sm:table-cell">Categoria</th><th className="px-4 py-3 font-medium">Valor</th><th className="px-4 py-3 font-medium">Status</th>{canManage && <th className="px-4 py-3 text-right font-medium">Ações</th>}</tr></thead><tbody>{filtered.map((service) => <tr key={service.id} className="border-b border-border-color/60 hover:bg-bg-tertiary/40"><td className="px-4 py-3"><div className="font-medium">{service.nome}</div><p className="line-clamp-1 max-w-md text-xs text-text-secondary">{service.texto_contrato || service.descricao || '—'}</p>{service.bonus_automatico && <span className="mt-1 inline-block rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">Bônus automático</span>}</td><td className="hidden px-4 py-3 sm:table-cell">{service.categoria || '—'}</td><td className="whitespace-nowrap px-4 py-3 tabular-nums">{service.valor > 0 ? formatValorCobranca(service.valor, service.tipo_cobranca || service.tipo) : '—'}</td><td className="px-4 py-3"><Badge variant={service.ativo ? 'success' : 'neutral'}>{service.ativo ? 'Ativo' : 'Inativo'}</Badge></td>{canManage && <td className="whitespace-nowrap px-4 py-3 text-right"><button type="button" aria-label={`Editar ${service.nome}`} className="rounded-lg p-2 hover:bg-bg-tertiary" onClick={() => openEdit(service)}><Pencil className="h-4 w-4 text-text-secondary" /></button><button type="button" aria-label={`Excluir ${service.nome}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(service.id)}><Trash2 className="h-4 w-4 text-erro" /></button></td>}</tr>)}</tbody></table></div>}
     </Card>
-    <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Editar serviço' : 'Novo serviço'} size="lg" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>{editing ? 'Salvar alterações' : 'Cadastrar serviço'}</Button></>}>
+    {(canManage || (canWrite && open && !editing)) && <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Editar serviço' : 'Novo serviço'} size="lg" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>{editing ? 'Salvar alterações' : 'Cadastrar serviço'}</Button></>}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2"><Input label="Nome do serviço" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required /></div>
         <Input label="Categoria" value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} />
@@ -86,6 +89,6 @@ export default function Servicos() {
         <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" className="accent-brand" checked={form.ativo} onChange={(e) => setForm({ ...form, ativo: e.target.checked })} />Serviço ativo</label>
         {error && <p className="text-sm text-erro sm:col-span-2" role="alert">{error}</p>}
       </div>
-    </Modal>
+    </Modal>}
   </div>;
 }

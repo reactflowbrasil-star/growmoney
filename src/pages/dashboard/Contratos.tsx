@@ -11,6 +11,7 @@ import {
   formatBRL,
   type ContratoLocal,
 } from '@/lib/contratos-store';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 const statusVariant: Record<ContratoLocal['status'], 'neutral' | 'info' | 'success' | 'danger'> = {
@@ -21,14 +22,16 @@ const statusVariant: Record<ContratoLocal['status'], 'neutral' | 'info' | 'succe
 };
 
 export default function Contratos() {
+  const { isAdmin: isPlatformAdmin } = useAdminAuth();
   const { empresaAtiva } = useAuth();
+  const canManage = isPlatformAdmin || empresaAtiva?.role === 'admin';
   const [rows, setRows] = useState<ContratoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busca, setBusca] = useState('');
   const [editing, setEditing] = useState<ContratoLocal | null>(null);
   const [editError, setEditError] = useState('');
-  const canEdit = empresaAtiva?.role === 'admin' || empresaAtiva?.role === 'gestor';
+  const canEdit = canManage;
   const [params] = useSearchParams();
   const criado = params.get('criado');
 
@@ -179,11 +182,11 @@ export default function Contratos() {
           <EmptyState
             title="Nenhum contrato"
             description="Crie o primeiro contrato em poucos passos: cliente, serviços, condições e revisão."
-            action={
+            action={(
               <Link to="/contratos/novo">
                 <Button leftIcon={<Plus className="w-4 h-4" />}>Novo contrato</Button>
               </Link>
-            }
+            )}
           />
         ) : (
           <div className="overflow-x-auto">
@@ -196,7 +199,7 @@ export default function Contratos() {
                   <th className="px-4 py-3 font-medium hidden sm:table-cell">Parcelas</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium hidden md:table-cell">Vigência</th>
-                  <th className="px-4 py-3 font-medium text-right">Ações</th>
+                  {canManage && <th className="px-4 py-3 font-medium text-right">Ações</th>}
                 </tr>
               </thead>
               <tbody>
@@ -216,7 +219,7 @@ export default function Contratos() {
                       {r.data_inicio}
                       {r.data_termino ? ` → ${r.data_termino}` : ''}
                     </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                    {canManage && <td className="px-4 py-3 text-right whitespace-nowrap">
                       {canEdit && <button
                         className="p-2 rounded-lg hover:bg-bg-tertiary inline-flex"
                         title="Editar contrato"
@@ -244,7 +247,7 @@ export default function Contratos() {
                       >
                         <Trash2 className="w-4 h-4 text-erro" />
                       </button>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>
@@ -253,7 +256,7 @@ export default function Contratos() {
         )}
       </Card>
 
-      <Modal open={!!editing} onClose={() => setEditing(null)} title="Editar contrato" size="lg">
+      {canManage && <Modal open={!!editing} onClose={() => setEditing(null)} title="Editar contrato" size="lg">
         {editing && <form onSubmit={saveEdit} className="space-y-4">
           {editError && <p className="text-sm text-erro" role="alert">{editError}</p>}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -272,7 +275,7 @@ export default function Contratos() {
             <Button type="submit">Salvar alterações</Button>
           </div>
         </form>}
-      </Modal>
+      </Modal>}
     </div>
   );
 }

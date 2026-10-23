@@ -19,6 +19,9 @@ export interface Signer {
   token: string;
   signedAt?: string;
   viewedAt?: string;
+  emailSentAt?: string;
+  emailSendStatus?: 'sending' | 'sent' | 'failed';
+  emailSendStartedAt?: string;
   signatureDataUrl?: string;
   signatureMode?: SignatureMode;
   order: number;

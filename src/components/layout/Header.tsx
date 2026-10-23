@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, Search, Menu, LogOut, Settings, User } from 'lucide-react';
+import { Bell, Search, Menu, LogOut, Settings, User, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BRAND } from '@/lib/brand';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -24,7 +25,11 @@ export function Header({
 }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const { isAdmin } = useAdminAuth();
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => setAvatarFailed(false), [user?.avatar]);
 
   return (
     <header
@@ -64,6 +69,9 @@ export function Header({
       </div>
 
       <div className="flex items-center gap-1 ml-auto">
+        {isAdmin && <Link to="/admin" className="hidden sm:inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand px-3 text-sm font-semibold text-white shadow-md shadow-brand/20 transition hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" aria-label="Abrir painel administrativo">
+          <ShieldCheck className="h-4 w-4" /> <span>PAINEL ADMIN</span>
+        </Link>}
         <div className="relative">
           <button
             onClick={() => {
@@ -110,8 +118,8 @@ export function Header({
             className="flex items-center gap-2 p-1.5 pl-2 rounded-xl hover:bg-bg-tertiary pressable"
             aria-label="Perfil"
           >
-            {user?.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+            {user?.avatar && !avatarFailed ? (
+              <img src={user.avatar} alt={user.name} onError={() => setAvatarFailed(true)} className="w-8 h-8 rounded-full object-cover" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-white text-sm font-bold">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}

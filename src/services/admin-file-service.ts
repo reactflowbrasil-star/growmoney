@@ -3,6 +3,8 @@ import { requirePlatformAdmin } from '@/services/admin-resource-service';
 
 export const ADMIN_FILE_MAX_BYTES = 10 * 1024 * 1024;
 export const ADMIN_FILE_BUCKET = 'growmoney-files';
+export const ADMIN_FILE_CATEGORIES = ['fotos', 'arquivos', 'contratos'] as const;
+type AdminFileCategory = (typeof ADMIN_FILE_CATEGORIES)[number];
 
 export type AdminFile = {
   id: string;
@@ -29,9 +31,9 @@ export class AdminFileService {
   static async upload(file: File, categoria: string): Promise<void> {
     const user = await requirePlatformAdmin();
     if (file.size > ADMIN_FILE_MAX_BYTES) throw new Error('O arquivo excede o limite de 10 MB.');
-    if (!categoria.trim()) throw new Error('Informe a categoria do arquivo.');
+    const safeCategory = this.validateCategory(categoria);
     const safeName = file.name.normalize('NFKD').replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '').slice(-120) || 'arquivo';
-    const objectPath = `admin/${user.id}/${crypto.randomUUID()}-${safeName}`;
+    const objectPath = `${user.id}/${safeCategory}/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${safeName}`;
     const { error: uploadError } = await supabase.storage.from(ADMIN_FILE_BUCKET).upload(objectPath, file, {
       contentType: file.type || 'application/octet-stream',
       upsert: false,
@@ -39,7 +41,7 @@ export class AdminFileService {
     if (uploadError) throw new Error(`Falha ao enviar arquivo: ${uploadError.message}`);
     const { error: metadataError } = await supabase.from('gm_files').insert({
       user_id: user.id,
-      categoria: categoria.trim(),
+      categoria: safeCategory,
       bucket_id: ADMIN_FILE_BUCKET,
       object_path: objectPath,
       original_name: file.name,
@@ -55,16 +57,49 @@ export class AdminFileService {
 
   static async update(fileId: string, values: Pick<AdminFile, 'categoria' | 'original_name'>): Promise<void> {
     const user = await requirePlatformAdmin();
+    const categoria = this.validateCategory(values.categoria);
+    const originalName = values.original_name.trim();
+    if (!originalName) throw new Error('Informe o nome do arquivo.');
+
+    const { data: current, error: readError } = await supabase.from('gm_files')
+      .select('id,user_id,categoria,bucket_id,object_path,original_name,content_type,size_bytes,created_at')
+      .eq('id', fileId).maybeSingle();
+    if (readError) throw new Error(`Falha ao carregar arquivo: ${readError.message}`);
+    if (!current) throw new Error('Arquivo não encontrado ou sem permissão para alterá-lo.');
+    const file = current as AdminFile;
+    this.assertManagedFile(file);
+
+    let nextPath = file.object_path;
+    let moved = false;
+    if (categoria !== file.categoria) {
+      const parts = file.object_path.split('/');
+      if (parts.length < 3 || parts[0] !== file.user_id || parts[1] !== file.categoria) {
+        throw new Error('O caminho atual não permite alterar a categoria com segurança.');
+      }
+      parts[1] = categoria;
+      nextPath = parts.join('/');
+      const { error: moveError } = await supabase.storage.from(file.bucket_id).move(file.object_path, nextPath);
+      if (moveError) throw new Error(`Falha ao mover arquivo: ${moveError.message}`);
+      moved = true;
+    }
+
     const { data, error } = await supabase.from('gm_files').update({
-      categoria: values.categoria.trim(), original_name: values.original_name.trim(),
+      categoria, original_name: originalName, object_path: nextPath,
     }).eq('id', fileId).select('id').maybeSingle();
-    if (error) throw new Error(`Falha ao atualizar arquivo: ${error.message}`);
-    if (!data) throw new Error('Arquivo não encontrado ou sem permissão para alterá-lo.');
+    if (error || !data) {
+      if (moved) {
+        const { error: rollbackError } = await supabase.storage.from(file.bucket_id).move(nextPath, file.object_path);
+        if (rollbackError) throw new Error(`Falha ao atualizar cadastro (${error?.message || 'registro indisponível'}) e ao restaurar o arquivo (${rollbackError.message}).`);
+      }
+      if (error) throw new Error(`Falha ao atualizar arquivo: ${error.message}`);
+      throw new Error('Arquivo não encontrado ou sem permissão para alterá-lo.');
+    }
     await this.audit(user.id, 'arquivo.atualizado', { arquivo_id: fileId });
   }
 
   static async delete(file: AdminFile): Promise<void> {
     const user = await requirePlatformAdmin();
+    this.assertManagedFile(file);
     const { error: storageError } = await supabase.storage.from(file.bucket_id).remove([file.object_path]);
     if (storageError) throw new Error(`Não foi possível remover o objeto do armazenamento: ${storageError.message}`);
     const { data, error } = await supabase.from('gm_files').delete().eq('id', file.id).select('id').maybeSingle();
@@ -75,6 +110,7 @@ export class AdminFileService {
 
   static async getDownloadUrl(file: AdminFile): Promise<string> {
     await requirePlatformAdmin();
+    this.assertManagedFile(file);
     const { data, error } = await supabase.storage.from(file.bucket_id).createSignedUrl(file.object_path, 60);
     if (error || !data?.signedUrl) throw new Error(`Falha ao abrir arquivo: ${error?.message || 'URL indisponível'}`);
     return data.signedUrl;
@@ -86,5 +122,20 @@ export class AdminFileService {
       p_details: { ...details, admin_user_id: adminUserId },
     });
     if (error) throw new Error(`Operação concluída, mas a auditoria não foi registrada: ${error.message}`);
+  }
+
+  private static validateCategory(value: string): AdminFileCategory {
+    const normalized = value.trim();
+    if (!ADMIN_FILE_CATEGORIES.includes(normalized as AdminFileCategory)) {
+      throw new Error(`Categoria inválida. Use: ${ADMIN_FILE_CATEGORIES.join(', ')}.`);
+    }
+    return normalized as AdminFileCategory;
+  }
+
+  private static assertManagedFile(file: AdminFile) {
+    const parts = file.object_path.split('/');
+    if (file.bucket_id !== ADMIN_FILE_BUCKET || parts[0] !== file.user_id || parts[1] !== file.categoria) {
+      throw new Error('Os metadados do arquivo não correspondem ao caminho esperado no armazenamento.');
+    }
   }
 }

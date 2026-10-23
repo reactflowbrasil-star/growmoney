@@ -170,26 +170,17 @@ export async function createEnvelope(input: {
 }
 
 export async function sendEnvelope(id: string, actor: string): Promise<Envelope | null> {
-  const envelope = await getEnvelope(id);
-  if (!envelope) return null;
-  if (envelope.status === 'cancelado' || envelope.status === 'expirado') {
-    throw new Error('Este envelope não pode mais ser enviado.');
-  }
-  if (!envelope.signers.some((signer) => signer.role === 'sign')) {
-    throw new Error('Adicione ao menos um signatário antes de ativar os links.');
-  }
-  if (envelope.status !== 'rascunho') return envelope;
-
-  const now = new Date().toISOString();
-  envelope.status = 'enviado';
-  envelope.sentAt = now;
-  envelope.updatedAt = now;
-  envelope.events.push(pushEvent('sent', 'Links de assinatura ativados para compartilhamento', actor));
-  await saveEnvelope(envelope);
+  const { data, error } = await supabase.functions.invoke('smtp-mailer', {
+    body: { action: 'send_signature', envelopeId: id },
+  });
+  if (error) throw new Error(`Falha no envio do convite por e-mail: ${error.message}`);
+  if (data?.error) throw new Error(String(data.error));
+  const envelope = data?.envelope as Envelope | undefined;
+  if (!envelope) throw new Error('O servidor não retornou o envelope atualizado.');
   addAlert({
     envelopeId: envelope.id,
-    title: `Links ativos: ${envelope.titulo}`,
-    body: `Os links para ${envelope.signers.filter((signer) => signer.role === 'sign').length} signatário(s) estão prontos. Compartilhe cada convite por e-mail ou mensagem.`,
+    title: `Convites enviados: ${envelope.titulo}`,
+    body: `O servidor SMTP enviou convites para ${envelope.signers.filter((signer) => signer.role === 'sign' && signer.emailSentAt).length} signatário(s).`,
     email: actor,
   });
   return envelope;

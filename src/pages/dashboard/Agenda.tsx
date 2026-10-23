@@ -3,6 +3,7 @@ import { Calendar as CalendarIcon, Plus, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 type Evento = { id: string; title: string; data_hora: string; tipo: 'reuniao' | 'ligacao' | 'visita' | 'videoconferencia' | 'outro'; status: 'agendado' | 'confirmado' | 'realizado' | 'cancelado' | 'reagendado' };
 const emptyForm = { title: '', date: '', time: '09:00', tipo: 'reuniao' as Evento['tipo'] };
@@ -10,6 +11,8 @@ const formatDate = (value: string) => new Date(value).toLocaleDateString('pt-BR'
 
 export default function Agenda() {
   const { user, empresaAtiva, hasPermission } = useAuth();
+  const { isAdmin } = useAdminAuth();
+  const canManage = isAdmin || empresaAtiva?.role === 'admin';
   const [rows, setRows] = useState<Evento[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -70,20 +73,20 @@ export default function Agenda() {
               <div className="w-14 shrink-0 text-center"><p className="text-xs text-text-secondary">{formatDate(event.data_hora)}</p><p className="text-sm font-semibold">{new Date(event.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p></div>
               <div className="min-w-0 flex-1"><p className="truncate font-medium">{event.title}</p><p className="text-xs capitalize text-text-secondary">{event.tipo.replace('videoconferencia', 'videoconferência')}</p></div>
               <Badge variant={event.status === 'confirmado' || event.status === 'realizado' ? 'success' : event.status === 'cancelado' ? 'danger' : 'info'}>{event.status}</Badge>
-              {hasPermission('agendamentos:delete') && <button type="button" aria-label={`Excluir ${event.title}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(event)}><Trash2 className="h-4 w-4 text-erro" /></button>}
+              {canManage && <button type="button" aria-label={`Excluir ${event.title}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(event)}><Trash2 className="h-4 w-4 text-erro" /></button>}
             </li>
           ))}</ul>}
         </Card>
         <Card><h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-secondary">Resumo</h3><div className="space-y-2 text-sm"><div className="flex justify-between"><span className="text-text-secondary">Total</span><span className="font-semibold">{rows.length}</span></div><div className="flex justify-between"><span className="text-text-secondary">Agendados</span><span className="font-semibold">{rows.filter((row) => row.status === 'agendado').length}</span></div></div></Card>
       </div>
-      <Modal open={open} onClose={() => setOpen(false)} title="Novo compromisso" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>Agendar</Button></>}>
+      {hasPermission('agendamentos:write') && <Modal open={open} onClose={() => setOpen(false)} title="Novo compromisso" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>Agendar</Button></>}>
         <div className="space-y-4">
           <Input label="Título" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           <div className="grid gap-3 sm:grid-cols-2"><Input label="Data" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required /><Input label="Hora" type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
           <div><label className="mb-1.5 block text-sm font-medium">Tipo</label><select className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 text-sm" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value as Evento['tipo'] })}><option value="reuniao">Reunião</option><option value="ligacao">Ligação</option><option value="visita">Visita</option><option value="videoconferencia">Videoconferência</option><option value="outro">Outro</option></select></div>
           {error && <p className="text-sm text-erro" role="alert">{error}</p>}
         </div>
-      </Modal>
+      </Modal>}
     </div>
   );
 }

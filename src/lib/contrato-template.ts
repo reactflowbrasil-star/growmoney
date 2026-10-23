@@ -1,5 +1,26 @@
 import { formatBRL, type ContratoLocal } from '@/lib/contratos-store';
 
+const EMPRESA = {
+  razaoSocial: 'GROWMONEY DIGITAL LTDA',
+  nomeFantasia: 'GROWMONEY DIGITAL',
+  cnpj: '10.949.897/0001-58',
+  naturezaJuridica: '206-2 — Sociedade Empresária Limitada',
+  logradouro: 'R Sete Barras',
+  numero: '257',
+  complemento: 'Box 254',
+  cep: '02.927-080',
+  bairro: 'Nossa Senhora do O',
+  municipio: 'São Paulo',
+  uf: 'SP',
+  email: 'RENATOARANTESDIGITAL@GMAIL.COM',
+  telefone: '(62) 8594-3333',
+} as const;
+
+function getLogoUrl() {
+  const origin = typeof window !== 'undefined' ? window.location.origin : import.meta.env.VITE_APP_URL || '';
+  return new URL(`${import.meta.env.BASE_URL}assets/grow-logo-black.png`, origin || 'http://localhost').href;
+}
+
 const esc = (value: unknown) =>
   String(value ?? '—').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char] || char);
 
@@ -10,6 +31,7 @@ const dataBR = (date?: string) => {
 };
 
 export function gerarContratoHtml(contrato: ContratoLocal) {
+  const logoUrl = esc(getLogoUrl());
   const prazo = contrato.prazo_meses || 12;
   const descontos = contrato.desconto_valor || 0;
   const valorAntesDesconto = contrato.valor_bruto || contrato.valor;
@@ -35,11 +57,11 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
 
   return `
   <article class="contract-document">
-    <header class="contract-brand"><strong>AUTOMATTIZE PRO</strong><span>Contrato de serviço publicitário</span></header>
+    <header class="contract-brand"><img src="${logoUrl}" alt="${esc(EMPRESA.nomeFantasia)}" /><span>Contrato de serviço publicitário</span></header>
     <h1>Contrato de serviço publicitário</h1>
     <p class="contract-number">Contrato #${String(contrato.numero || 0).padStart(4, '0')}</p>
     <h2>I – CONTRATADO</h2>
-    <p>AUTOMATTIZE PRO, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº 62.943.785/0001-93, situada em Rua C-38 QD 52 Lote 49 n150 Edifício Terra Mundi, Goiânia, GO, CEP 74265-280, doravante citada como CONTRATADA.</p>
+    <p><strong>${esc(EMPRESA.razaoSocial)}</strong>, nome fantasia ${esc(EMPRESA.nomeFantasia)}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${esc(EMPRESA.cnpj)}, natureza jurídica ${esc(EMPRESA.naturezaJuridica)}, com sede em ${esc(EMPRESA.logradouro)}, nº ${esc(EMPRESA.numero)}, ${esc(EMPRESA.complemento)}, CEP ${esc(EMPRESA.cep)}, bairro ${esc(EMPRESA.bairro)}, ${esc(EMPRESA.municipio)} – ${esc(EMPRESA.uf)}, e-mail ${esc(EMPRESA.email)}, telefone ${esc(EMPRESA.telefone)}, doravante citada como CONTRATADA.</p>
     <h2>II – CONTRATANTE</h2>
     <table><tbody>
       <tr><th>Nome fantasia / Razão social</th><td>${esc(contrato.cliente_nome)}</td><th>CNPJ/CPF</th><td>${esc(contrato.cliente_documento)}</td></tr>
@@ -64,7 +86,7 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p><b>1.2.1</b> Os serviços descritos no item anterior, que são serviços de “meio”, têm como finalidade aprimorar as informações e a imagem da contratante junto ao Google, com vistas a melhorar sua visibilidade perante os usuários dos serviços oferecidos pelo Google.</p>
     <p><b>1.2.2</b> A contratante deverá apresentar para a contratada seu endereço completo, seus meios de contato, seus ramos de atuação profissional e/ou comercial e todas as informações que sejam possíveis de serem inseridas junto ao Google.</p>
     <p><b>1.2.3</b> Em razão do serviço prestado pela contratada, todas as pessoas que, dentro de um raio de 15 (quinze) quilômetros do estabelecimento comercial da contratante, realizarem pesquisas junto ao Google utilizando as palavras chaves de busca/engajamento indicadas encontrarão os dados e as informações da contratante.</p>
-    <p><b>1.3</b> A título de cortesia, a contratada dará suporte profissional de atualização para a contratante durante o período de 12 (doze) meses, a contar da assinatura e do efetivo pagamento deste contrato. Para acionar o suporte, a contratante deverá entrar em contato através do telefone/WhatsApp (62) 98283-4893 e/ou do e-mail automattizepro@gmail.com.</p>
+    <p><b>1.3</b> A título de cortesia, a contratada dará suporte profissional de atualização para a contratante durante o período de 12 (doze) meses, a contar da assinatura e do efetivo pagamento deste contrato. Para acionar o suporte, a contratante deverá entrar em contato através do telefone/WhatsApp ${esc(EMPRESA.telefone)} e/ou do e-mail ${esc(EMPRESA.email)}.</p>
     <p><b>1.4</b> Fica certo e acordado entre as partes, ainda, que a contratada poderá, a seu exclusivo critério, contratar terceiros para a prestação dos serviços contratados, sendo que neste ato a contratante concede poderes à contratada para que esta conclua, por sua conta e ordem, todos os contratos necessários para a execução do objeto do presente instrumento.</p>
     <h2>CLÁUSULA SEGUNDA – DAS OBRIGAÇÕES DAS PARTES</h2>
     <p><b>2.1</b> As partes obrigam-se, na execução do presente contrato, a:</p>
@@ -104,9 +126,9 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p><b>7.1</b> As obrigações e/ou direitos decorrentes deste contrato não poderão ser cedidos ou transferidos por qualquer das partes, nem dados como garantia de obrigações sem a prévia e expressa anuência, por escrito, da outra parte.</p>
     <p><b>7.2</b> Fica expressamente estipulado que não se estabelece por força do presente contrato qualquer espécie de vínculo empregatício, associação e/ou parceria entre as partes.</p>
     <p><b>7.3</b> O presente contrato é celebrado em caráter irrevogável e irretratável, obrigando as partes, seus herdeiros e sucessores a qualquer título.</p>
-    <p><b>7.4</b> Fica desde já eleito o foro da comarca de Goiânia - GO para dirimir quaisquer litígios, contendas e/ou discussões oriundas deste contrato, com renúncia expressa a qualquer outro foro, por mais privilegiado que seja.</p>
+    <p><b>7.4</b> Fica desde já eleito o foro da comarca de ${esc(EMPRESA.municipio)} - ${esc(EMPRESA.uf)} para dirimir quaisquer litígios, contendas e/ou discussões oriundas deste contrato, com renúncia expressa a qualquer outro foro, por mais privilegiado que seja.</p>
     <p>E por estarem justas e contratadas, assine digitalmente o presente contrato.</p>
-    <p><strong>Contratada: AUTOMATTIZE PRO</strong></p>
+    <p><strong>Contratada: ${esc(EMPRESA.razaoSocial)} — ${esc(EMPRESA.cnpj)}</strong></p>
     <h2>RESUMO DA CONTRATAÇÃO</h2>
     <table><tbody>
       <tr><th>Prazo</th><td>${prazo} meses</td></tr>
@@ -119,12 +141,13 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p>O valor total do contrato é o valor da prestação de serviços durante todo o período de ${prazo} meses.</p>
     <p>O investimento em mídia das plataformas Google Ads e Meta Ads não está incluído nos valores acima e é pago separadamente pela CONTRATANTE.</p>
     <h2>LOCAL E MODALIDADE DA CONTRATAÇÃO</h2>
-    <p>A CONTRATANTE declara que a negociação, apresentação dos serviços, condições comerciais, valores, prazo contratual e demais condições deste instrumento foram apresentados e formalizados presencialmente no estabelecimento comercial da CONTRATADA, tendo a CONTRATANTE tido oportunidade de conhecer previamente o conteúdo deste contrato, esclarecer eventuais dúvidas e manifestar livremente sua concordância com a contratação.</p>
-    <div class="signatures"><div>CONTRATANTE</div><div><strong>AUTOMATTIZE PRO</strong><br/>CONTRATADA</div></div>
+    <p>A CONTRATANTE declara que a negociação, apresentação dos serviços, condições comerciais, valores, prazo contratual e demais condições deste instrumento foram apresentados e formalizados presencialmente no estabelecimento comercial da CONTRATADA, situado em ${esc(EMPRESA.logradouro)}, nº ${esc(EMPRESA.numero)}, ${esc(EMPRESA.complemento)}, ${esc(EMPRESA.municipio)} - ${esc(EMPRESA.uf)}, tendo a CONTRATANTE tido oportunidade de conhecer previamente o conteúdo deste contrato, esclarecer eventuais dúvidas e manifestar livremente sua concordância com a contratação.</p>
+    <div class="signatures"><div>CONTRATANTE</div><div><strong>${esc(EMPRESA.razaoSocial)}</strong><br/>CNPJ ${esc(EMPRESA.cnpj)}<br/>CONTRATADA</div></div>
   </article>
   <style>
     .contract-document{max-width:860px;margin:0 auto;color:#1f2937;font-family:Arial,sans-serif;font-size:11pt;line-height:1.55}
-    .contract-brand{display:flex;justify-content:space-between;border-bottom:2px solid #ff6a00;padding-bottom:12px;margin-bottom:20px;color:#c2410c}
+    .contract-brand{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #ff6a00;padding-bottom:12px;margin-bottom:20px;color:#c2410c}
+    .contract-brand img{display:block;width:180px;height:auto;max-height:56px;object-fit:contain}
     .contract-document h1{font-size:20pt;text-align:center;margin:12px 0 2px}
     .contract-document h2{font-size:12pt;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #cbd5e1;color:#0f172a}
     .contract-document p{margin:8px 0;text-align:justify}

@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 
@@ -8,6 +9,7 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   badge?: string;
+  prominent?: boolean;
 }
 
 interface SidebarProps {
@@ -27,7 +29,10 @@ export function Sidebar({
   embedded = false,
 }: SidebarProps) {
   const location = useLocation();
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const isCollapsed = embedded ? false : collapsed;
+
+  useEffect(() => setAvatarFailed(false), [user?.avatar]);
 
   const toggleCollapse = () => {
     onCollapse?.(!collapsed);
@@ -100,14 +105,16 @@ export function Sidebar({
               onClick={handleNavClick}
               className={cn(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-                active
-                  ? 'nav-link-active'
-                  : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary pressable',
+                item.prominent
+                  ? 'bg-brand text-white shadow-md shadow-brand/25 hover:bg-brand-dark'
+                  : active
+                    ? 'nav-link-active'
+                    : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary pressable',
                 isCollapsed && 'justify-center px-2'
               )}
               title={item.label}
             >
-              <span className="shrink-0">{item.icon}</span>
+              <span className={cn('shrink-0', item.prominent && 'text-white')}>{item.icon}</span>
               {!isCollapsed && <span className="truncate">{item.label}</span>}
               {!isCollapsed && item.badge && (
                 <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-brand/20 text-brand">
@@ -122,8 +129,8 @@ export function Sidebar({
       {user && !isCollapsed && (
         <div className="border-t border-border-color p-3 safe-pb">
           <div className="flex items-center gap-2.5">
-            {user.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover shrink-0" />
+            {user.avatar && !avatarFailed ? (
+              <img src={user.avatar} alt={user.name} onError={() => setAvatarFailed(true)} className="w-9 h-9 rounded-full object-cover shrink-0" />
             ) : (
               <div className="w-9 h-9 rounded-full bg-brand/20 text-brand flex items-center justify-center text-sm font-bold shrink-0">
                 {(user.name || user.email || 'U').charAt(0).toUpperCase()}

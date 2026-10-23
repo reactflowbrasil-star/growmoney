@@ -185,7 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         nome: profile?.nome || displayNameFromUser(session.user),
         avatar_url: profile?.avatar_url || null,
         avatar: profile?.avatar_url
-          ? await criarLinkArquivo(profile.avatar_url, 60 * 60 * 24 * 30).catch(() => undefined)
+          ? await criarLinkArquivo(profile.avatar_url, 60 * 60).catch(() => undefined)
           : undefined,
         // Application permissions follow the active tenant membership. Platform
         // access remains a separate trusted platform_admins authorization.
@@ -413,16 +413,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!data) throw new Error('Perfil não encontrado ou sem permissão para alterá-lo.');
 
     const path = updates.avatar_url === undefined ? user.avatar_url : updates.avatar_url;
-    const avatar = path ? await criarLinkArquivo(path, 60 * 60 * 24 * 30).catch(() => undefined) : undefined;
+    const avatar = path ? await criarLinkArquivo(path, 60 * 60).catch(() => undefined) : undefined;
     setUser((current) => current ? { ...current, nome: updates.nome, avatar_url: path, avatar } : current);
   }, [user]);
 
+  const refreshAvatar = useCallback(async () => {
+    if (!user?.avatar_url) return;
+    const avatar = await criarLinkArquivo(user.avatar_url, 60 * 60).catch(() => undefined);
+    setUser((current) => current?.id === user.id ? { ...current, avatar } : current);
+  }, [user?.id, user?.avatar_url]);
+
+  useEffect(() => {
+    if (!user?.avatar_url) return;
+    void refreshAvatar();
+    const interval = window.setInterval(() => void refreshAvatar(), 50 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [refreshAvatar, user?.avatar_url]);
+
   const hasPermissionCb = useCallback(
     (permission: string) => {
-      if (!user || !user.role) return false;
-      return checkPermission(user.role as any, permission as any);
+      const role = empresaAtiva?.role || user?.role;
+      if (!role) return false;
+      return checkPermission(role as any, permission as any);
     },
-    [user]
+    [empresaAtiva?.role, user?.role]
   );
 
   const value: AuthContextValue = {
