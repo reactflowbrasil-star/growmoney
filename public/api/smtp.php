@@ -19,7 +19,7 @@ function clean_header(string $value, int $limit = 998): string {
     return trim(substr($value, 0, $limit));
 }
 
-function smtp_read($socket, array $expected): string {
+function smtp_read($socket, array $expected, string $stage = 'SMTP_RESPONSE'): string {
     $lines = [];
     do {
         $line = fgets($socket, 2048);
@@ -29,14 +29,16 @@ function smtp_read($socket, array $expected): string {
         $more = isset($line[3]) && $line[3] === '-';
     } while ($more);
     if (!in_array((int)$code, $expected, true)) {
-        smtp_fail('SMTP_' . preg_replace('/\D/', '', $code), 'O servidor SMTP recusou uma etapa da conexão (' . preg_replace('/\D/', '', $code) . ').');
+        $safeStage = preg_replace('/[^A-Z0-9_]/', '', strtoupper($stage)) ?: 'SMTP_RESPONSE';
+        $status = preg_replace('/\D/', '', $code);
+        smtp_fail('SMTP_' . $status . '_' . $safeStage, 'O servidor SMTP recusou a etapa ' . strtolower(str_replace('_', ' ', $safeStage)) . ' (' . $status . ').');
     }
     return implode("\n", $lines);
 }
 
-function smtp_command($socket, string $command, array $expected): string {
+function smtp_command($socket, string $command, array $expected, string $stage = 'SMTP_COMMAND'): string {
     smtp_write($socket, $command . "\r\n");
-    return smtp_read($socket, $expected);
+    return smtp_read($socket, $expected, $stage);
 }
 
 function smtp_write($socket, string $data): void {
@@ -106,17 +108,17 @@ function smtp_send(array $settings, string $action, ?array $mail): void {
     if (!$socket) smtp_fail('SMTP_CONNECT', 'Não foi possível conectar ao servidor SMTP da hospedagem.');
     stream_set_timeout($socket, 20);
     try {
-        smtp_read($socket, [220]);
-        smtp_command($socket, 'EHLO growmoney', [250]);
-        smtp_command($socket, 'STARTTLS', [220]);
+        smtp_read($socket, [220], 'GREETING');
+        smtp_command($socket, 'EHLO growmoney', [250], 'EHLO');
+        smtp_command($socket, 'STARTTLS', [220], 'STARTTLS');
         $tls = @stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         if ($tls !== true) smtp_fail('SMTP_TLS', 'O servidor não concluiu a negociação TLS segura.');
-        smtp_command($socket, 'EHLO growmoney', [250]);
-        smtp_command($socket, 'AUTH LOGIN', [334]);
-        smtp_command($socket, base64_encode($username), [334]);
-        smtp_command($socket, base64_encode($password), [235]);
+        smtp_command($socket, 'EHLO growmoney', [250], 'EHLO_TLS');
+        smtp_command($socket, 'AUTH LOGIN', [334], 'AUTH_LOGIN');
+        smtp_command($socket, base64_encode($username), [334], 'AUTH_USERNAME');
+        smtp_command($socket, base64_encode($password), [235], 'AUTH_PASSWORD');
         if ($action === 'verify') {
-            smtp_command($socket, 'QUIT', [221]);
+            smtp_command($socket, 'QUIT', [221], 'QUIT');
             return;
         }
         if (!$mail || !isset($mail['to']) || !isset($mail['subject'])) {
@@ -134,9 +136,9 @@ function smtp_send(array $settings, string $action, ?array $mail): void {
         if (count($recipients) < 1 || count($recipients) > 20) {
             reply(400, ['error' => 'A mensagem deve ter entre 1 e 20 destinatários.', 'code' => 'RECIPIENT_LIMIT']);
         }
-        smtp_command($socket, 'MAIL FROM:<' . $from . '>', [250]);
-        foreach ($recipients as $recipient) smtp_command($socket, 'RCPT TO:<' . $recipient . '>', [250, 251]);
-        smtp_command($socket, 'DATA', [354]);
+        smtp_command($socket, 'MAIL FROM:<' . $from . '>', [250], 'MAIL_FROM');
+        foreach ($recipients as $recipient) smtp_command($socket, 'RCPT TO:<' . $recipient . '>', [250, 251], 'RCPT_TO');
+        smtp_command($socket, 'DATA', [354], 'DATA');
 
         $subject = clean_header((string)$mail['subject'], 240);
         $text = (string)($mail['text'] ?? '');
@@ -150,8 +152,8 @@ function smtp_send(array $settings, string $action, ?array $mail): void {
         $message = preg_replace('/\r\n|\r|\n/', "\r\n", $message) ?? $message;
         $message = preg_replace('/(?m)^\./', '..', $message) ?? $message;
         smtp_write($socket, $message . ".\r\n");
-        smtp_read($socket, [250]);
-        smtp_command($socket, 'QUIT', [221]);
+        smtp_read($socket, [250], 'MESSAGE_ACCEPTANCE');
+        smtp_command($socket, 'QUIT', [221], 'QUIT');
     } finally {
         if (is_resource($socket)) fclose($socket);
     }
@@ -185,4 +187,5 @@ try {
     error_log('GrowMoney SMTP bridge failure: ' . get_class($error));
     reply(502, ['error' => 'O servidor SMTP recusou a conexão ou a mensagem.', 'code' => 'SMTP_BRIDGE_FAILURE']);
 }
+
 
