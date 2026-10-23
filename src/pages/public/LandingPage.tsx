@@ -412,9 +412,9 @@ export default function LandingPage() {
             <Link to="/privacidade" className="transition-colors hover:text-text-primary">Privacidade</Link>
           </nav>
         </div>
-        <div className="mx-auto mt-5 flex max-w-7xl flex-col items-center justify-center gap-1 border-t border-border-color/60 px-4 pt-4 text-center text-xs text-text-secondary sm:px-6 lg:px-8">
-          <p>© 2027 {BRAND.name}. Todos os direitos reservados.</p>
-          <p>Desenvolvido por <a href="https://agenciaafrica.com.br" target="_blank" rel="noopener noreferrer" className="font-semibold text-text-primary transition-colors hover:text-brand">Agência AFRICA</a></p>
+        <div className="mx-auto mt-5 flex w-full max-w-7xl flex-col items-center justify-center gap-1 border-t border-border-color/60 px-4 pt-4 text-center text-xs text-text-secondary sm:px-6 lg:px-8">
+          <p className="w-full text-center">© 2027 {BRAND.name}. Todos os direitos reservados.</p>
+          <p className="w-full text-center">Desenvolvido por <a href="https://agenciaafrica.com.br" target="_blank" rel="noopener noreferrer" className="font-semibold text-text-primary transition-colors hover:text-brand">Agência AFRICA</a></p>
         </div>
       </footer>
     </div>
