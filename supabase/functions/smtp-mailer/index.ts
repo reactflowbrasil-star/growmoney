@@ -165,6 +165,12 @@ function safeSmtpFailure(error: unknown) {
   const code = error && typeof error === "object" && "code" in error && typeof error.code === "string"
     ? error.code.replace(/[^A-Z0-9_]/gi, "").slice(0, 32)
     : "";
+  if (code === "SMTP_550_RCPT_TO") {
+    return {
+      message: "O servidor SMTP recusou o endereço destinatário (550 em RCPT TO). Confirme se a caixa existe e se o servidor aceita mensagens para esse domínio.",
+      code,
+    };
+  }
   return {
     message: code
       ? `Falha no envio SMTP (${code}). Verifique o servidor, porta 587 com STARTTLS e as credenciais.`
