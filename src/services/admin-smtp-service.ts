@@ -1,3 +1,4 @@
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
 
 export type SmtpSettings = {
@@ -18,6 +19,14 @@ export type SmtpSettingsInput = Omit<SmtpSettings, 'passwordConfigured'> & {
 
 async function invoke<T>(action: string, fields: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await supabase.functions.invoke('smtp-mailer', { body: { action, ...fields } });
+  if (error instanceof FunctionsHttpError) {
+    let message: unknown;
+    try {
+      message = (await error.context.clone().json() as { error?: unknown }).error;
+    } catch { /* Keep the SDK message when the function didn't return JSON. */ }
+    if (typeof message === 'string' && message.trim()) throw new Error(message);
+    throw new Error(`Serviço SMTP (${error.context.status}): ${error.message}`);
+  }
   if (error) throw new Error(error.message || 'Não foi possível acessar o serviço SMTP.');
   if (data?.error) throw new Error(String(data.error));
   return data as T;

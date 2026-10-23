@@ -20,6 +20,7 @@ export default function AdminSistema() {
   const [smtpLoading, setSmtpLoading] = useState(true);
   const [smtpSaving, setSmtpSaving] = useState(false);
   const [smtpTesting, setSmtpTesting] = useState(false);
+  const [smtpCanValidate, setSmtpCanValidate] = useState(false);
   const [testSending, setTestSending] = useState(false);
   const [testRecipient, setTestRecipient] = useState('');
   const [smtpError, setSmtpError] = useState('');
@@ -33,9 +34,11 @@ export default function AdminSistema() {
       if (settings) {
         setSmtp({ host: settings.host, port: settings.port, secure: settings.secure, username: settings.username, password: '', fromEmail: settings.fromEmail, fromName: settings.fromName, enabled: settings.enabled });
         setPasswordConfigured(settings.passwordConfigured);
+        setSmtpCanValidate(settings.passwordConfigured);
       } else {
         setSmtp(emptySmtp);
         setPasswordConfigured(false);
+        setSmtpCanValidate(false);
       }
     } catch (error) {
       setSmtpError(error instanceof Error ? error.message : 'Não foi possível carregar a configuração SMTP.');
@@ -46,7 +49,10 @@ export default function AdminSistema() {
 
   useEffect(() => { void loadSmtp(); }, [loadSmtp]);
 
-  const updateSmtp = <K extends keyof SmtpForm>(key: K, value: SmtpForm[K]) => setSmtp((current) => ({ ...current, [key]: value }));
+  const updateSmtp = <K extends keyof SmtpForm>(key: K, value: SmtpForm[K]) => {
+    setSmtpCanValidate(false);
+    setSmtp((current) => ({ ...current, [key]: value }));
+  };
 
   const saveSmtp = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -54,6 +60,7 @@ export default function AdminSistema() {
     try {
       await AdminSmtpService.saveSettings({ ...smtp, clearPassword: false });
       setPasswordConfigured(true);
+      setSmtpCanValidate(true);
       setSmtp((current) => ({ ...current, password: '' }));
       setSmtpNotice('Configuração SMTP salva. A senha foi armazenada com proteção no servidor.');
     } catch (error) {
@@ -175,7 +182,7 @@ export default function AdminSistema() {
             <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={smtp.enabled} onChange={(event) => updateSmtp('enabled', event.target.checked)} className="h-4 w-4 accent-brand" /><span><span className="block font-medium">SMTP ativo</span><span className="text-xs text-text-secondary">Desative para interromper novos envios do sistema.</span></span></label>
             <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
               <Button type="submit" loading={smtpSaving}>Salvar configuração</Button>
-              <Button type="button" variant="outline" leftIcon={<Server className="h-4 w-4" />} loading={smtpTesting} disabled={!passwordConfigured && !smtp.password} onClick={() => void testSmtp()}>Validar servidor SMTP</Button>
+              <Button type="button" variant="outline" leftIcon={<Server className="h-4 w-4" />} loading={smtpTesting} disabled={!smtpCanValidate} onClick={() => void testSmtp()}>Validar servidor SMTP</Button>
               <Badge variant={smtp.enabled && passwordConfigured ? 'success' : 'neutral'}>{smtp.enabled && passwordConfigured ? 'Ativo e configurado' : passwordConfigured ? 'Configurado, desativado' : 'Não configurado'}</Badge>
             </div>
           </form>
