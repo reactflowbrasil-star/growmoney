@@ -36,6 +36,16 @@ export default function AuthCallback() {
         if (cancelled) return;
 
         if (s2) {
+          const flow = new URLSearchParams(window.location.search).get('flow');
+          if (flow === 'vendor-activation') {
+            const { data, error: notificationError } = await supabase.functions.invoke('smtp-mailer', {
+              body: { action: 'notify_vendor_activated' },
+            });
+            if (notificationError) console.warn('Ativação concluída, mas a notificação administrativa falhou:', notificationError.message);
+            else if (data?.notifications?.some((result: { notified?: boolean }) => !result.notified)) {
+              console.warn('Ativação concluída; o aviso ao administrador será tentado novamente no próximo acesso.');
+            }
+          }
           navigate('/dashboard', { replace: true });
         } else {
           setError('Não foi possível concluir o login. Tente novamente.');

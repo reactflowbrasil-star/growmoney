@@ -14,7 +14,7 @@ type Settings = {
   enabled: boolean;
 };
 
-type Action = "get_settings" | "save_settings" | "test_connection" | "test_email" | "send_signature";
+type Action = "get_settings" | "save_settings" | "test_connection" | "test_email" | "send_signature" | "check_vendor_mail" | "send_vendor_activation" | "notify_vendor_activated";
 
 const corsHeaders = (origin: string | null) => {
   const configured = Deno.env.get("APP_ORIGIN") || "https://canal360.run.place";
@@ -150,6 +150,23 @@ function brandedEmail(title: string, intro: string, body: string, appUrl: string
   return `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#17202a"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 12px"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#fff;border:1px solid #e6e8eb;border-radius:14px;overflow:hidden"><tr><td style="padding:24px 32px;border-bottom:3px solid #ff6a00"><img src="${logoUrl}" width="132" alt="GrowMoney" style="display:block;max-width:132px;height:auto"></td></tr><tr><td style="padding:32px"><h1 style="font-size:22px;margin:0 0 16px">${safeTitle}</h1><p style="font-size:15px;line-height:1.6;margin:0 0 16px">${safeIntro}</p><div style="font-size:15px;line-height:1.7">${safeBody}</div><p style="font-size:12px;color:#68717d;margin:28px 0 0">Mensagem enviada pelo sistema GrowMoney.</p></td></tr></table></td></tr></table></body></html>`;
 }
 
+function brandedActionEmail(title: string, intro: string, buttonText: string, link: string, appUrl: string) {
+  const safeTitle = escapeHtml(title);
+  const safeIntro = escapeHtml(intro);
+  const safeLink = escapeHtml(link);
+  const safeButton = escapeHtml(buttonText);
+  const logoUrl = `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`;
+  return `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#17202a"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 12px"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#fff;border:1px solid #e6e8eb;border-radius:14px;overflow:hidden"><tr><td style="padding:24px 32px;border-bottom:3px solid #ff6a00"><img src="${logoUrl}" width="132" alt="GrowMoney" style="display:block;max-width:132px;height:auto"></td></tr><tr><td style="padding:32px"><h1 style="font-size:22px;margin:0 0 16px">${safeTitle}</h1><p style="font-size:15px;line-height:1.6;margin:0 0 24px">${safeIntro}</p><p style="margin:0 0 20px"><a href="${safeLink}" style="display:inline-block;background:#ff6a00;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:8px">${safeButton}</a></p><p style="font-size:12px;line-height:1.5;color:#68717d;margin:0">Se o botão não abrir, copie este endereço para o navegador:<br><a href="${safeLink}" style="color:#c65300;word-break:break-all">${safeLink}</a></p><p style="font-size:12px;color:#68717d;margin:28px 0 0">Mensagem enviada pelo sistema GrowMoney.</p></td></tr></table></td></tr></table></body></html>`;
+}
+
+async function isCompanyAdmin(client: SupabaseClient, userId: string, empresaId: unknown): Promise<boolean> {
+  if (typeof empresaId !== "string" || !/^[0-9a-f-]{36}$/i.test(empresaId)) return false;
+  const { data, error } = await client.from("empresa_members")
+    .select("id").eq("empresa_id", empresaId).eq("usuario_id", userId)
+    .eq("role", "admin").eq("status", "aceito").maybeSingle();
+  return !error && Boolean(data);
+}
+
 async function logMail(client: SupabaseClient, actorId: string, action: string, recipient: string | null, success: boolean, details: Record<string, unknown> = {}) {
   await client.from("gm_smtp_mail_log").insert({
     actor_id: actorId,
@@ -183,13 +200,143 @@ Deno.serve(async (request: Request) => {
     return respond({ error: "Corpo da solicitação inválido." }, 400, origin);
   }
   const action = input.action as Action;
-  if (!["get_settings", "save_settings", "test_connection", "test_email", "send_signature"].includes(action)) {
+  if (!["get_settings", "save_settings", "test_connection", "test_email", "send_signature", "check_vendor_mail", "send_vendor_activation", "notify_vendor_activated"].includes(action)) {
     return respond({ error: "Ação inválida." }, 400, origin);
   }
 
-  const adminAction = action !== "send_signature";
-  if (adminAction && !(await isPlatformAdmin(clients.userClient))) {
+  const platformAdmin = await isPlatformAdmin(clients.userClient);
+  const platformAdminOnlyAction = ["get_settings", "save_settings", "test_connection", "test_email"].includes(action);
+  if (platformAdminOnlyAction && !platformAdmin) {
     return respond({ error: "Acesso restrito ao administrador da plataforma." }, 403, origin);
+  }
+  if (["check_vendor_mail", "send_vendor_activation"].includes(action)
+    && !platformAdmin && !(await isCompanyAdmin(clients.serviceClient, actorId, input.empresaId))) {
+    return respond({ error: "Apenas o administrador da empresa pode enviar convites de vendedor." }, 403, origin);
+  }
+
+  if (action === "check_vendor_mail") {
+    try {
+      const settings = await loadSettings(clients.serviceClient);
+      if (!settings?.enabled) return respond({ error: "Configure e ative o SMTP no painel administrativo antes de cadastrar vendedores." }, 409, origin);
+      const transport = makeTransport(settings, await decryptPassword(settings));
+      await transport.verify();
+      return respond({ ready: true }, 200, origin);
+    } catch (error) {
+      return respond({ error: safeSmtpFailure(error).message }, 502, origin);
+    }
+  }
+
+  if (action === "send_vendor_activation") {
+    const email = input.email;
+    const nome = typeof input.nome === "string" ? safeHeader(input.nome, "Vendedor") : "Vendedor";
+    const activationLink = input.activationLink;
+    const empresaId = input.empresaId;
+    if (!emailIsValid(email) || typeof activationLink !== "string" || activationLink.length > 4096
+      || !/^https:\/\//i.test(activationLink) || typeof empresaId !== "string") {
+      return respond({ error: "Dados do convite de ativação inválidos." }, 400, origin);
+    }
+    try {
+      const linkUrl = new URL(activationLink);
+      const authUrl = new URL(Deno.env.get("SUPABASE_URL") || "");
+      if (linkUrl.origin !== authUrl.origin || linkUrl.pathname !== "/auth/v1/verify") {
+        return respond({ error: "O link informado não pertence ao serviço de autenticação do GrowMoney." }, 400, origin);
+      }
+    } catch {
+      return respond({ error: "Link de ativação inválido." }, 400, origin);
+    }
+    const { data: seller, error: sellerError } = await clients.serviceClient.from("vendedores")
+      .select("id").eq("empresa_id", empresaId).eq("email", email.toLowerCase()).eq("status", "inativo").maybeSingle();
+    if (sellerError || !seller) return respond({ error: "Vendedor pendente não encontrado para este convite." }, 404, origin);
+    try {
+      const settings = await loadSettings(clients.serviceClient);
+      if (!settings?.enabled) throw new Error("SMTP_NOT_CONFIGURED");
+      const transport = makeTransport(settings, await decryptPassword(settings));
+      await transport.verify();
+      const { data: company } = await clients.serviceClient.from("empresas").select("nome").eq("id", empresaId).maybeSingle();
+      const appUrl = Deno.env.get("APP_BASE_URL") || "https://canal360.run.place/grow";
+      await transport.sendMail({
+        from: { name: settings.from_name, address: settings.from_email },
+        to: email,
+        subject: "Ative seu acesso ao GrowMoney",
+        text: `Olá ${nome},\n\nSeu cadastro de vendedor para ${company?.nome || "a empresa"} foi criado. Ative seu acesso pelo link abaixo:\n\n${activationLink}\n\nSe você não esperava este convite, ignore esta mensagem.`,
+        html: brandedActionEmail("Ative seu cadastro", `Olá ${nome}. Seu acesso de vendedor para ${company?.nome || "a empresa"} está quase pronto. Confirme seu e-mail para ativar a conta.`, "Ativar meu cadastro", activationLink, appUrl),
+      });
+      await logMail(clients.serviceClient, actorId, "vendor_activation_email", email, true, { empresaId, vendedorId: seller.id });
+      return respond({ sent: true }, 200, origin);
+    } catch (error) {
+      const failure = safeSmtpFailure(error);
+      await logMail(clients.serviceClient, actorId, "vendor_activation_email", email, false, { empresaId, vendedorId: seller.id, errorCode: failure.code });
+      return respond({ error: failure.message }, 502, origin);
+    }
+  }
+
+  if (action === "notify_vendor_activated") {
+    const { data: { user: confirmedUser }, error: confirmedUserError } = await clients.userClient.auth.getUser();
+    if (confirmedUserError || !confirmedUser || !confirmedUser.email_confirmed_at) {
+      return respond({ notApplicable: true }, 200, origin);
+    }
+    const { data: sellerRows, error: sellerError } = await clients.serviceClient.from("vendedores")
+      .select("id, empresa_id, nome, email").eq("usuario_id", confirmedUser.id);
+    if (sellerError || !sellerRows?.length) return respond({ notApplicable: true }, 200, origin);
+    await clients.serviceClient.from("vendedores").update({ status: "ativo" }).eq("usuario_id", confirmedUser.id);
+    const results: Array<{ notified: boolean; alreadySent?: boolean }> = [];
+    for (const seller of sellerRows) {
+      const { data: event } = await clients.serviceClient.from("gm_vendor_activation_events")
+        .select("id, empresa_id, admin_user_id, status, claimed_at").eq("vendedor_id", seller.id).maybeSingle();
+      if (!event) continue;
+      if (event.status === "sent") { results.push({ notified: true, alreadySent: true }); continue; }
+      const now = new Date();
+      const staleBefore = new Date(now.getTime() - 5 * 60 * 1000).toISOString();
+      let { data: claimed } = await clients.serviceClient.from("gm_vendor_activation_events")
+        .update({ status: "sending", claimed_at: now.toISOString(), updated_at: now.toISOString(), last_error_code: null })
+        .eq("id", event.id).in("status", ["pending", "failed"]).select("id").maybeSingle();
+      if (!claimed && event.status === "sending") {
+        ({ data: claimed } = await clients.serviceClient.from("gm_vendor_activation_events")
+          .update({ status: "sending", claimed_at: now.toISOString(), updated_at: now.toISOString(), last_error_code: null })
+          .eq("id", event.id).eq("status", "sending").lt("claimed_at", staleBefore).select("id").maybeSingle());
+      }
+      if (!claimed) { results.push({ notified: false }); continue; }
+
+      try {
+        const { data: memberships } = await clients.serviceClient.from("empresa_members")
+          .select("usuario_id").eq("empresa_id", seller.empresa_id).eq("role", "admin").eq("status", "aceito");
+        const adminIds = new Set<string>((memberships || []).map((membership) => membership.usuario_id));
+        adminIds.add(event.admin_user_id);
+        adminIds.delete(confirmedUser.id);
+        const { data: profiles } = await clients.serviceClient.from("profiles")
+          .select("id, email, nome").in("id", [...adminIds]);
+        const recipientMap = new Map<string, { email: string; nome: string }>();
+        for (const profile of profiles || []) {
+          if (emailIsValid(profile.email) && profile.email.toLowerCase() !== String(seller.email).toLowerCase()) {
+            recipientMap.set(profile.email.toLowerCase(), { email: profile.email, nome: profile.nome || "Administrador" });
+          }
+        }
+        if (!recipientMap.size) throw new Error("ADMIN_RECIPIENT_MISSING");
+        const settings = await loadSettings(clients.serviceClient);
+        if (!settings?.enabled) throw new Error("SMTP_NOT_CONFIGURED");
+        const transport = makeTransport(settings, await decryptPassword(settings));
+        await transport.verify();
+        const appUrl = Deno.env.get("APP_BASE_URL") || "https://canal360.run.place/grow";
+        const companyName = await clients.serviceClient.from("empresas").select("nome").eq("id", seller.empresa_id).maybeSingle();
+        const recipients = [...recipientMap.values()];
+        await transport.sendMail({
+          from: { name: settings.from_name, address: settings.from_email },
+          to: recipients.map((recipient) => recipient.email),
+          subject: `Cadastro de vendedor ativado: ${safeHeader(seller.nome, "Vendedor")}`,
+          text: `O vendedor ${seller.nome} (${seller.email}) confirmou o e-mail e ativou o cadastro em ${companyName.data?.nome || "sua empresa"}.`,
+          html: brandedEmail("Cadastro ativado", `O cadastro de ${seller.nome} foi confirmado pelo próprio vendedor.`, `E-mail: ${seller.email}\nEmpresa: ${companyName.data?.nome || "—"}\nStatus: ativo`, appUrl),
+        });
+        await clients.serviceClient.from("gm_vendor_activation_events").update({ status: "sent", notified_at: new Date().toISOString(), updated_at: new Date().toISOString(), last_error_code: null }).eq("id", event.id);
+        await logMail(clients.serviceClient, confirmedUser.id, "vendor_activation_admin_notice", recipients.map((recipient) => recipient.email).join(", "), true, { empresaId: seller.empresa_id, vendedorId: seller.id });
+        results.push({ notified: true });
+      } catch (error) {
+        const failure = safeSmtpFailure(error);
+        await clients.serviceClient.from("gm_vendor_activation_events").update({ status: "failed", updated_at: new Date().toISOString(), last_error_code: failure.code }).eq("id", event.id);
+        await logMail(clients.serviceClient, confirmedUser.id, "vendor_activation_admin_notice", null, false, { empresaId: seller.empresa_id, vendedorId: seller.id, errorCode: failure.code });
+        results.push({ notified: false });
+      }
+    }
+    return respond({ activated: true, notifications: results }, 200, origin);
   }
 
   if (action === "get_settings") {

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:44:54.429Z",
+  "generated_at": "2026-10-23T04:52:25.526Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -835,6 +835,11 @@
       "label": "supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql"
     },
     {
+      "id": "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023044825_vendor_activation_email_tracking.sql"
+    },
+    {
       "id": "file:tailwind.config.ts",
       "type": "file",
       "label": "tailwind.config.ts"
@@ -1018,6 +1023,11 @@
       "id": "table:platform_admins",
       "type": "database-table",
       "label": "platform_admins"
+    },
+    {
+      "id": "table:gm_vendor_activation_events",
+      "type": "database-table",
+      "label": "gm_vendor_activation_events"
     },
     {
       "id": "table:gm_admin_audit",
@@ -3479,13 +3489,25 @@
     },
     {
       "from": "file:supabase/functions/admin-users/index.ts",
+      "to": "table:empresa_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/admin-users/index.ts",
       "to": "table:profiles",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
     {
       "from": "file:supabase/functions/admin-users/index.ts",
-      "to": "table:empresa_members",
+      "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/admin-users/index.ts",
+      "to": "table:gm_vendor_activation_events",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -3521,7 +3543,37 @@
     },
     {
       "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:empresa_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
       "to": "table:gm_smtp_mail_log",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:empresas",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:gm_vendor_activation_events",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/smtp-mailer/index.ts",
+      "to": "table:profiles",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -3726,6 +3778,12 @@
     {
       "from": "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql",
       "to": "table:gm_smtp_mail_log",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql",
+      "to": "table:gm_vendor_activation_events",
       "type": "defines-table",
       "confidence": "EXTRACTED"
     }

@@ -255,6 +255,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (error) throw new Error(`Falha ao autenticar: ${error.message}`);
       if (!data.session) throw new Error('Sessão não criada');
+      const { error: activationNoticeError } = await supabase.functions.invoke('smtp-mailer', {
+        body: { action: 'notify_vendor_activated' },
+      });
+      if (activationNoticeError) console.warn('Não foi possível repetir o aviso de ativação ao administrador:', activationNoticeError.message);
       await hydrateFromSession(data.session as any);
     },
     [hydrateFromSession]

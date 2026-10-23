@@ -19,6 +19,7 @@ export default function AdminUsuarios() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -36,14 +37,18 @@ export default function AdminUsuarios() {
     return users.filter((user) => !term || `${user.nome} ${user.email} ${user.role} ${user.memberships.map((item) => item.empresa_nome).join(' ')}`.toLowerCase().includes(term));
   }, [users, search]);
 
-  const newUser = () => { setEditing(null); setForm({ ...blankForm, empresaId: companies[0]?.id || '' }); setError(''); setOpen(true); };
+  const newUser = () => { setEditing(null); setForm({ ...blankForm, empresaId: companies[0]?.id || '' }); setError(''); setNotice(''); setOpen(true); };
   const editUser = (user: AdminUser) => { setEditing(user); setForm({ ...blankForm, nome: user.nome, telefone: user.telefone || '' }); setError(''); setOpen(true); };
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault(); setSaving(true); setError('');
     try {
       if (editing) await AdminUserService.update(editing.id, form.nome, form.telefone);
-      else await AdminUserService.create(form.empresaId, form.email, form.password, form.nome);
+      else {
+        const result = await AdminUserService.create(form.empresaId, form.email, form.password, form.nome);
+        if (result.emailSent) setNotice(result.message);
+        else setError(result.message);
+      }
       setOpen(false); await load();
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Falha ao salvar usuário.'); }
     finally { setSaving(false); }
@@ -61,6 +66,7 @@ export default function AdminUsuarios() {
     <div className="max-w-7xl space-y-4">
       <PageHeader title="Usuários" description="Contas, dados de perfil e vínculos empresariais" actions={<div className="flex gap-2"><Button size="sm" variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} onClick={() => void load()}>Atualizar</Button>{isAdmin && <Button size="sm" leftIcon={<Plus className="h-4 w-4" />} disabled={!companies.length} onClick={newUser}>Novo vendedor</Button>}</div>} />
       {error && !open && <div className="rounded-xl border border-erro/30 bg-erro/10 p-4 text-sm text-erro" role="alert">{error}</div>}
+      {notice && <div className="rounded-xl border border-brand/30 bg-brand/10 p-4 text-sm text-text-primary" role="status">{notice}</div>}
       <Card padding="none" className="overflow-hidden">
         <div className="border-b border-border-color p-4"><div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input aria-label="Buscar usuários" placeholder="Buscar nome, e-mail ou empresa..." value={search} onChange={(event) => setSearch(event.target.value)} className="pl-10" /></div></div>
         {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando usuários…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum usuário" description="As contas disponíveis aparecerão aqui." icon={<Users className="h-6 w-6" />} /></div> : (

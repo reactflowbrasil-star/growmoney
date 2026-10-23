@@ -13,6 +13,15 @@ export type AdminUser = {
 
 export type AdminCompanyOption = { id: string; nome: string };
 
+async function edgeFunctionError(error: Error, fallback: string) {
+  const context = (error as Error & { context?: unknown }).context;
+  if (context instanceof Response) {
+    const payload = await context.clone().json().catch(() => null) as { error?: unknown } | null;
+    if (typeof payload?.error === 'string') return payload.error;
+  }
+  return `${fallback}: ${error.message}`;
+}
+
 async function requirePlatformAdmin() {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new Error('Entre com uma conta administrativa para continuar.');
@@ -54,12 +63,16 @@ export class AdminUserService {
     await this.audit(admin.id, 'usuario.atualizado', { user_id: id });
   }
 
-  static async create(empresaId: string, email: string, password: string, nome: string): Promise<void> {
+  static async create(empresaId: string, email: string, password: string, nome: string, metaMensal = 0): Promise<{ emailSent: boolean; message: string }> {
     await requirePlatformAdmin();
-    const { error } = await supabase.functions.invoke('admin-users', {
-      body: { action: 'create', empresaId, email: email.trim(), password, nome: nome.trim() },
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body: { action: 'create', empresaId, email: email.trim(), password, nome: nome.trim(), metaMensal },
     });
-    if (error) throw new Error(`Falha ao criar usuário: ${error.message}`);
+    if (error) throw new Error(await edgeFunctionError(error, 'Falha ao criar usuário'));
+    return {
+      emailSent: data?.emailSent === true,
+      message: typeof data?.message === 'string' ? data.message : 'Cadastro criado. O link de ativação foi enviado ao vendedor.',
+    };
   }
 
   static async delete(empresaId: string, userId: string): Promise<void> {

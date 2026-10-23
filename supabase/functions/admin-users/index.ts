@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 type RequestBody =
-  | { action: 'create'; empresaId: string; email: string; password: string; nome: string }
+  | { action: 'create'; empresaId: string; email: string; password: string; nome: string; metaMensal?: number }
   | { action: 'delete'; empresaId: string; userId: string };
 
 function json(status: number, payload: Record<string, unknown>) {
@@ -60,9 +60,23 @@ Deno.serve(async (request) => {
     .eq('user_id', actor.id)
     .maybeSingle();
   if (platformAdminError) return json(500, { error: 'Falha ao verificar permissões administrativas.' });
-  if (!platformAdminRecord) return json(403, { error: 'Apenas administradores da plataforma podem gerenciar contas.' });
 
   if (body.action === 'create') {
+    let empresaAdmin = false;
+    if (!platformAdminRecord) {
+      const { data: membership, error: membershipCheckError } = await serviceClient
+        .from('empresa_members')
+        .select('role')
+        .eq('empresa_id', body.empresaId)
+        .eq('usuario_id', actor.id)
+        .eq('status', 'aceito')
+        .maybeSingle();
+      if (membershipCheckError) return json(500, { error: 'Falha ao verificar permissões da empresa.' });
+      empresaAdmin = membership?.role === 'admin';
+    }
+    if (!platformAdminRecord && !empresaAdmin) {
+      return json(403, { error: 'Apenas administradores da plataforma ou da empresa podem cadastrar vendedores.' });
+    }
     if (typeof body.email !== 'string' || typeof body.nome !== 'string' || typeof body.password !== 'string') {
       return json(400, { error: 'Nome, e-mail e senha são obrigatórios.' });
     }
@@ -72,18 +86,40 @@ Deno.serve(async (request) => {
       return json(400, { error: 'Informe nome, e-mail válido e senha com pelo menos 8 caracteres.' });
     }
 
-    const { data: created, error: createError } = await serviceClient.auth.admin.createUser({
+    const metaMensal = Number(body.metaMensal ?? 0);
+    if (!Number.isFinite(metaMensal) || metaMensal < 0 || metaMensal > 1_000_000_000) {
+      return json(400, { error: 'Informe uma meta mensal válida.' });
+    }
+
+    const baseUrl = (Deno.env.get('APP_BASE_URL') || 'https://canal360.run.place/grow').replace(/\/$/, '');
+    const activationRedirect = `${baseUrl}/auth/callback?flow=vendor-activation`;
+    const readiness = await fetch(`${url}/functions/v1/smtp-mailer`, {
+      method: 'POST',
+      headers: { Authorization: authorization, apikey: anonKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'check_vendor_mail', empresaId: body.empresaId }),
+    });
+    if (!readiness.ok) {
+      const readinessBody = await readiness.json().catch(() => ({}));
+      return json(readiness.status, { error: typeof readinessBody.error === 'string' ? readinessBody.error : 'Configure e valide o SMTP antes de cadastrar vendedores.' });
+    }
+
+    const { data: generated, error: createError } = await serviceClient.auth.admin.generateLink({
+      type: 'signup',
       email,
       password: body.password,
-      email_confirm: true,
-      user_metadata: { nome, full_name: nome },
+      options: {
+        redirectTo: activationRedirect,
+        data: { nome, full_name: nome },
+      },
     });
-    if (createError || !created.user) {
-      return json(400, { error: createError?.message || 'Não foi possível criar a conta.' });
+    const createdUser = generated?.user;
+    const activationLink = generated?.properties?.action_link;
+    if (createError || !createdUser || !activationLink) {
+      return json(400, { error: createError?.message || 'Não foi possível criar o convite de ativação.' });
     }
 
     const { error: profileError } = await serviceClient.from('profiles').upsert({
-      id: created.user.id,
+      id: createdUser.id,
       email,
       nome,
       role: 'vendedor',
@@ -92,15 +128,45 @@ Deno.serve(async (request) => {
       ? { error: profileError }
       : await serviceClient.from('empresa_members').insert({
           empresa_id: body.empresaId,
-          usuario_id: created.user.id,
+          usuario_id: createdUser.id,
           role: 'vendedor',
           status: 'aceito',
           aceito_em: new Date().toISOString(),
         });
 
     if (profileError || memberError) {
-      await serviceClient.auth.admin.deleteUser(created.user.id);
+      await serviceClient.auth.admin.deleteUser(createdUser.id);
       return json(500, { error: 'Não foi possível concluir a vinculação; a conta criada foi revertida.' });
+    }
+
+    const { data: vendor, error: vendorError } = await serviceClient.from('vendedores').insert({
+      empresa_id: body.empresaId,
+      nome,
+      email,
+      identificador_interno: crypto.randomUUID().slice(0, 12),
+      role: 'vendedor',
+      status: 'inativo',
+      meta_mensal: metaMensal,
+      usuario_id: createdUser.id,
+      atualizado_por: actor.id,
+    }).select('id').single();
+    if (vendorError || !vendor) {
+      await serviceClient.from('empresa_members').delete().eq('empresa_id', body.empresaId).eq('usuario_id', createdUser.id);
+      await serviceClient.auth.admin.deleteUser(createdUser.id);
+      return json(500, { error: 'Não foi possível concluir o cadastro do vendedor; a conta criada foi revertida.' });
+    }
+
+    const { error: activationEventError } = await serviceClient.from('gm_vendor_activation_events').insert({
+      vendedor_id: vendor.id,
+      empresa_id: body.empresaId,
+      admin_user_id: actor.id,
+      status: 'pending',
+    });
+    if (activationEventError) {
+      await serviceClient.from('vendedores').delete().eq('id', vendor.id);
+      await serviceClient.from('empresa_members').delete().eq('empresa_id', body.empresaId).eq('usuario_id', createdUser.id);
+      await serviceClient.auth.admin.deleteUser(createdUser.id);
+      return json(500, { error: 'Não foi possível registrar o fluxo de ativação; a conta criada foi revertida.' });
     }
 
     const { error: auditError } = await serviceClient.from('gm_admin_audit').insert({
@@ -109,11 +175,33 @@ Deno.serve(async (request) => {
       details: { email, role: 'vendedor', empresa_id: body.empresaId },
     });
     if (auditError) {
-      await serviceClient.auth.admin.deleteUser(created.user.id);
+      await serviceClient.from('gm_vendor_activation_events').delete().eq('vendedor_id', vendor.id);
+      await serviceClient.from('vendedores').delete().eq('id', vendor.id);
+      await serviceClient.from('empresa_members').delete().eq('empresa_id', body.empresaId).eq('usuario_id', createdUser.id);
+      await serviceClient.auth.admin.deleteUser(createdUser.id);
       return json(500, { error: 'Não foi possível registrar auditoria; a conta criada foi revertida.' });
     }
-    return json(201, { userId: created.user.id, email, nome, role: 'vendedor' });
+
+    const mailResponse = await fetch(`${url}/functions/v1/smtp-mailer`, {
+      method: 'POST',
+      headers: { Authorization: authorization, apikey: anonKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send_vendor_activation', empresaId: body.empresaId, email, nome, activationLink }),
+    });
+    const mailBody = await mailResponse.json().catch(() => ({}));
+    return json(201, {
+      userId: createdUser.id,
+      vendedorId: vendor.id,
+      email,
+      nome,
+      role: 'vendedor',
+      emailSent: mailResponse.ok,
+      message: mailResponse.ok
+        ? 'Cadastro criado. O link de ativação foi enviado ao vendedor.'
+        : (typeof mailBody.error === 'string' ? mailBody.error : 'Cadastro criado, mas não foi possível enviar o link de ativação.'),
+    });
   }
+
+  if (!platformAdminRecord) return json(403, { error: 'Apenas administradores da plataforma podem excluir contas.' });
 
   if (typeof body.userId !== 'string' || !body.userId || body.userId === actor.id) return json(400, { error: 'Usuário de destino inválido.' });
   const { data: target, error: targetError } = await serviceClient.auth.admin.getUserById(body.userId);
