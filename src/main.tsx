@@ -1,8 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -11,6 +12,8 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { SonarGrid } from '@/components/ui/sonar-grid';
 import { FloatingThemeSwitcher } from '@/components/ui/FloatingThemeSwitcher';
+import VendedorWorkspace from '@/pages/dashboard/VendedorWorkspace';
+import Visitas from '@/pages/dashboard/Visitas';
 import { GlobalFooter } from '@/components/layout/GlobalFooter';
 import './index.css';
 
@@ -113,6 +116,8 @@ function App() {
                   </Route>
 
                   <Route element={<ProtectedRoute />}>
+                    <Route path="/vendedor" element={<VendedorWorkspace />} />
+                    <Route element={<WorkspaceRoleRoute />}>
                     <Route element={<AppLayout />}>
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/dashboard/executivo" element={<DashboardExecutivo />} />
@@ -125,12 +130,14 @@ function App() {
                       <Route path="/servicos" element={<Servicos />} />
                       <Route path="/vendedores" element={<Vendedores />} />
                       <Route path="/agenda" element={<Agenda />} />
+                      <Route path="/visitas" element={<Visitas />} />
                       <Route path="/financeiro" element={<Financeiro />} />
                       <Route path="/relatorios" element={<Relatorios />} />
                       <Route path="/auditoria" element={<Auditoria />} />
                       <Route path="/configuracoes" element={<Configuracoes />} />
                       <Route path="/perfil" element={<Perfil />} />
                       <Route path="/empresas" element={<Empresas />} />
+                    </Route>
                     </Route>
                   </Route>
 
@@ -149,10 +156,18 @@ function App() {
   );
 }
 
+function WorkspaceRoleRoute() {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (user?.role === 'vendedor') return <Navigate to="/vendedor" replace />;
+  return <Outlet />;
+}
+
 const rootEl = document.getElementById('root');
 if (!rootEl) {
   throw new Error('Elemento #root nao encontrado no HTML');
 }
 
 createRoot(rootEl).render(<App />);
+
 

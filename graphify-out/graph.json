@@ -1,7 +1,10 @@
+Warning: truncated output (original token count: 30369)
+Total output lines: 4231
+
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T05:32:29.270Z",
+  "generated_at": "2026-10-23T05:48:47.293Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -410,6 +413,16 @@
       "label": "src/lib/vendedor-validation.ts"
     },
     {
+      "id": "file:src/lib/vendor-visit-types.test.ts",
+      "type": "file",
+      "label": "src/lib/vendor-visit-types.test.ts"
+    },
+    {
+      "id": "file:src/lib/vendor-visit-types.ts",
+      "type": "file",
+      "label": "src/lib/vendor-visit-types.ts"
+    },
+    {
       "id": "file:src/main.tsx",
       "type": "file",
       "label": "src/main.tsx"
@@ -575,9 +588,19 @@
       "label": "src/pages/dashboard/Servicos.tsx"
     },
     {
+      "id": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "type": "file",
+      "label": "src/pages/dashboard/VendedorWorkspace.tsx"
+    },
+    {
       "id": "file:src/pages/dashboard/Vendedores.tsx",
       "type": "file",
       "label": "src/pages/dashboard/Vendedores.tsx"
+    },
+    {
+      "id": "file:src/pages/dashboard/Visitas.tsx",
+      "type": "file",
+      "label": "src/pages/dashboard/Visitas.tsx"
     },
     {
       "id": "file:src/pages/public/AssinarDocumento.tsx",
@@ -623,6 +646,11 @@
       "id": "file:src/repositories/vendedor-repository.ts",
       "type": "file",
       "label": "src/repositories/vendedor-repository.ts"
+    },
+    {
+      "id": "file:src/repositories/vendor-visit-repository.ts",
+      "type": "file",
+      "label": "src/repositories/vendor-visit-repository.ts"
     },
     {
       "id": "file:src/routes/ProtectedRoute.tsx",
@@ -723,6 +751,11 @@
       "id": "file:src/services/vendor-chat-service.ts",
       "type": "file",
       "label": "src/services/vendor-chat-service.ts"
+    },
+    {
+      "id": "file:src/services/vendor-visit-service.ts",
+      "type": "file",
+      "label": "src/services/vendor-visit-service.ts"
     },
     {
       "id": "file:src/test/InstallPwaButton.test.tsx",
@@ -880,6 +913,11 @@
       "label": "supabase/migrations/20261023050243_vendedor_empresa_chat.sql"
     },
     {
+      "id": "file:supabase/migrations/20261023054301_vendedor_visitas.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023054301_vendedor_visitas.sql"
+    },
+    {
       "id": "file:tailwind.config.ts",
       "type": "file",
       "label": "tailwind.config.ts"
@@ -985,6 +1023,16 @@
       "label": "vendedores"
     },
     {
+      "id": "table:clients",
+      "type": "database-table",
+      "label": "clients"
+    },
+    {
+      "id": "table:vendedor_visitas",
+      "type": "database-table",
+      "label": "vendedor_visitas"
+    },
+    {
       "id": "rpc:admin_list_audit",
       "type": "database-rpc",
       "label": "admin_list_audit"
@@ -993,11 +1041,6 @@
       "id": "table:agenda_historico",
       "type": "database-table",
       "label": "agenda_historico"
-    },
-    {
-      "id": "table:clients",
-      "type": "database-table",
-      "label": "clients"
     },
     {
       "id": "table:client_historico",
@@ -1373,1438 +1416,7 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:src/components/forms/ServicoForm.tsx",
-      "to": "file:src/lib/servico-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/forms/VendedorForm.tsx",
-      "to": "file:src/components/ui/Input.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/forms/VendedorForm.tsx",
-      "to": "file:src/components/ui/Button.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/forms/VendedorForm.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/forms/VendedorForm.tsx",
-      "to": "file:src/lib/servico-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout Sidebar.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/components/layout/Sidebar.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/components/layout/Header.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/components/layout/MobileBottomNav.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/services/dashboard-activity-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/config/nav.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/AppLayout.tsx",
-      "to": "file:src/components/chat/LiveChat.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Header.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Header.tsx",
-      "to": "file:src/lib/brand.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Header.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Header.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Header.tsx",
-      "to": "file:src/components/chat/LiveChat.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/MobileBottomNav.tsx",
-      "to": "file:src/config/nav.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/MobileBottomNav.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Sidebar.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/layout/Sidebar.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/pwa/InstallPwaButton.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/pwa/InstallPwaButton.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/Badge.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/Button.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/Card.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/FileUpload.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/FileUpload.tsx",
-      "to": "file:src/services/file-storage.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/FloatingThemeSwitcher.tsx",
-      "to": "file:src/contexts/ThemeContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/Input.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/Loading.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/Modal.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/Button.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/Input.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/Card.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/EmptyState.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/Loading.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/Modal.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/Badge.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/FileUpload.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/index.ts",
-      "to": "file:src/components/ui/PageHeader.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/ui/sonar-grid.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AdminAuthContext.tsx",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AdminAuthContext.tsx",
-      "to": "file:src/lib/admin-auth.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AdminAuthContext.tsx",
-      "to": "rpc:is_platform_admin",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "file:src/services/file-storage.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "file:src/lib/permissions.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "file:src/lib/auth-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "table:empresa_members",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "table:profiles",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "table:empresas",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/contexts/AuthContext.tsx",
-      "to": "rpc:is_platform_admin",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/index.css",
-      "to": "file:src/design-system/tokens.css",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/assinatura-store.ts",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/assinatura-store.ts",
-      "to": "file:src/lib/assinatura-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/assinatura-store.ts",
-      "to": "table:signature_envelopes",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/assinatura-store.ts",
-      "to": "rpc:get_signature_envelope_by_token",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/assinatura-store.ts",
-      "to": "rpc:mark_signature_envelope_viewed",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/assinatura-store.ts",
-      "to": "rpc:apply_signature_to_envelope",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/contrato-template.ts",
-      "to": "file:src/lib/contratos-store.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/contratos-store.test.ts",
-      "to": "file:src/lib/contratos-store.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/contratos-store.ts",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/contratos-store.ts",
-      "to": "table:gm_contracts",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/contratos-store.ts",
-      "to": "rpc:is_platform_admin",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/contratos-store.ts",
-      "to": "rpc:empresa_role",
-      "type": "calls-rpc",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/lib/vendedor-validation.test.ts",
-      "to": "file:src/lib/vendedor-validation.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/contexts/ThemeContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/auth/ProtectedRoute.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/admin/AdminProtectedRoute.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/layout/AppLayout.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/admin/AdminLayout.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/ui/sonar-grid.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/ui/FloatingThemeSwitcher.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/layout/GlobalFooter.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/public/LandingPage.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Login.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Cadastro.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/AuthCallback.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/RecuperacaoSenha.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/TermosUso.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Privacidade.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Dashboard.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/DashboardExecutivo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Clientes.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Contratos.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/ContratoNovo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Servicos.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Vendedores.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Agenda.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Financeiro.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Relatorios.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Auditoria.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Configuracoes.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Perfil.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Empresas.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Assinaturas.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/public/AssinarDocumento.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminLogin.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminDashboard.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminEmpresas.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminUsuarios.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminArquivos.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminSistema.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminAuditoria.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminSeguranca.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/public/LandingPage.tsx",
-      "type": "route:/",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Login.tsx",
-      "type": "route:/auth",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Login.tsx",
-      "type": "route:/login",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Cadastro.tsx",
-      "type": "route:/cadastro",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/AuthCallback.tsx",
-      "type": "route:/auth/callback",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/RecuperacaoSenha.tsx",
-      "type": "route:/recuperar-senha",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/TermosUso.tsx",
-      "type": "route:/termos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/auth/Privacidade.tsx",
-      "type": "route:/privacidade",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/public/AssinarDocumento.tsx",
-      "type": "route:/assinar/:token",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminLogin.tsx",
-      "type": "route:/admin/login",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/components/admin/AdminLayout.tsx",
-      "type": "route:/admin",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminEmpresas.tsx",
-      "type": "route:empresas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminUsuarios.tsx",
-      "type": "route:usuarios",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:clientes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:contratos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:assinaturas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminArquivos.tsx",
-      "type": "route:arquivos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:financeiro",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminSistema.tsx",
-      "type": "route:sistema",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminAuditoria.tsx",
-      "type": "route:auditoria",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminSeguranca.tsx",
-      "type": "route:seguranca",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Dashboard.tsx",
-      "type": "route:/dashboard",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/DashboardExecutivo.tsx",
-      "type": "route:/dashboard/executivo",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Clientes.tsx",
-      "type": "route:/clientes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Clientes.tsx",
-      "type": "route:/clients",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Contratos.tsx",
-      "type": "route:/contratos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/ContratoNovo.tsx",
-      "type": "route:/contratos/novo",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Assinaturas.tsx",
-      "type": "route:/assinaturas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "type": "route:/assinaturas/:id",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Servicos.tsx",
-      "type": "route:/servicos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Vendedores.tsx",
-      "type": "route:/vendedores",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Agenda.tsx",
-      "type": "route:/agenda",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Financeiro.tsx",
-      "type": "route:/financeiro",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Relatorios.tsx",
-      "type": "route:/relatorios",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Auditoria.tsx",
-      "type": "route:/auditoria",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Configuracoes.tsx",
-      "type": "route:/configuracoes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Perfil.tsx",
-      "type": "route:/perfil",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/dashboard/Empresas.tsx",
-      "type": "route:/empresas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminArquivos.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminArquivos.tsx",
-      "to": "file:src/services/admin-file-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminArquivos.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminArquivos.tsx",
-      "to": "file:src/components/admin/AdminAccordionList.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminArquivos.tsx",
-      "to": "file:src/hooks/useAdminHiddenRecords.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminAuditoria.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminAuditoria.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminAuditoria.tsx",
-      "to": "file:src/services/admin-audit-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminAuditoria.tsx",
-      "to": "file:src/repositories/admin-audit-repository.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminDashboard.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminDashboard.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminEmpresas.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminLogin.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminLogin.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminLogin.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminRecursos.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminRecursos.tsx",
-      "to": "file:src/services/admin-resource-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminRecursos.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminRecursos.tsx",
-      "to": "file:src/services/file-storage.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminRecursos.tsx",
-      "to": "file:src/components/admin/AdminAccordionList.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminRecursos.tsx",
-      "to": "file:src/hooks/useAdminHiddenRecords.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSeguranca.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSeguranca.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSistema.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSistema.tsx",
-      "to": "file:src/lib/brand.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSistema.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSistema.tsx",
-      "to": "file:src/services/admin-system-backup-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminSistema.tsx",
-      "to": "file:src/services/admin-smtp-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminUsuarios.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminUsuarios.tsx",
-      "to": "file:src/services/admin-user-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminUsuarios.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminUsuarios.tsx",
-      "to": "file:src/components/admin/AdminAccordionList.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/admin/AdminUsuarios.tsx",
-      "to": "file:src/hooks/useAdminHiddenRecords.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/AuthCallback.tsx",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/AuthCallback.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/AuthCallback.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastre.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastro.tsx",
-      "to": "file:src/components/ui/Input.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastro.tsx",
-      "to": "file:src/components/ui/Button.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastro.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastro.tsx",
-      "to": "file:src/lib/brand.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastro.tsx",
-      "to": "file:src/components/auth/GoogleButton.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Cadastro.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Login.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Login.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Login.tsx",
-      "to": "file:src/lib/brand.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Login.tsx",
-      "to": "file:src/components/auth/GoogleButton.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Login.tsx",
-      "to": "file:src/components/pwa/InstallPwaButton.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Login.tsx",
-      "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Privacidade.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/Privacidade.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/RecuperacaoSenha.tsx",
-      "to": "file:src/components/ui/Button.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/RecuperacaoSenha.tsx",
-      "to": "file:src/components/ui/Input.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/RecuperacaoSenha.tsx",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/RecuperaçãoSenha.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/TermosUso.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/auth/TermosUso.tsx",
-      "to": "file:src/lib/utils.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Agenda.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Agenda.tsx",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Agenda.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Agenda.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Agenda.tsx",
-      "to": "table:agenda",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "to": "file:src/lib/assinatura-store.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "to": "file:src/services/file-storage.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/AssinaturaDetalhe.tsx",
-      "to": "file:src/lib/assinatura-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Assinaturas.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Assinaturas.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Assinaturas.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Assinaturas.tsx",
-      "to": "file:src/lib/assinatura-store.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Assinaturas.tsx",
-      "to": "file:src/lib/assinatura-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Auditoria.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/components/admin/AdminAccordionList.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/hooks/useAdminHiddenRecords.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/lib/export.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/services/client-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/lib/client-types.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Configuracoes.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Configuracoes.tsx",
-      "to": "file:src/contexts/AuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Configuracoes.tsx",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Configuracoes.tsx",
-      "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Configuracoes.tsx",
-      "to": "table:empresas",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/ContratoNovo.tsx",
-      "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
+      "from": "file:src/components/forms/ServicoForm…10369 tokens truncated…"
     },
     {
       "from": "file:src/pages/dashboard/ContratoNovo.tsx",
@@ -3053,6 +1665,60 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/components/brand/BrandLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/components/pwa/InstallPwaButton.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/lib/vendor-visit-types.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/repositories/vendor-visit-repository.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/services/vendor-visit-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/dashboard/Vendedores.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3109,6 +1775,60 @@
     {
       "from": "file:src/pages/dashboard/Vendedores.tsx",
       "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "file:src/lib/vendor-visit-types.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "file:src/repositories/vendor-visit-repository.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "file:src/services/vendor-visit-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "table:clients",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "table:vendedores",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Visitas.tsx",
+      "to": "table:vendedor_visitas",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -3325,6 +2045,24 @@
     {
       "from": "file:src/repositories/vendedor-repository.ts",
       "to": "table:comissoes",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/repositories/vendor-visit-repository.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/repositories/vendor-visit-repository.ts",
+      "to": "file:src/lib/vendor-visit-types.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/repositories/vendor-visit-repository.ts",
+      "to": "table:vendedor_visitas",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -3655,6 +2393,18 @@
     {
       "from": "file:src/services/vendor-chat-service.ts",
       "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/vendor-visit-service.ts",
+      "to": "file:src/repositories/vendor-visit-repository.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/vendor-visit-service.ts",
+      "to": "file:src/lib/vendor-visit-types.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -4003,6 +2753,12 @@
     {
       "from": "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql",
       "to": "table:gm_chat_messages",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261023054301_vendedor_visitas.sql",
+      "to": "table:vendedor_visitas",
       "type": "defines-table",
       "confidence": "EXTRACTED"
     }

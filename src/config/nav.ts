@@ -6,6 +6,7 @@ import {
   FileSignature,
   FileText,
   LayoutDashboard,
+  MapPin,
   Settings,
   Shield,
   TrendingUp,
@@ -23,9 +24,11 @@ export const navItems = [
   { label: 'Serviços', href: '/servicos', icon: Briefcase },
   { label: 'Vendedores', href: '/vendedores', icon: Users },
   { label: 'Agenda', href: '/agenda', icon: Calendar },
+  { label: 'Visitas', href: '/visitas', icon: MapPin },
   { label: 'Financeiro', href: '/financeiro', icon: Wallet },
   { label: 'Relatórios', href: '/relatorios', icon: BarChart3 },
   { label: 'Auditoria', href: '/auditoria', icon: Shield },
   { label: 'Configurações', href: '/configuracoes', icon: Settings },
   { label: 'Perfil', href: '/perfil', icon: Users },
 ];
+

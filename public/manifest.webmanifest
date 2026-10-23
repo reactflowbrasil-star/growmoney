@@ -3,7 +3,7 @@
   "name": "Grow Money Digital",
   "short_name": "GROW",
   "description": "Gestão financeira inteligente para empresas que crescem",
-  "start_url": "./?source=pwa",
+  "start_url": "./vendedor?source=pwa",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0b1220",
@@ -26,3 +26,4 @@
   ],
   "categories": ["business", "finance", "productivity"]
 }
+

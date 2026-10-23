@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>224 nós · 480 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>232 nós · 510 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -80,6 +80,8 @@
   "file:src/lib/utils.ts"["src/lib/utils.ts"]
   "file:src/lib/vendedor-validation.test.ts"["src/lib/vendedor-validation.test.ts"]
   "file:src/lib/vendedor-validation.ts"["src/lib/vendedor-validation.ts"]
+  "file:src/lib/vendor-visit-types.test.ts"["src/lib/vendor-visit-types.test.ts"]
+  "file:src/lib/vendor-visit-types.ts"["src/lib/vendor-visit-types.ts"]
   "file:src/main.tsx"["src/main.tsx"]
   "file:src/pages/admin/AdminArquivos.tsx"["src/pages/admin/AdminArquivos.tsx"]
   "file:src/pages/admin/AdminAuditoria.tsx"["src/pages/admin/AdminAuditoria.tsx"]
@@ -113,7 +115,9 @@
   "file:src/pages/dashboard/Perfil.tsx"["src/pages/dashboard/Perfil.tsx"]
   "file:src/pages/dashboard/Relatorios.tsx"["src/pages/dashboard/Relatorios.tsx"]
   "file:src/pages/dashboard/Servicos.tsx"["src/pages/dashboard/Servicos.tsx"]
+  "file:src/pages/dashboard/VendedorWorkspace.tsx"["src/pages/dashboard/VendedorWorkspace.tsx"]
   "file:src/pages/dashboard/Vendedores.tsx"["src/pages/dashboard/Vendedores.tsx"]
+  "file:src/pages/dashboard/Visitas.tsx"["src/pages/dashboard/Visitas.tsx"]
   "file:src/pages/public/AssinarDocumento.tsx"["src/pages/public/AssinarDocumento.tsx"]
   "file:src/pages/public/LandingPage.tsx"["src/pages/public/LandingPage.tsx"]
   "file:src/repositories/admin-audit-repository.ts"["src/repositories/admin-audit-repository.ts"]
@@ -123,6 +127,7 @@
   "file:src/repositories/empresa-repository.ts"["src/repositories/empresa-repository.ts"]
   "file:src/repositories/servico-repository.ts"["src/repositories/servico-repository.ts"]
   "file:src/repositories/vendedor-repository.ts"["src/repositories/vendedor-repository.ts"]
+  "file:src/repositories/vendor-visit-repository.ts"["src/repositories/vendor-visit-repository.ts"]
   "file:src/routes/ProtectedRoute.tsx"["src/routes/ProtectedRoute.tsx"]
   "file:src/routes/index.ts"["src/routes/index.ts"]
   "file:src/services/admin-audit-service.ts"["src/services/admin-audit-service.ts"]
@@ -143,6 +148,7 @@
   "file:src/services/servico-service.ts"["src/services/servico-service.ts"]
   "file:src/services/vendedor-service.ts"["src/services/vendedor-service.ts"]
   "file:src/services/vendor-chat-service.ts"["src/services/vendor-chat-service.ts"]
+  "file:src/services/vendor-visit-service.ts"["src/services/vendor-visit-service.ts"]
   "file:src/test/InstallPwaButton.test.tsx"["src/test/InstallPwaButton.test.tsx"]
   "file:src/test/setup.ts"["src/test/setup.ts"]
   "file:src/vite-env.d.ts"["src/vite-env.d.ts"]
@@ -174,6 +180,7 @@
   "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql"["supabase/migrations/20261023044825_vendor_activation_email_tracking.sql"]
   "file:supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"["supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"]
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql"["supabase/migrations/20261023050243_vendedor_empresa_chat.sql"]
+  "file:supabase/migrations/20261023054301_vendedor_visitas.sql"["supabase/migrations/20261023054301_vendedor_visitas.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -195,9 +202,10 @@
   "table:agenda"["agenda"]
   "table:gm_financial_entries"["gm_financial_entries"]
   "table:vendedores"["vendedores"]
+  "table:clients"["clients"]
+  "table:vendedor_visitas"["vendedor_visitas"]
   "rpc:admin_list_audit"["admin_list_audit"]
   "table:agenda_historico"["agenda_historico"]
-  "table:clients"["clients"]
   "table:client_historico"["client_historico"]
   "table:convites"["convites"]
   "table:services"["services"]
@@ -334,6 +342,8 @@
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:empresa_role"
   "file:src/lib/vendedor-validation.test.ts" -->|imports| "file:src/lib/vendedor-validation.ts"
+  "file:src/lib/vendor-visit-types.test.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
+  "file:src/lib/vendor-visit-types.ts" -->|imports| "file:src/lib/client-types.ts"
   "file:src/main.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/main.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/main.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
@@ -343,6 +353,8 @@
   "file:src/main.tsx" -->|imports| "file:src/components/admin/AdminLayout.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/ui/sonar-grid.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/ui/FloatingThemeSwitcher.tsx"
+  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/VendedorWorkspace.tsx"
+  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Visitas.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/layout/GlobalFooter.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/public/LandingPage.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/auth/Login.tsx"
@@ -398,6 +410,7 @@
   "file:src/main.tsx" -->|route:sistema| "file:src/pages/admin/AdminSistema.tsx"
   "file:src/main.tsx" -->|route:auditoria| "file:src/pages/admin/AdminAuditoria.tsx"
   "file:src/main.tsx" -->|route:seguranca| "file:src/pages/admin/AdminSeguranca.tsx"
+  "file:src/main.tsx" -->|route:/vendedor| "file:src/pages/dashboard/VendedorWorkspace.tsx"
   "file:src/main.tsx" -->|route:/dashboard| "file:src/pages/dashboard/Dashboard.tsx"
   "file:src/main.tsx" -->|route:/dashboard/executivo| "file:src/pages/dashboard/DashboardExecutivo.tsx"
   "file:src/main.tsx" -->|route:/clientes| "file:src/pages/dashboard/Clientes.tsx"
@@ -409,6 +422,7 @@
   "file:src/main.tsx" -->|route:/servicos| "file:src/pages/dashboard/Servicos.tsx"
   "file:src/main.tsx" -->|route:/vendedores| "file:src/pages/dashboard/Vendedores.tsx"
   "file:src/main.tsx" -->|route:/agenda| "file:src/pages/dashboard/Agenda.tsx"
+  "file:src/main.tsx" -->|route:/visitas| "file:src/pages/dashboard/Visitas.tsx"
   "file:src/main.tsx" -->|route:/financeiro| "file:src/pages/dashboard/Financeiro.tsx"
   "file:src/main.tsx" -->|route:/relatorios| "file:src/pages/dashboard/Relatorios.tsx"
   "file:src/main.tsx" -->|route:/auditoria| "file:src/pages/dashboard/Auditoria.tsx"
@@ -544,6 +558,15 @@
   "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/services/servico-catalogo-persistente.ts"
   "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Servicos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/components/ui/index.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/vendor-visit-types.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/services/vendor-visit-service.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/admin/AdminAccordionList.tsx"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/hooks/useAdminHiddenRecords.ts"
@@ -554,6 +577,15 @@
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/services/file-storage.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/lib/vendedor-validation.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|reads-or-writes| "table:vendedores"
+  "file:src/pages/dashboard/Visitas.tsx" -->|imports| "file:src/components/ui/index.ts"
+  "file:src/pages/dashboard/Visitas.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Visitas.tsx" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/pages/dashboard/Visitas.tsx" -->|imports| "file:src/lib/vendor-visit-types.ts"
+  "file:src/pages/dashboard/Visitas.tsx" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
+  "file:src/pages/dashboard/Visitas.tsx" -->|imports| "file:src/services/vendor-visit-service.ts"
+  "file:src/pages/dashboard/Visitas.tsx" -->|reads-or-writes| "table:clients"
+  "file:src/pages/dashboard/Visitas.tsx" -->|reads-or-writes| "table:vendedores"
+  "file:src/pages/dashboard/Visitas.tsx" -->|reads-or-writes| "table:vendedor_visitas"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/assinatura/SignaturePad.tsx"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -590,6 +622,9 @@
   "file:src/repositories/vendedor-repository.ts" -->|reads-or-writes| "table:vendedores"
   "file:src/repositories/vendedor-repository.ts" -->|reads-or-writes| "table:vendedor_desempenho"
   "file:src/repositories/vendedor-repository.ts" -->|reads-or-writes| "table:comissoes"
+  "file:src/repositories/vendor-visit-repository.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/repositories/vendor-visit-repository.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
+  "file:src/repositories/vendor-visit-repository.ts" -->|reads-or-writes| "table:vendedor_visitas"
   "file:src/routes/ProtectedRoute.tsx" -->|imports| "file:src/components/auth/ProtectedRoute.tsx"
   "file:src/services/admin-audit-service.ts" -->|imports| "file:src/repositories/admin-audit-repository.ts"
   "file:src/services/admin-file-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
@@ -645,6 +680,8 @@
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/servico-types.ts"
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/permissions.ts"
   "file:src/services/vendor-chat-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/vendor-visit-service.ts" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
+  "file:src/services/vendor-visit-service.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/test/InstallPwaButton.test.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:platform_admins"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresa_members"
@@ -702,4 +739,5 @@
   "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql" -->|defines-table| "table:gm_smtp_settings"
   "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql" -->|defines-table| "table:gm_smtp_mail_log"
   "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql" -->|defines-table| "table:gm_vendor_activation_events"
-  "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql" -->|defines-table| "table:gm_chat_messages"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>
+  "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql" -->|defines-table| "table:gm_chat_messages"
+  "file:supabase/migrations/20261023054301_vendedor_visitas.sql" -->|defines-table| "table:vendedor_visitas"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>
