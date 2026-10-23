@@ -80,6 +80,15 @@ export async function uploadArquivo(file: File, categoria: ArquivoCategoria): Pr
   return { id: registro.id, nome: file.name, caminho, url: signed.signedUrl, tamanho: file.size, tipo };
 }
 
+export async function excluirArquivo(caminho: string): Promise<void> {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) throw new Error('Entre na sua conta para remover arquivos.');
+  const { error: storageError } = await supabase.storage.from(BUCKET).remove([caminho]);
+  if (storageError) throw new Error(`Não foi possível remover o arquivo: ${storageError.message}`);
+  const { error: recordError } = await supabase.from('gm_files').delete().eq('object_path', caminho).eq('user_id', user.id);
+  if (recordError) throw new Error(`Arquivo removido, mas não foi possível remover o registro: ${recordError.message}`);
+}
+
 export async function listarArquivos(categoria: ArquivoCategoria): Promise<ArquivoEnviado[]> {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) throw new Error('Entre na sua conta para acessar os arquivos.');

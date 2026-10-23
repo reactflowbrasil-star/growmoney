@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 type RequestBody =
-  | { action: 'create'; empresaId: string; email: string; password: string; nome: string; metaMensal?: number }
+  | { action: 'create'; empresaId: string; email: string; password: string; nome: string; metaMensal?: number; cpf?: string; dataNascimento?: string; cep?: string; logradouro?: string; numero?: string; complemento?: string; bairro?: string; cidade?: string; uf?: string; fotoPath?: string }
   | { action: 'delete'; empresaId: string; userId: string };
 
 function json(status: number, payload: Record<string, unknown>) {
@@ -15,6 +15,16 @@ function json(status: number, payload: Record<string, unknown>) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+function cpfValido(value: string) {
+  if (!/^\d{11}$/.test(value) || /^([0-9])\1{10}$/.test(value)) return false;
+  const digit = (base: string, initialWeight: number) => {
+    const sum = [...base].reduce((total, char, index) => total + Number(char) * (initialWeight - index), 0);
+    const remainder = (sum * 10) % 11;
+    return remainder === 10 ? 0 : remainder;
+  };
+  return digit(value.slice(0, 9), 10) === Number(value[9]) && digit(value.slice(0, 10), 11) === Number(value[10]);
 }
 
 Deno.serve(async (request) => {
@@ -91,6 +101,21 @@ Deno.serve(async (request) => {
       return json(400, { error: 'Informe uma meta mensal válida.' });
     }
 
+    const cpf = typeof body.cpf === 'string' ? body.cpf.replace(/\D/g, '') : '';
+    if (cpf && !cpfValido(cpf)) return json(400, { error: 'CPF inválido. Confira os dígitos verificadores.' });
+    const dataNascimento = typeof body.dataNascimento === 'string' && body.dataNascimento ? body.dataNascimento : null;
+    if (dataNascimento && (!/^\d{4}-\d{2}-\d{2}$/.test(dataNascimento) || Number.isNaN(Date.parse(`${dataNascimento}T00:00:00Z`)))) {
+      return json(400, { error: 'Data de nascimento inválida.' });
+    }
+    const fotoPath = typeof body.fotoPath === 'string' ? body.fotoPath : null;
+    if (fotoPath) {
+      const { data: photo, error: photoError } = await serviceClient.from('gm_files')
+        .select('object_path, content_type, size_bytes').eq('object_path', fotoPath).eq('user_id', actor.id).eq('categoria', 'fotos').maybeSingle();
+      if (photoError || !photo || !photo.content_type.startsWith('image/') || Number(photo.size_bytes) > 5 * 1024 * 1024) {
+        return json(400, { error: 'Foto inválida ou não enviada pela sua conta.' });
+      }
+    }
+
     const baseUrl = (Deno.env.get('APP_BASE_URL') || 'https://canal360.run.place/grow').replace(/\/$/, '');
     const activationRedirect = `${baseUrl}/auth/callback?flow=vendor-activation`;
     const readiness = await fetch(`${url}/functions/v1/smtp-mailer`, {
@@ -147,6 +172,16 @@ Deno.serve(async (request) => {
       role: 'vendedor',
       status: 'inativo',
       meta_mensal: metaMensal,
+      cpf: cpf || null,
+      data_nascimento: dataNascimento,
+      cep: typeof body.cep === 'string' ? body.cep.replace(/\D/g, '').slice(0, 8) || null : null,
+      logradouro: typeof body.logradouro === 'string' ? body.logradouro.trim().slice(0, 180) || null : null,
+      numero: typeof body.numero === 'string' ? body.numero.trim().slice(0, 30) || null : null,
+      complemento: typeof body.complemento === 'string' ? body.complemento.trim().slice(0, 120) || null : null,
+      bairro: typeof body.bairro === 'string' ? body.bairro.trim().slice(0, 120) || null : null,
+      cidade: typeof body.cidade === 'string' ? body.cidade.trim().slice(0, 120) || null : null,
+      uf: typeof body.uf === 'string' ? body.uf.trim().toUpperCase().slice(0, 2) || null : null,
+      foto_path: fotoPath,
       usuario_id: createdUser.id,
       atualizado_por: actor.id,
     }).select('id').single();

@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>215 nós · 451 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>218 nós · 455 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -76,6 +76,8 @@
   "file:src/lib/servico-types.ts"["src/lib/servico-types.ts"]
   "file:src/lib/supabase/client.ts"["src/lib/supabase/client.ts"]
   "file:src/lib/utils.ts"["src/lib/utils.ts"]
+  "file:src/lib/vendedor-validation.test.ts"["src/lib/vendedor-validation.test.ts"]
+  "file:src/lib/vendedor-validation.ts"["src/lib/vendedor-validation.ts"]
   "file:src/main.tsx"["src/main.tsx"]
   "file:src/pages/admin/AdminArquivos.tsx"["src/pages/admin/AdminArquivos.tsx"]
   "file:src/pages/admin/AdminAuditoria.tsx"["src/pages/admin/AdminAuditoria.tsx"]
@@ -166,6 +168,7 @@
   "file:supabase/migrations/20261023043612_realtime_dashboard_notifications.sql"["supabase/migrations/20261023043612_realtime_dashboard_notifications.sql"]
   "file:supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql"["supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql"]
   "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql"["supabase/migrations/20261023044825_vendor_activation_email_tracking.sql"]
+  "file:supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"["supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -318,6 +321,7 @@
   "file:src/lib/contratos-store.ts" -->|reads-or-writes| "table:gm_contracts"
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:empresa_role"
+  "file:src/lib/vendedor-validation.test.ts" -->|imports| "file:src/lib/vendedor-validation.ts"
   "file:src/main.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/main.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/main.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
@@ -522,6 +526,8 @@
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/services/file-storage.ts"
+  "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/lib/vendedor-validation.ts"
   "file:src/pages/dashboard/Vendedores.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/assinatura/SignaturePad.tsx"
@@ -616,6 +622,7 @@
   "file:src/test/InstallPwaButton.test.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:platform_admins"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresa_members"
+  "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:gm_files"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:profiles"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:vendedores"
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:gm_vendor_activation_events"

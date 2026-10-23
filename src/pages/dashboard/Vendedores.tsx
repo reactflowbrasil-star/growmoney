@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Download, Plus, Search, Trash2, Users } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Camera, Download, ImagePlus, Plus, Search, Trash2, Users } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, Input, Modal, PageHeader } from '@/components/ui';
 import { exportCsv, formatBRL } from '@/lib/export';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { criarLinkArquivo, excluirArquivo, uploadArquivo } from '@/services/file-storage';
+import { cpfValido, formatarCpf, somenteDigitos } from '@/lib/vendedor-validation';
 
-type Vendedor = { id: string; nome: string; email: string; meta_mensal: number | null; status: 'ativo' | 'inativo' | 'suspenso'; identificador_interno: string };
-const emptyForm = { nome: '', email: '', meta: '', password: '' };
+type Vendedor = { id: string; nome: string; email: string; meta_mensal: number | null; status: 'ativo' | 'inativo' | 'suspenso'; identificador_interno: string; foto_path: string | null; foto_url?: string };
+const emptyForm = { nome: '', email: '', meta: '', password: '', cpf: '', dataNascimento: '', cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' };
 
 export default function Vendedores() {
   const { user, empresaAtiva, hasPermission } = useAuth();
@@ -20,15 +22,55 @@ export default function Vendedores() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [cpfStatus, setCpfStatus] = useState('');
+  const [cepStatus, setCepStatus] = useState('');
+  const [foto, setFoto] = useState<File | null>(null);
+  const [fotoPreview, setFotoPreview] = useState('');
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!foto) { setFotoPreview(''); return; }
+    const preview = URL.createObjectURL(foto);
+    setFotoPreview(preview);
+    return () => URL.revokeObjectURL(preview);
+  }, [foto]);
+
+  useEffect(() => {
+    const cep = somenteDigitos(form.cep);
+    if (cep.length !== 8) { setCepStatus(''); return; }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setCepStatus('Buscando endereço…');
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: controller.signal, headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error('Não foi possível consultar o CEP.');
+        const data = await response.json() as { erro?: boolean; logradouro?: string; bairro?: string; localidade?: string; uf?: string };
+        if (data.erro) throw new Error('CEP não encontrado.');
+        if (controller.signal.aborted) return;
+        setForm((current) => ({ ...current, logradouro: data.logradouro || current.logradouro, bairro: data.bairro || current.bairro, cidade: data.localidade || current.cidade, uf: data.uf || current.uf }));
+        setCepStatus('Endereço localizado. Confira os dados.');
+      } catch (lookupError) {
+        if (!controller.signal.aborted) setCepStatus(lookupError instanceof Error ? lookupError.message : 'Falha ao consultar CEP.');
+      }
+    }, 350);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [form.cep]);
 
   const load = useCallback(async () => {
     if (!empresaAtiva?.id) { setRows([]); setLoading(false); return; }
     setLoading(true);
     const { data, error: loadError } = await supabase.from('vendedores')
-      .select('id, nome, email, meta_mensal, status, identificador_interno')
+      .select('id, nome, email, meta_mensal, status, identificador_interno, foto_path')
       .eq('empresa_id', empresaAtiva.id).order('nome', { ascending: true });
     if (loadError) setError(`Não foi possível carregar vendedores: ${loadError.message}`);
-    else { setRows((data || []) as Vendedor[]); setError(''); }
+    else {
+      const withPhotos = await Promise.all(((data || []) as Vendedor[]).map(async (row) => ({
+        ...row,
+        foto_url: row.foto_path ? await criarLinkArquivo(row.foto_path).catch(() => '') : '',
+      })));
+      setRows(withPhotos); setError('');
+    }
     setLoading(false);
   }, [empresaAtiva?.id]);
   useEffect(() => { void load(); }, [load]);
@@ -37,16 +79,29 @@ export default function Vendedores() {
   const salvar = async () => {
     if (!empresaAtiva?.id || !user?.id) { setError('Selecione uma empresa para cadastrar vendedores.'); return; }
     if (!form.nome.trim() || !form.email.trim() || form.password.length < 8) { setError('Informe nome, e-mail e uma senha inicial com pelo menos 8 caracteres.'); return; }
+    if (form.cpf && !cpfValido(form.cpf)) { setCpfStatus('CPF inválido. Confira os números digitados.'); setError('Corrija o CPF antes de continuar.'); return; }
+    if (foto && (!foto.type.match(/^image\/(jpeg|png|webp)$/) || foto.size > 5 * 1024 * 1024)) { setError('A foto deve ser JPG, PNG ou WebP e ter até 5 MB.'); return; }
     setSaving(true); setError('');
+    let fotoPath: string | undefined;
+    try {
+      if (foto) fotoPath = (await uploadArquivo(foto, 'fotos')).caminho;
+    } catch (uploadError) {
+      setSaving(false); setError(uploadError instanceof Error ? uploadError.message : 'Não foi possível enviar a foto.'); return;
+    }
     const { data, error: saveError } = await supabase.functions.invoke('admin-users', {
       body: {
         action: 'create', empresaId: empresaAtiva.id,
         nome: form.nome.trim(), email: form.email.trim().toLowerCase(),
         password: form.password, metaMensal: Number(form.meta) || 0,
+        cpf: somenteDigitos(form.cpf), dataNascimento: form.dataNascimento,
+        cep: form.cep, logradouro: form.logradouro, numero: form.numero,
+        complemento: form.complemento, bairro: form.bairro, cidade: form.cidade, uf: form.uf,
+        fotoPath,
       },
     });
     setSaving(false);
     if (saveError) {
+      if (fotoPath) await excluirArquivo(fotoPath).catch(() => undefined);
       const context = (saveError as Error & { context?: unknown }).context;
       const payload = context instanceof Response
         ? await context.clone().json().catch(() => null) as { error?: unknown } | null
@@ -54,7 +109,7 @@ export default function Vendedores() {
       setError(typeof payload?.error === 'string' ? payload.error : `Não foi possível salvar o vendedor: ${saveError.message}`);
       return;
     }
-    setOpen(false); setForm(emptyForm); await load();
+    setOpen(false); setForm(emptyForm); setFoto(null); setCpfStatus(''); setCepStatus(''); await load();
     if (data?.emailSent === false) setError(data.message || 'O vendedor foi cadastrado, mas o e-mail de ativação não foi enviado.');
   };
   const excluir = async (row: Vendedor) => {
@@ -62,6 +117,10 @@ export default function Vendedores() {
     const { error: deleteError } = await supabase.from('vendedores').delete().eq('id', row.id).eq('empresa_id', empresaAtiva.id);
     if (deleteError) setError(`Não foi possível excluir o vendedor: ${deleteError.message}`);
     else await load();
+  };
+  const fecharModal = () => {
+    if (saving) return;
+    setOpen(false); setFoto(null); setForm(emptyForm); setError(''); setCpfStatus(''); setCepStatus('');
   };
 
   return <div className="max-w-7xl space-y-4">
@@ -74,11 +133,19 @@ export default function Vendedores() {
       <div className="border-b border-border-color p-4"><div className="relative max-w-sm"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" /><Input placeholder="Buscar vendedor..." value={busca} onChange={(e) => setBusca(e.target.value)} className="pl-10" /></div></div>
       {loading ? <p className="p-8 text-center text-sm text-text-secondary">Carregando equipe…</p> : filtered.length === 0 ? <div className="p-8"><EmptyState title="Nenhum vendedor" description="Adicione sua equipe comercial." icon={<Users className="h-6 w-6" />} /></div> :
         <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b border-border-color bg-bg-secondary/50 text-text-secondary"><th className="px-4 py-3 font-medium">Nome</th><th className="hidden px-4 py-3 font-medium sm:table-cell">E-mail</th><th className="px-4 py-3 font-medium">Meta mensal</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 text-right font-medium">Ações</th></tr></thead>
-          <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3 font-medium">{row.nome}</td><td className="hidden px-4 py-3 text-text-secondary sm:table-cell">{row.email}</td><td className="px-4 py-3 tabular-nums">{formatBRL(row.meta_mensal || 0)}</td><td className="px-4 py-3"><Badge variant={row.status === 'ativo' ? 'success' : 'neutral'}>{row.status === 'inativo' ? 'Aguardando ativação' : row.status}</Badge></td>{canManage && <td className="px-4 py-3 text-right"><button type="button" aria-label={`Excluir ${row.nome}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(row)}><Trash2 className="h-4 w-4 text-erro" /></button></td>}</tr>)}</tbody>
+          <tbody>{filtered.map((row) => <tr key={row.id} className="border-b border-border-color last:border-0 hover:bg-bg-secondary/40"><td className="px-4 py-3 font-medium"><span className="flex items-center gap-3">{row.foto_url ? <img src={row.foto_url} alt="" className="h-9 w-9 rounded-full object-cover" /> : <span className="flex h-9 w-9 items-center justify-center rounded-full bg-bg-secondary"><Users className="h-4 w-4 text-text-secondary" /></span>}{row.nome}</span></td><td className="hidden px-4 py-3 text-text-secondary sm:table-cell">{row.email}</td><td className="px-4 py-3 tabular-nums">{formatBRL(row.meta_mensal || 0)}</td><td className="px-4 py-3"><Badge variant={row.status === 'ativo' ? 'success' : 'neutral'}>{row.status === 'inativo' ? 'Aguardando ativação' : row.status}</Badge></td>{canManage && <td className="px-4 py-3 text-right"><button type="button" aria-label={`Excluir ${row.nome}`} className="rounded-lg p-2 hover:bg-erro/10" onClick={() => void excluir(row)}><Trash2 className="h-4 w-4 text-erro" /></button></td>}</tr>)}</tbody>
         </table></div>}
     </Card>
-    {canManage && hasPermission('vendedores:write') && <Modal open={open} onClose={() => setOpen(false)} title="Novo vendedor" footer={<><Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>Salvar vendedor</Button></>}>
-      <div className="space-y-4"><Input label="Nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required /><Input label="E-mail" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /><Input label="Senha inicial" type="password" minLength={8} hint="O vendedor poderá entrar após confirmar o e-mail enviado." value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /><Input label="Meta mensal (R$)" type="number" min="0" step="0.01" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} />{error && <p className="text-sm text-erro" role="alert">{error}</p>}</div>
+    {canManage && hasPermission('vendedores:write') && <Modal open={open} onClose={fecharModal} title="Novo vendedor" size="xl" footer={<><Button variant="outline" disabled={saving} onClick={fecharModal}>Cancelar</Button><Button loading={saving} onClick={() => void salvar()}>Salvar vendedor</Button></>}>
+      <div className="mx-auto max-w-4xl space-y-6">
+        <section className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border-color bg-bg-secondary">{fotoPreview ? <img src={fotoPreview} alt="Prévia da foto do vendedor" className="h-full w-full object-cover" /> : <Users className="h-9 w-9 text-text-secondary" />}</div>
+          <div className="space-y-2"><p className="font-medium">Foto do vendedor</p><p className="text-sm text-text-secondary">JPG, PNG ou WebP, até 5 MB.</p><div className="flex flex-wrap gap-2"><Button type="button" variant="outline" size="sm" leftIcon={<Camera className="h-4 w-4" />} onClick={() => cameraRef.current?.click()}>Fotografar</Button><Button type="button" variant="outline" size="sm" leftIcon={<ImagePlus className="h-4 w-4" />} onClick={() => uploadRef.current?.click()}>Enviar foto</Button></div><input ref={cameraRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" capture="user" onChange={(e) => setFoto(e.target.files?.[0] || null)} /><input ref={uploadRef} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFoto(e.target.files?.[0] || null)} /></div>
+        </section>
+        <section className="space-y-3"><h3 className="font-semibold">Dados pessoais</h3><div className="grid gap-4 sm:grid-cols-2"><Input label="Nome completo" autoComplete="name" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required /><Input label="CPF" inputMode="numeric" autoComplete="off" value={form.cpf} onChange={(e) => { const cpf = formatarCpf(e.target.value); setForm({ ...form, cpf }); setCpfStatus(cpf.replace(/\D/g, '').length === 11 ? (cpfValido(cpf) ? 'CPF válido.' : 'CPF inválido.') : ''); }} onBlur={() => form.cpf && setCpfStatus(cpfValido(form.cpf) ? 'CPF válido.' : 'CPF inválido.')} hint="Validação local dos dígitos verificadores. O CPF não revela nome ou nascimento; preencha esses dados manualmente." />{cpfStatus && <p className={`text-sm ${cpfStatus.includes('inválido') ? 'text-erro' : 'text-text-secondary'}`} role="status">{cpfStatus}</p>}<Input label="Data de nascimento" type="date" autoComplete="bday" value={form.dataNascimento} onChange={(e) => setForm({ ...form, dataNascimento: e.target.value })} /><Input label="E-mail" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /><Input label="Senha inicial" type="password" minLength={8} hint="O vendedor poderá entrar após confirmar o e-mail enviado." value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /><Input label="Meta mensal (R$)" type="number" min="0" step="0.01" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} /></div></section>
+        <section className="space-y-3"><h3 className="font-semibold">Endereço</h3><div className="grid gap-4 sm:grid-cols-2"><Input label="CEP" inputMode="numeric" autoComplete="postal-code" maxLength={9} value={form.cep} onChange={(e) => setForm({ ...form, cep: somenteDigitos(e.target.value).slice(0, 8) })} hint="Ao informar os 8 dígitos, consultamos o endereço automaticamente." /><Input label="Logradouro" autoComplete="street-address" value={form.logradouro} onChange={(e) => setForm({ ...form, logradouro: e.target.value })} /><Input label="Número" value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} /><Input label="Complemento" value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} /><Input label="Bairro" value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} /><Input label="Cidade" autoComplete="address-level2" value={form.cidade} onChange={(e) => setForm({ ...form, cidade: e.target.value })} /><Input label="UF" autoComplete="address-level1" maxLength={2} value={form.uf} onChange={(e) => setForm({ ...form, uf: e.target.value.toUpperCase().slice(0, 2) })} />{cepStatus && <p className="text-sm text-text-secondary sm:col-span-2" role="status">{cepStatus}</p>}</div></section>
+        {error && <p className="text-sm text-erro" role="alert">{error}</p>}
+      </div>
     </Modal>}
   </div>;
 }
