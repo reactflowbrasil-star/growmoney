@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, User, Mail, Lock, FileText } from 'lucide-react';
+import { Building2, User, Mail, Lock, FileText, BriefcaseBusiness, ArrowLeft, ArrowRight, UserRound } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,6 +9,7 @@ import { GoogleButton } from '@/components/auth/GoogleButton';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export default function Cadastro() {
+  const [perfil, setPerfil] = useState<'empresa' | 'cliente' | 'vendedor' | null>(null);
   const [form, setForm] = useState({
     empresa: '',
     cnpj: '',
@@ -94,9 +95,45 @@ export default function Cadastro() {
         <div className="auth-brand text-center mb-3 space-y-1.5">
           <BrandLogo linkTo={false} heightClass="h-auto max-h-[min(11svh,68px)]" className="auth-logo mx-auto w-full max-w-[min(100%,250px)]" />
           <h1 className="text-xl font-bold text-text-primary">Criar conta</h1>
-          <p className="text-sm text-text-secondary">Cadastro empresarial · {BRAND.name}</p>
+          <p className="text-sm text-text-secondary">{perfil ? 'Perfil selecionado' : 'Escolha seu perfil para continuar'} · {BRAND.name}</p>
         </div>
 
+        {!perfil ? (
+          <section aria-label="Escolha do perfil" className="grid gap-3 sm:grid-cols-3">
+            {([
+              { id: 'empresa', label: 'Empresa', description: 'Quero criar e administrar uma empresa.', icon: Building2 },
+              { id: 'cliente', label: 'Cliente', description: 'Recebi um contrato ou documento para assinar.', icon: UserRound },
+              { id: 'vendedor', label: 'Vendedor', description: 'Faço parte da equipe comercial de uma empresa.', icon: BriefcaseBusiness },
+            ] as const).map((option) => (
+              <button key={option.id} type="button" onClick={() => setPerfil(option.id)} className="group flex min-h-36 flex-col items-center justify-center gap-2 rounded-2xl border border-border-color bg-bg-secondary/60 p-4 text-center transition-all hover:-translate-y-0.5 hover:border-brand/60 hover:bg-brand/5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white"><option.icon className="h-5 w-5" aria-hidden="true" /></span>
+                <span className="font-semibold text-text-primary">{option.label}</span>
+                <span className="text-xs leading-relaxed text-text-secondary">{option.description}</span>
+              </button>
+            ))}
+          </section>
+        ) : (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-border-color bg-bg-secondary/60 px-3 py-2">
+            <span className="text-sm text-text-secondary">Perfil: <strong className="capitalize text-text-primary">{perfil}</strong></span>
+            <button type="button" onClick={() => { setPerfil(null); setError(''); setSuccess(''); }} className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"><ArrowLeft className="h-4 w-4"/>Trocar perfil</button>
+          </div>
+        )}
+
+        {perfil === 'cliente' && <div className="space-y-4 rounded-2xl border border-border-color bg-bg-secondary/60 p-5 text-center">
+          <UserRound className="mx-auto h-8 w-8 text-brand" aria-hidden="true" />
+          <h2 className="text-lg font-semibold">Acesso de cliente</h2>
+          <p className="text-sm text-text-secondary">Para proteger seus documentos, o acesso é feito pelo link individual enviado pela empresa. Abra o link recebido para visualizar ou assinar; não é necessário criar uma conta GrowMoney.</p>
+          <Link to="/auth" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border-color px-4 text-sm font-semibold text-brand hover:bg-brand/5">Já tenho uma conta <ArrowRight className="h-4 w-4" /></Link>
+        </div>}
+
+        {perfil === 'vendedor' && <div className="space-y-4 rounded-2xl border border-border-color bg-bg-secondary/60 p-5 text-center">
+          <BriefcaseBusiness className="mx-auto h-8 w-8 text-brand" aria-hidden="true" />
+          <h2 className="text-lg font-semibold">Acesso de vendedor</h2>
+          <p className="text-sm text-text-secondary">O administrador da empresa cria seu usuário e envia o link de ativação por e-mail. Depois de ativar, entre com seu e-mail e senha para abrir a área exclusiva de vendedor.</p>
+          <Link to="/auth" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border-color px-4 text-sm font-semibold text-brand hover:bg-brand/5">Já tenho acesso <ArrowRight className="h-4 w-4" /></Link>
+        </div>}
+
+        {perfil === 'empresa' && <>
         <GoogleButton label="Cadastrar com Google" className="auth-google" />
 
         <div className="auth-divider relative my-2.5">
@@ -143,8 +180,10 @@ export default function Cadastro() {
             Entrar
           </Link>
         </p>
+        </>}
       </div>
     </main>
   );
 }
+
 
