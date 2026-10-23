@@ -38,13 +38,8 @@ export default function AuthCallback() {
         if (s2) {
           const flow = new URLSearchParams(window.location.search).get('flow');
           if (flow === 'vendor-activation') {
-            const { data, error: notificationError } = await supabase.functions.invoke('smtp-mailer', {
-              body: { action: 'notify_vendor_activated' },
-            });
-            if (notificationError) console.warn('Ativação concluída, mas a notificação administrativa falhou:', notificationError.message);
-            else if (data?.notifications?.some((result: { notified?: boolean }) => !result.notified)) {
-              console.warn('Ativação concluída; o aviso ao administrador será tentado novamente no próximo acesso.');
-            }
+            navigate('/recuperar-senha?redefinir=1&flow=vendor-activation', { replace: true });
+            return;
           }
           navigate('/dashboard', { replace: true });
         } else {

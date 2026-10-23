@@ -6,8 +6,8 @@ import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
 import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
 
-type UserForm = { nome: string; telefone: string; email: string; password: string; empresaId: string };
-const blankForm: UserForm = { nome: '', telefone: '', email: '', password: '', empresaId: '' };
+type UserForm = { nome: string; telefone: string; email: string; empresaId: string };
+const blankForm: UserForm = { nome: '', telefone: '', email: '', empresaId: '' };
 
 export default function AdminUsuarios() {
   const { isAdmin } = useAdminAuth();
@@ -49,7 +49,7 @@ export default function AdminUsuarios() {
     try {
       if (editing) await AdminUserService.update(editing.id, form.nome, form.telefone);
       else {
-        const result = await AdminUserService.create(form.empresaId, form.email, form.password, form.nome);
+        const result = await AdminUserService.create(form.empresaId, form.email, form.nome);
         if (result.emailSent) setNotice(result.message);
         else setError(result.message);
       }
@@ -98,7 +98,7 @@ export default function AdminUsuarios() {
           <Input label="Nome" required value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} />
           {editing ? <Input label="Telefone" type="tel" value={form.telefone} onChange={(event) => setForm({ ...form, telefone: event.target.value })} /> : <>
             <Input label="E-mail" type="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
-            <Input label="Senha inicial" type="password" minLength={8} required hint="Mínimo de 8 caracteres." value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} />
+            <p className="sm:col-span-2 text-sm text-text-secondary">O vendedor receberá um link de ativação por e-mail e definirá a própria senha ao abrir o convite.</p>
             <div className="sm:col-span-2"><label htmlFor="new-user-company" className="mb-1.5 block text-sm font-medium">Empresa</label><select id="new-user-company" className="w-full rounded-xl border border-border-color bg-bg-secondary px-3 py-2.5 text-sm" required value={form.empresaId} onChange={(event) => setForm({ ...form, empresaId: event.target.value })}><option value="">Selecione a empresa…</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.nome}</option>)}</select><p className="mt-1 text-xs text-text-secondary">A conta criada terá papel de vendedor na empresa selecionada.</p></div>
           </>}
         </form>

@@ -63,10 +63,10 @@ export class AdminUserService {
     await this.audit(admin.id, 'usuario.atualizado', { user_id: id });
   }
 
-  static async create(empresaId: string, email: string, password: string, nome: string, metaMensal = 0): Promise<{ emailSent: boolean; message: string }> {
+  static async create(empresaId: string, email: string, nome: string, metaMensal = 0): Promise<{ emailSent: boolean; message: string }> {
     await requirePlatformAdmin();
     const { data, error } = await supabase.functions.invoke('admin-users', {
-      body: { action: 'create', empresaId, email: email.trim(), password, nome: nome.trim(), metaMensal },
+      body: { action: 'create', empresaId, email: email.trim(), nome: nome.trim(), metaMensal },
     });
     if (error) throw new Error(await edgeFunctionError(error, 'Falha ao criar usuário'));
     return {

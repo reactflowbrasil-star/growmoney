@@ -5,9 +5,14 @@ import { BRAND } from '@/lib/brand';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { AdminSystemBackupService, type ImportPreview } from '@/services/admin-system-backup-service';
 import { AdminSmtpService, type SmtpSettings } from '@/services/admin-smtp-service';
+import { DEFAULT_EMAIL_TEMPLATES, EMAIL_TEMPLATE_INFO, EMAIL_TEMPLATE_KEYS, EMAIL_TEMPLATE_PREVIEW_VALUES, renderEmailTemplate, type EmailTemplate, type EmailTemplateKey } from '@/lib/email-templates';
 
 type SmtpForm = Omit<SmtpSettings, 'passwordConfigured'> & { password: string };
 const emptySmtp: SmtpForm = { host: '', port: 587, secure: false, username: '', password: '', fromEmail: '', fromName: 'GrowMoney', enabled: false };
+
+function escapePreviewHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] || character);
+}
 
 export default function AdminSistema() {
   const envOk = Boolean(import.meta.env.VITE_SUPABASE_URL);
@@ -25,6 +30,24 @@ export default function AdminSistema() {
   const [testRecipient, setTestRecipient] = useState('');
   const [smtpError, setSmtpError] = useState('');
   const [smtpNotice, setSmtpNotice] = useState('');
+  const [emailTemplates, setEmailTemplates] = useState(DEFAULT_EMAIL_TEMPLATES);
+  const [emailTemplateKey, setEmailTemplateKey] = useState<EmailTemplateKey>('vendor_activation');
+  const [emailTemplatesLoading, setEmailTemplatesLoading] = useState(true);
+  const [emailTemplateSaving, setEmailTemplateSaving] = useState(false);
+  const [emailTemplateError, setEmailTemplateError] = useState('');
+  const [emailTemplateNotice, setEmailTemplateNotice] = useState('');
+
+  const loadEmailTemplates = useCallback(async () => {
+    setEmailTemplatesLoading(true);
+    setEmailTemplateError('');
+    try {
+      setEmailTemplates(await AdminSmtpService.getEmailTemplates());
+    } catch (error) {
+      setEmailTemplateError(error instanceof Error ? error.message : 'Não foi possível carregar os modelos de e-mail.');
+    } finally {
+      setEmailTemplatesLoading(false);
+    }
+  }, []);
 
   const loadSmtp = useCallback(async () => {
     setSmtpLoading(true);
@@ -48,6 +71,39 @@ export default function AdminSistema() {
   }, []);
 
   useEffect(() => { void loadSmtp(); }, [loadSmtp]);
+  useEffect(() => { void loadEmailTemplates(); }, [loadEmailTemplates]);
+
+  const updateEmailTemplate = <K extends keyof EmailTemplate>(field: K, value: EmailTemplate[K]) => {
+    setEmailTemplateNotice('');
+    setEmailTemplates((current) => ({ ...current, [emailTemplateKey]: { ...current[emailTemplateKey], [field]: value } }));
+  };
+
+  const saveEmailTemplate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setEmailTemplateSaving(true); setEmailTemplateError(''); setEmailTemplateNotice('');
+    try {
+      await AdminSmtpService.saveEmailTemplate(emailTemplateKey, emailTemplates[emailTemplateKey]);
+      setEmailTemplateNotice('Modelo salvo. Os próximos e-mails deste tipo usarão o HTML atualizado.');
+    } catch (error) {
+      setEmailTemplateError(error instanceof Error ? error.message : 'Não foi possível salvar o modelo.');
+    } finally {
+      setEmailTemplateSaving(false);
+    }
+  };
+
+  const restoreDefaultEmailTemplate = async () => {
+    const template = DEFAULT_EMAIL_TEMPLATES[emailTemplateKey];
+    setEmailTemplateSaving(true); setEmailTemplateError(''); setEmailTemplateNotice('');
+    try {
+      await AdminSmtpService.saveEmailTemplate(emailTemplateKey, template);
+      setEmailTemplates((current) => ({ ...current, [emailTemplateKey]: template }));
+      setEmailTemplateNotice('Modelo padrão restaurado e salvo.');
+    } catch (error) {
+      setEmailTemplateError(error instanceof Error ? error.message : 'Não foi possível restaurar o modelo padrão.');
+    } finally {
+      setEmailTemplateSaving(false);
+    }
+  };
 
   const updateSmtp = <K extends keyof SmtpForm>(key: K, value: SmtpForm[K]) => {
     setSmtpCanValidate(false);
@@ -195,6 +251,51 @@ export default function AdminSistema() {
         {smtpNotice && <p className="rounded-lg border border-brand/30 bg-brand/10 p-3 text-sm" role="status">{smtpNotice}</p>}
         <p className="text-xs text-text-secondary">A senha SMTP não é carregada de volta ao navegador. O fluxo transacional de convites de assinatura usa este serviço quando habilitado; mensagens de autenticação do Supabase Auth dependem da configuração própria de SMTP do Supabase.</p>
       </Card>
+      <Card className="space-y-4 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2"><Mail className="h-5 w-5 text-brand" /><h2 className="font-semibold">Modelos de e-mail</h2></div>
+            <p className="mt-1 text-sm text-text-secondary">Edite o assunto e o HTML das mensagens transacionais. Os modelos padrão incluem a logo no topo e os dados da GrowMoney no rodapé.</p>
+          </div>
+          <Button type="button" size="sm" variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} loading={emailTemplatesLoading} onClick={() => void loadEmailTemplates()}>Atualizar modelos</Button>
+        </div>
+        {emailTemplatesLoading ? <p className="py-5 text-center text-sm text-text-secondary">Carregando modelos…</p> : <>
+          <label className="block space-y-1.5 text-sm font-medium" htmlFor="admin-email-template">
+            Modelo para editar
+            <select id="admin-email-template" value={emailTemplateKey} onChange={(event) => { setEmailTemplateKey(event.target.value as EmailTemplateKey); setEmailTemplateNotice(''); }} className="min-h-11 w-full rounded-lg border border-border-color bg-bg-primary px-3 py-2 text-text-primary">
+              {EMAIL_TEMPLATE_KEYS.map((key) => <option key={key} value={key}>{EMAIL_TEMPLATE_INFO[key].name}</option>)}
+            </select>
+          </label>
+          <p className="text-xs text-text-secondary">{EMAIL_TEMPLATE_INFO[emailTemplateKey].description} Variáveis disponíveis: {EMAIL_TEMPLATE_INFO[emailTemplateKey].variables.map((variable) => `{{${variable}}}`).join(', ')}.</p>
+          <form onSubmit={saveEmailTemplate} className="space-y-4">
+            <Input label="Assunto" required maxLength={180} value={emailTemplates[emailTemplateKey].subject} onChange={(event) => updateEmailTemplate('subject', event.target.value)} />
+            <label className="block space-y-1.5 text-sm font-medium" htmlFor="admin-email-template-html">
+              HTML do e-mail
+              <textarea id="admin-email-template-html" required maxLength={50000} spellCheck={false} value={emailTemplates[emailTemplateKey].html} onChange={(event) => updateEmailTemplate('html', event.target.value)} className="min-h-[320px] w-full resize-y rounded-lg border border-border-color bg-bg-primary px-3 py-3 font-mono text-xs leading-relaxed text-text-primary focus:outline-none focus:ring-2 focus:ring-brand/40" />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" loading={emailTemplateSaving}>Salvar modelo</Button>
+              <Button type="button" variant="outline" disabled={emailTemplateSaving} onClick={() => void restoreDefaultEmailTemplate()}>Restaurar padrão</Button>
+            </div>
+          </form>
+          <div className="space-y-2">
+            <div><h3 className="text-sm font-semibold">Prévia</h3><p className="text-xs text-text-secondary">A prévia usa dados fictícios e permanece isolada do restante do painel.</p></div>
+            <iframe
+              title={`Prévia do e-mail: ${EMAIL_TEMPLATE_INFO[emailTemplateKey].name}`}
+              sandbox=""
+              referrerPolicy="no-referrer"
+              srcDoc={renderEmailTemplate(emailTemplates[emailTemplateKey].html, {
+                ...EMAIL_TEMPLATE_PREVIEW_VALUES[emailTemplateKey],
+                logoUrl: `${window.location.origin}${import.meta.env.BASE_URL}assets/grow-logo-black.png`,
+              }, escapePreviewHtml)}
+              className="h-[480px] w-full rounded-xl border border-border-color bg-white"
+            />
+          </div>
+        </>}
+        {emailTemplateError && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{emailTemplateError}</p>}
+        {emailTemplateNotice && <p className="rounded-lg border border-brand/30 bg-brand/10 p-3 text-sm" role="status">{emailTemplateNotice}</p>}
+        <p className="text-xs text-text-secondary">Os convites de assinatura, a ativação de vendedores e os testes SMTP usam estes modelos. Os e-mails de autenticação, como confirmação e recuperação de senha, continuam configurados no serviço de autenticação do Supabase.</p>
+      </Card>
       <Card className="p-5 space-y-3">
         <h2 className="font-semibold">Integrações</h2>
         <div className="flex items-center justify-between gap-3 text-sm">
@@ -246,4 +347,3 @@ export default function AdminSistema() {
     </div>
   );
 }
-

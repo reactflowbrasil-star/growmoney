@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>237 nós · 516 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>241 nós · 522 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -74,6 +74,8 @@
   "file:src/lib/dashboard-shortcuts.test.ts"["src/lib/dashboard-shortcuts.test.ts"]
   "file:src/lib/dashboard-shortcuts.ts"["src/lib/dashboard-shortcuts.ts"]
   "file:src/lib/dashboard-types.ts"["src/lib/dashboard-types.ts"]
+  "file:src/lib/email-templates.test.ts"["src/lib/email-templates.test.ts"]
+  "file:src/lib/email-templates.ts"["src/lib/email-templates.ts"]
   "file:src/lib/empresa-types.ts"["src/lib/empresa-types.ts"]
   "file:src/lib/export.ts"["src/lib/export.ts"]
   "file:src/lib/financeiro-types.ts"["src/lib/financeiro-types.ts"]
@@ -184,6 +186,7 @@
   "file:supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"["supabase/migrations/20261023045635_vendedor_dados_pessoais.sql"]
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql"["supabase/migrations/20261023050243_vendedor_empresa_chat.sql"]
   "file:supabase/migrations/20261023054301_vendedor_visitas.sql"["supabase/migrations/20261023054301_vendedor_visitas.sql"]
+  "file:supabase/migrations/20261023090501_admin_email_templates.sql"["supabase/migrations/20261023090501_admin_email_templates.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -228,6 +231,7 @@
   "table:gm_admin_audit"["gm_admin_audit"]
   "rpc:get_signature_attachment_by_token"["get_signature_attachment_by_token"]
   "table:gm_smtp_settings"["gm_smtp_settings"]
+  "table:gm_email_templates"["gm_email_templates"]
   "table:gm_smtp_mail_log"["gm_smtp_mail_log"]
   "table:gm_chat_messages"["gm_chat_messages"]
   "table:assinaturas"["assinaturas"]
@@ -351,6 +355,7 @@
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:empresa_role"
   "file:src/lib/dashboard-shortcuts.test.ts" -->|imports| "file:src/lib/dashboard-shortcuts.ts"
   "file:src/lib/dashboard-shortcuts.ts" -->|imports| "file:src/config/nav.ts"
+  "file:src/lib/email-templates.test.ts" -->|imports| "file:src/lib/email-templates.ts"
   "file:src/lib/vendedor-validation.test.ts" -->|imports| "file:src/lib/vendedor-validation.ts"
   "file:src/lib/vendor-visit-types.test.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/lib/vendor-visit-types.ts" -->|imports| "file:src/lib/client-types.ts"
@@ -467,6 +472,7 @@
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/services/admin-system-backup-service.ts"
   "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/services/admin-smtp-service.ts"
+  "file:src/pages/admin/AdminSistema.tsx" -->|imports| "file:src/lib/email-templates.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/services/admin-user-service.ts"
   "file:src/pages/admin/AdminUsuarios.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
@@ -648,6 +654,7 @@
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:admin_log_event"
   "file:src/services/admin-smtp-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/admin-smtp-service.ts" -->|imports| "file:src/lib/email-templates.ts"
   "file:src/services/admin-system-backup-service.test.ts" -->|imports| "file:src/services/admin-system-backup-service.ts"
   "file:src/services/admin-system-backup-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/admin-system-backup-service.ts" -->|imports| "file:src/services/admin-resource-service.ts"
@@ -704,7 +711,9 @@
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresas"
   "file:supabase/functions/get-signature-attachment/index.ts" -->|reads-or-writes| "table:gm_files"
   "file:supabase/functions/get-signature-attachment/index.ts" -->|calls-rpc| "rpc:get_signature_attachment_by_token"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|imports| "file:src/lib/email-templates.ts"
   "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_smtp_settings"
+  "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_email_templates"
   "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:empresa_members"
   "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_smtp_mail_log"
   "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:vendedores"
@@ -751,4 +760,5 @@
   "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql" -->|defines-table| "table:gm_smtp_mail_log"
   "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql" -->|defines-table| "table:gm_vendor_activation_events"
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql" -->|defines-table| "table:gm_chat_messages"
-  "file:supabase/migrations/20261023054301_vendedor_visitas.sql" -->|defines-table| "table:vendedor_visitas"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>
+  "file:supabase/migrations/20261023054301_vendedor_visitas.sql" -->|defines-table| "table:vendedor_visitas"
+  "file:supabase/migrations/20261023090501_admin_email_templates.sql" -->|defines-table| "table:gm_email_templates"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>

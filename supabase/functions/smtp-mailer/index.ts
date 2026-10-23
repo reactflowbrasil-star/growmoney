@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { EMAIL_TEMPLATE_KEYS, mergeEmailTemplates, renderEmailTemplate, validateEmailTemplate, type EmailTemplateKey } from "../../../src/lib/email-templates.ts";
 
 type Settings = {
   host: string;
@@ -13,7 +14,7 @@ type Settings = {
   enabled: boolean;
 };
 
-type Action = "get_settings" | "save_settings" | "test_connection" | "test_email" | "send_signature" | "check_vendor_mail" | "send_vendor_activation" | "notify_vendor_activated";
+type Action = "get_settings" | "save_settings" | "get_templates" | "save_template" | "test_connection" | "test_email" | "send_signature" | "check_vendor_mail" | "send_vendor_activation" | "notify_vendor_activated";
 
 const corsHeaders = (origin: string | null) => {
   const configured = Deno.env.get("APP_ORIGIN") || "https://canal360.run.place";
@@ -135,6 +136,17 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => replacements[char] || char);
 }
 
+async function loadEmailTemplates(client: SupabaseClient) {
+  const { data, error } = await client.from("gm_email_templates").select("template_key, subject, html");
+  if (error) throw new Error("Não foi possível carregar os modelos de e-mail.");
+  const stored = Object.fromEntries((data || []).map((row) => [row.template_key, { subject: row.subject, html: row.html }]));
+  return mergeEmailTemplates(stored);
+}
+
+function renderSubject(template: string, variables: Record<string, string>, fallback: string) {
+  return safeHeader(renderEmailTemplate(template, variables, (value) => value), fallback);
+}
+
 function safeHeader(value: unknown, fallback: string) {
   return (typeof value === "string" ? value : fallback).replace(/[\r\n\u0000-\u001f]/g, " ").trim().slice(0, 160) || fallback;
 }
@@ -159,23 +171,6 @@ function safeSmtpFailure(error: unknown) {
       : "Falha no envio SMTP. Verifique o servidor, porta 587 com STARTTLS e as credenciais.",
     code: code || "SMTP_ERROR",
   };
-}
-
-function brandedEmail(title: string, intro: string, body: string, appUrl: string) {
-  const safeTitle = escapeHtml(title);
-  const safeIntro = escapeHtml(intro);
-  const safeBody = escapeHtml(body).replace(/\n/g, "<br>");
-  const logoUrl = `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`;
-  return `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#17202a"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 12px"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#fff;border:1px solid #e6e8eb;border-radius:14px;overflow:hidden"><tr><td style="padding:24px 32px;border-bottom:3px solid #ff6a00"><img src="${logoUrl}" width="132" alt="GrowMoney" style="display:block;max-width:132px;height:auto"></td></tr><tr><td style="padding:32px"><h1 style="font-size:22px;margin:0 0 16px">${safeTitle}</h1><p style="font-size:15px;line-height:1.6;margin:0 0 16px">${safeIntro}</p><div style="font-size:15px;line-height:1.7">${safeBody}</div><p style="font-size:12px;color:#68717d;margin:28px 0 0">Mensagem enviada pelo sistema GrowMoney.</p></td></tr></table></td></tr></table></body></html>`;
-}
-
-function brandedActionEmail(title: string, intro: string, buttonText: string, link: string, appUrl: string) {
-  const safeTitle = escapeHtml(title);
-  const safeIntro = escapeHtml(intro);
-  const safeLink = escapeHtml(link);
-  const safeButton = escapeHtml(buttonText);
-  const logoUrl = `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`;
-  return `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#17202a"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 12px"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#fff;border:1px solid #e6e8eb;border-radius:14px;overflow:hidden"><tr><td style="padding:24px 32px;border-bottom:3px solid #ff6a00"><img src="${logoUrl}" width="132" alt="GrowMoney" style="display:block;max-width:132px;height:auto"></td></tr><tr><td style="padding:32px"><h1 style="font-size:22px;margin:0 0 16px">${safeTitle}</h1><p style="font-size:15px;line-height:1.6;margin:0 0 24px">${safeIntro}</p><p style="margin:0 0 20px"><a href="${safeLink}" style="display:inline-block;background:#ff6a00;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:8px">${safeButton}</a></p><p style="font-size:12px;line-height:1.5;color:#68717d;margin:0">Se o botão não abrir, copie este endereço para o navegador:<br><a href="${safeLink}" style="color:#c65300;word-break:break-all">${safeLink}</a></p><p style="font-size:12px;color:#68717d;margin:28px 0 0">Mensagem enviada pelo sistema GrowMoney.</p></td></tr></table></td></tr></table></body></html>`;
 }
 
 async function isCompanyAdmin(client: SupabaseClient, userId: string, empresaId: unknown): Promise<boolean> {
@@ -219,12 +214,12 @@ Deno.serve(async (request: Request) => {
     return respond({ error: "Corpo da solicitação inválido." }, 400, origin);
   }
   const action = input.action as Action;
-  if (!["get_settings", "save_settings", "test_connection", "test_email", "send_signature", "check_vendor_mail", "send_vendor_activation", "notify_vendor_activated"].includes(action)) {
+  if (!["get_settings", "save_settings", "get_templates", "save_template", "test_connection", "test_email", "send_signature", "check_vendor_mail", "send_vendor_activation", "notify_vendor_activated"].includes(action)) {
     return respond({ error: "Ação inválida." }, 400, origin);
   }
 
   const platformAdmin = await isPlatformAdmin(clients.userClient);
-  const platformAdminOnlyAction = ["get_settings", "save_settings", "test_connection", "test_email"].includes(action);
+  const platformAdminOnlyAction = ["get_settings", "save_settings", "get_templates", "save_template", "test_connection", "test_email"].includes(action);
   if (platformAdminOnlyAction && !platformAdmin) {
     return respond({ error: "Acesso restrito ao administrador da plataforma." }, 403, origin);
   }
@@ -273,12 +268,17 @@ Deno.serve(async (request: Request) => {
       await transport.verify();
       const { data: company } = await clients.serviceClient.from("empresas").select("nome").eq("id", empresaId).maybeSingle();
       const appUrl = Deno.env.get("APP_BASE_URL") || "https://canal360.run.place/grow";
+      const template = (await loadEmailTemplates(clients.serviceClient)).vendor_activation;
+      const templateVariables = {
+        nome, empresa: company?.nome || "a empresa", link: activationLink,
+        appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
+      };
       await transport.sendMail({
         from: { name: settings.from_name, address: settings.from_email },
         to: email,
-        subject: "Ative seu acesso ao GrowMoney",
-        text: `Olá ${nome},\n\nSeu cadastro de vendedor para ${company?.nome || "a empresa"} foi criado. Ative seu acesso pelo link abaixo:\n\n${activationLink}\n\nSe você não esperava este convite, ignore esta mensagem.`,
-        html: brandedActionEmail("Ative seu cadastro", `Olá ${nome}. Seu acesso de vendedor para ${company?.nome || "a empresa"} está quase pronto. Confirme seu e-mail para ativar a conta.`, "Ativar meu cadastro", activationLink, appUrl),
+        subject: renderSubject(template.subject, templateVariables, "Ative seu acesso ao GrowMoney"),
+        text: `Olá ${nome},\n\nSeu cadastro de vendedor para ${company?.nome || "a empresa"} foi criado. Confirme seu e-mail e defina sua senha para ativar o acesso pelo link abaixo:\n\n${activationLink}\n\nSe você não esperava este convite, ignore esta mensagem.`,
+        html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
       });
       await logMail(clients.serviceClient, actorId, "vendor_activation_email", email, true, { empresaId, vendedorId: seller.id });
       return respond({ sent: true }, 200, origin);
@@ -338,12 +338,17 @@ Deno.serve(async (request: Request) => {
         const appUrl = Deno.env.get("APP_BASE_URL") || "https://canal360.run.place/grow";
         const companyName = await clients.serviceClient.from("empresas").select("nome").eq("id", seller.empresa_id).maybeSingle();
         const recipients = [...recipientMap.values()];
+        const template = (await loadEmailTemplates(clients.serviceClient)).vendor_activation_admin_notice;
+        const templateVariables = {
+          nome: seller.nome, email: seller.email, empresa: companyName.data?.nome || "—",
+          appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
+        };
         await transport.sendMail({
           from: { name: settings.from_name, address: settings.from_email },
           to: recipients.map((recipient) => recipient.email),
-          subject: `Cadastro de vendedor ativado: ${safeHeader(seller.nome, "Vendedor")}`,
+          subject: renderSubject(template.subject, templateVariables, `Cadastro de vendedor ativado: ${safeHeader(seller.nome, "Vendedor")}`),
           text: `O vendedor ${seller.nome} (${seller.email}) confirmou o e-mail e ativou o cadastro em ${companyName.data?.nome || "sua empresa"}.`,
-          html: brandedEmail("Cadastro ativado", `O cadastro de ${seller.nome} foi confirmado pelo próprio vendedor.`, `E-mail: ${seller.email}\nEmpresa: ${companyName.data?.nome || "—"}\nStatus: ativo`, appUrl),
+          html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
         });
         await clients.serviceClient.from("gm_vendor_activation_events").update({ status: "sent", notified_at: new Date().toISOString(), updated_at: new Date().toISOString(), last_error_code: null }).eq("id", event.id);
         await logMail(clients.serviceClient, confirmedUser.id, "vendor_activation_admin_notice", recipients.map((recipient) => recipient.email).join(", "), true, { empresaId: seller.empresa_id, vendedorId: seller.id });
@@ -356,6 +361,40 @@ Deno.serve(async (request: Request) => {
       }
     }
     return respond({ activated: true, notifications: results }, 200, origin);
+  }
+
+  if (action === "get_templates") {
+    try {
+      return respond({ templates: await loadEmailTemplates(clients.serviceClient) }, 200, origin);
+    } catch (error) {
+      return respond({ error: error instanceof Error ? error.message : "Falha ao consultar modelos de e-mail." }, 500, origin);
+    }
+  }
+
+  if (action === "save_template") {
+    const key = input.key;
+    const template = input.template;
+    if (typeof key !== "string" || !EMAIL_TEMPLATE_KEYS.includes(key as EmailTemplateKey)) {
+      return respond({ error: "Selecione um modelo de e-mail válido." }, 400, origin);
+    }
+    const validationError = validateEmailTemplate(template);
+    if (validationError) return respond({ error: validationError }, 400, origin);
+    const candidate = template as { subject: string; html: string };
+    try {
+      const { error } = await clients.serviceClient.from("gm_email_templates").upsert({
+        template_key: key, subject: candidate.subject.trim(), html: candidate.html,
+        updated_by: actorId, updated_at: new Date().toISOString(),
+      });
+      if (error) throw new Error("Não foi possível salvar o modelo de e-mail.");
+      const { error: auditError } = await clients.userClient.rpc("admin_log_event", {
+        p_action: "email_template_updated",
+        p_details: { templateKey: key, subjectLength: candidate.subject.length, htmlLength: candidate.html.length },
+      });
+      if (auditError) throw new Error("Modelo salvo, mas o evento de auditoria não foi registrado.");
+      return respond({ saved: true }, 200, origin);
+    } catch (error) {
+      return respond({ error: error instanceof Error ? error.message : "Falha ao salvar modelo de e-mail." }, 500, origin);
+    }
   }
 
   if (action === "get_settings") {
@@ -453,12 +492,17 @@ Deno.serve(async (request: Request) => {
         const signerName = safeHeader(signer.nome, "");
         const title = safeHeader(envelope.titulo, "Documento");
         const text = `Olá ${signerName},\n\nVocê recebeu o documento “${title}” para revisar e assinar.\n\n${message}\n\nAcesse seu link pessoal: ${signingUrl}\n\nSe você não esperava este e-mail, entre em contato com quem enviou o documento.`;
+        const template = (await loadEmailTemplates(clients.serviceClient)).signature;
+        const templateVariables = {
+          nome: signerName, titulo: title, mensagem: message, link: signingUrl,
+          appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
+        };
         await transport.sendMail({
           from: { name: settings.from_name, address: settings.from_email },
           to: String(signer.email),
-          subject: `Assinatura: ${title}`,
+          subject: renderSubject(template.subject, templateVariables, `Assinatura: ${title}`),
           text,
-          html: brandedEmail("Documento para assinatura", `Olá ${signerName}, você recebeu um documento para revisar e assinar.`, `${title}\n\n${message}\n\nAcesse seu link pessoal: ${signingUrl}`, appUrl),
+          html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
         });
         signer.emailSentAt = new Date().toISOString();
         accepted.push(String(signer.email));
@@ -510,11 +554,13 @@ Deno.serve(async (request: Request) => {
       if (!emailIsValid(to)) return respond({ error: "Informe um endereço de e-mail válido para o teste." }, 400, origin);
       await transport.verify();
       const appUrl = Deno.env.get("APP_BASE_URL") || "https://canal360.run.place/grow";
+      const template = (await loadEmailTemplates(clients.serviceClient)).test_email;
+      const templateVariables = { appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png` };
       await transport.sendMail({
         from: { name: settings.from_name, address: settings.from_email }, to,
-        subject: "Teste de envio — GrowMoney",
+        subject: renderSubject(template.subject, templateVariables, "Teste de envio — GrowMoney"),
         text: "O envio de e-mails do GrowMoney está configurado e funcionando.",
-        html: brandedEmail("Teste de envio realizado", "Este é um e-mail de validação do sistema.", "O servidor SMTP está conectado e o envio de mensagens foi confirmado.", appUrl),
+        html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
       });
       await logMail(clients.serviceClient, actorId, "test_email", to, true, {});
       return respond({ sent: true, message: `E-mail de teste enviado para ${to}.` }, 200, origin);
@@ -526,4 +572,3 @@ Deno.serve(async (request: Request) => {
     return respond({ error: failure.message }, 502, origin);
   }
 });
-

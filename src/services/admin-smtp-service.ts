@@ -1,5 +1,6 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase/client';
+import { DEFAULT_EMAIL_TEMPLATES, type EmailTemplate, type EmailTemplateKey } from '@/lib/email-templates';
 
 export type SmtpSettings = {
   host: string;
@@ -47,5 +48,12 @@ export const AdminSmtpService = {
   async sendTestEmail(to: string): Promise<string> {
     const result = await invoke<{ sent: boolean; message: string }>('test_email', { to });
     return result.message;
+  },
+  async getEmailTemplates(): Promise<Record<EmailTemplateKey, EmailTemplate>> {
+    const result = await invoke<{ templates?: Record<EmailTemplateKey, EmailTemplate> }>('get_templates');
+    return result.templates || DEFAULT_EMAIL_TEMPLATES;
+  },
+  async saveEmailTemplate(key: EmailTemplateKey, template: EmailTemplate): Promise<void> {
+    await invoke<{ saved: boolean }>('save_template', { key, template });
   },
 };

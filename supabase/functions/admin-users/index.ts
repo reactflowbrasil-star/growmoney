@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 type RequestBody =
-  | { action: 'create'; empresaId: string; email: string; password: string; nome: string; metaMensal?: number; cpf?: string; dataNascimento?: string; cep?: string; logradouro?: string; numero?: string; complemento?: string; bairro?: string; cidade?: string; uf?: string; fotoPath?: string }
+  | { action: 'create'; empresaId: string; email: string; nome: string; metaMensal?: number; cpf?: string; dataNascimento?: string; cep?: string; logradouro?: string; numero?: string; complemento?: string; bairro?: string; cidade?: string; uf?: string; fotoPath?: string }
   | { action: 'delete'; empresaId: string; userId: string };
 
 function json(status: number, payload: Record<string, unknown>) {
@@ -87,13 +87,13 @@ Deno.serve(async (request) => {
     if (!platformAdminRecord && !empresaAdmin) {
       return json(403, { error: 'Apenas administradores da plataforma ou da empresa podem cadastrar vendedores.' });
     }
-    if (typeof body.email !== 'string' || typeof body.nome !== 'string' || typeof body.password !== 'string') {
-      return json(400, { error: 'Nome, e-mail e senha são obrigatórios.' });
+    if (typeof body.email !== 'string' || typeof body.nome !== 'string') {
+      return json(400, { error: 'Nome e e-mail são obrigatórios.' });
     }
     const email = body.email.trim().toLowerCase();
     const nome = body.nome.trim();
-    if (!/^\S+@\S+\.\S+$/.test(email) || !nome || nome.length > 120 || body.password.length < 8) {
-      return json(400, { error: 'Informe nome, e-mail válido e senha com pelo menos 8 caracteres.' });
+    if (!/^\S+@\S+\.\S+$/.test(email) || !nome || nome.length > 120) {
+      return json(400, { error: 'Informe nome e e-mail válido.' });
     }
 
     const metaMensal = Number(body.metaMensal ?? 0);
@@ -129,9 +129,8 @@ Deno.serve(async (request) => {
     }
 
     const { data: generated, error: createError } = await serviceClient.auth.admin.generateLink({
-      type: 'signup',
+      type: 'invite',
       email,
-      password: body.password,
       options: {
         redirectTo: activationRedirect,
         data: { nome, full_name: nome },
