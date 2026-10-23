@@ -249,14 +249,19 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-sm text-text-secondary sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <BrandLogo linkTo={false} heightClass="h-9" className="max-w-[170px] object-left opacity-90" />
-            <span className="text-xs sm:text-sm">© {new Date().getFullYear()} {BRAND.name}</span>
+            <span className="text-xs sm:text-sm">© 2027 {BRAND.name}</span>
           </div>
           <nav aria-label="Informações legais" className="flex items-center gap-5 text-xs sm:text-sm">
             <Link to="/termos" className="transition-colors hover:text-text-primary">Termos</Link>
             <Link to="/privacidade" className="transition-colors hover:text-text-primary">Privacidade</Link>
           </nav>
         </div>
+        <div className="mx-auto mt-5 flex max-w-7xl flex-col items-center justify-center gap-1 border-t border-border-color/60 px-4 pt-4 text-center text-xs text-text-secondary sm:px-6 lg:px-8">
+          <p>© 2027 {BRAND.name}. Todos os direitos reservados.</p>
+          <p>Desenvolvido por <a href="https://agenciaafrica.com.br" target="_blank" rel="noopener noreferrer" className="font-semibold text-text-primary transition-colors hover:text-brand">Agência AFRICA</a></p>
+        </div>
       </footer>
     </div>
   );
 }
+
