@@ -27,15 +27,8 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
 
   if (!open || typeof document === 'undefined') return null;
 
-  const widths = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-  };
-
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-0 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-0">
       <button
         type="button"
         aria-label="Fechar janela"
@@ -45,9 +38,9 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
       <div
         className={cn(
           'relative flex min-h-0 w-full flex-col overflow-hidden border border-border-color bg-bg-primary shadow-xl',
-          'h-[100dvh] max-h-[100dvh] rounded-none sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl',
-          widths[size]
+          'h-[100dvh] max-h-[100dvh] max-w-none rounded-none'
         )}
+        data-size={size}
         role="dialog"
         aria-modal="true"
         aria-label={title}

@@ -14,12 +14,11 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (saved) setTheme(saved);
-  }, []);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const saved = window.localStorage.getItem('theme');
+    return saved === 'dark' || saved === 'light' ? saved : 'light';
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
