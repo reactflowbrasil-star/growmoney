@@ -27,13 +27,13 @@ function backupWith(overrides: Record<string, unknown[]> = {}) {
 }
 
 describe('validateSystemBackup', () => {
-  it('accepts a structurally complete backup for preview while blocking writes', () => {
+  it('accepts a structurally complete backup for transactional restoration', () => {
     const preview = validateSystemBackup(backupWith());
 
     expect(preview.valid).toBe(true);
     expect(preview.recordCount).toBe(2);
-    expect(preview.canApply).toBe(false);
-    expect(preview.blockedReason).toContain('RPC transacional');
+    expect(preview.canApply).toBe(true);
+    expect(preview.blockedReason).toContain('única transação');
   });
 
   it('rejects secret fields and datasets outside the allowlist', () => {

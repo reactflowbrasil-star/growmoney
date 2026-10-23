@@ -42,7 +42,7 @@ export type SystemBackup = {
 
 export type ImportPreview = {
   valid: boolean;
-  canApply: false;
+  canApply: boolean;
   blockedReason: string;
   recordCount: number;
   tableCounts: Partial<Record<SystemBackupDataset, number>>;
@@ -55,6 +55,7 @@ const EXCLUSIONS = [
   'Autorização de platform admin e registros de auditoria',
   'Históricos de domínio e eventos de assinatura',
   'Arquivos binários do Storage (somente metadados gm_files)',
+  'Envelopes de assinatura e tokens privados de acesso',
 ];
 const SENSITIVE_KEY = /(token|secret|password|passwd|credential|authorization|api.?key|private.?key)/i;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -106,6 +107,12 @@ export async function exportFullSystemBackup(): Promise<SystemBackup> {
   let recordCount = 0;
 
   for (const table of SYSTEM_BACKUP_DATASETS) {
+    if (table === 'signature_envelopes') {
+      // Signing links are bearer credentials. Never place them in a downloaded
+      // backup; an envelope without its private signer tokens is not restorable.
+      datasets[table] = [];
+      continue;
+    }
     const rows: Record<string, unknown>[] = [];
     for (let from = 0; ; from += PAGE_SIZE) {
       const to = from + PAGE_SIZE - 1;
@@ -155,13 +162,13 @@ function collectSensitivePaths(value: unknown, path: string, output: string[]) {
   }
 }
 
-/** Validates a backup for preview only. This service intentionally performs no writes. */
+/** Validates the complete backup before any destructive server-side restore. */
 export function validateSystemBackup(input: unknown): ImportPreview {
   const errors: string[] = [];
   const warnings = [
     'Os IDs de usuários referenciados precisam existir no ambiente de destino; dados de identidade não são importados.',
-    'Metadados de gm_files não incluem os binários armazenados no Supabase Storage.',
-    'A aplicação está bloqueada até existir uma RPC transacional server-side para todos os datasets e referências.',
+    'Metadados de gm_files não contêm os binários; os arquivos do Storage precisam existir no ambiente de destino.',
+    'Envelopes de assinatura e seus links privados não são incluídos no backup por segurança.',
   ];
   const tableCounts: Partial<Record<SystemBackupDataset, number>> = {};
   let recordCount = 0;
@@ -255,8 +262,10 @@ export function validateSystemBackup(input: unknown): ImportPreview {
 
   return {
     valid: errors.length === 0,
-    canApply: false,
-    blockedReason: 'A importação persistente requer uma RPC transacional server-side ainda não instalada.',
+    canApply: errors.length === 0,
+    blockedReason: errors.length === 0
+      ? 'A restauração substitui os dados operacionais atuais em uma única transação. Identidades, auditoria, SMTP e arquivos binários são preservados.'
+      : 'Corrija os erros do arquivo antes de restaurar.',
     recordCount,
     tableCounts,
     errors,
@@ -305,4 +314,30 @@ function validateIncludedReferences(
 export const AdminSystemBackupService = {
   exportFullSystemBackup,
   validateSystemBackup,
+  async restoreSystemBackup(input: unknown, confirmation: string) {
+    const preview = validateSystemBackup(input);
+    if (!preview.valid || !preview.canApply || !isPlainObject(input) || !isPlainObject(input.datasets)) {
+      throw new Error('O backup precisa estar válido antes da restauração.');
+    }
+    if (confirmation !== 'RESTAURAR E SUBSTITUIR DADOS') {
+      throw new Error('Confirmação de restauração inválida.');
+    }
+    const { data, error } = await supabase.rpc('admin_restore_system_backup', {
+      p_datasets: input.datasets,
+      p_confirmation: confirmation,
+    });
+    if (error) throw new Error(`A restauração foi cancelada: ${error.message}`);
+    return data as { restored: boolean; recordCount: number; inserted: Record<string, number> };
+  },
+  async clearSystemData(confirmation: string) {
+    await requirePlatformAdmin();
+    if (confirmation !== 'APAGAR TODOS OS DADOS') {
+      throw new Error('Confirmação inválida.');
+    }
+    const { data, error } = await supabase.rpc('admin_clear_operational_data', {
+      p_confirmation: confirmation,
+    });
+    if (error) throw new Error(`A limpeza não foi realizada: ${error.message}`);
+    return data as { cleared: boolean; deleted: Record<string, number> };
+  },
 };

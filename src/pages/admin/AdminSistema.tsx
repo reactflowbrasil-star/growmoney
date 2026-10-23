@@ -12,8 +12,9 @@ const emptySmtp: SmtpForm = { host: '', port: 465, secure: true, username: '', p
 export default function AdminSistema() {
   const envOk = Boolean(import.meta.env.VITE_SUPABASE_URL);
   const [exporting, setExporting] = useState(false);
-  const [preview, setPreview] = useState<{ name: string; result: ImportPreview } | null>(null);
+  const [preview, setPreview] = useState<{ name: string; result: ImportPreview; input: unknown } | null>(null);
   const [transferError, setTransferError] = useState('');
+  const [transferBusy, setTransferBusy] = useState(false);
   const [smtp, setSmtp] = useState<SmtpForm>(emptySmtp);
   const [passwordConfigured, setPasswordConfigured] = useState(false);
   const [smtpLoading, setSmtpLoading] = useState(true);
@@ -102,10 +103,42 @@ export default function AdminSistema() {
     if (!file) return;
     try {
       const input: unknown = JSON.parse(await file.text());
-      setPreview({ name: file.name, result: AdminSystemBackupService.validateSystemBackup(input) });
+      setPreview({ name: file.name, result: AdminSystemBackupService.validateSystemBackup(input), input });
     } catch (error) {
       setTransferError(error instanceof Error ? error.message : 'Não foi possível ler o arquivo selecionado.');
     }
+  };
+
+  const restoreBackup = async () => {
+    if (!preview?.result.valid || !preview.result.canApply || transferBusy) return;
+    const confirmed = window.confirm('Atenção: a restauração substituirá em uma única transação os dados operacionais atuais. Esta ação não pode ser desfeita. Usuários, permissões administrativas, auditoria e configuração SMTP serão preservados.');
+    if (!confirmed) return;
+    const phrase = window.prompt('Para autorizar, digite exatamente: RESTAURAR E SUBSTITUIR DADOS');
+    if (phrase === null) return;
+    setTransferBusy(true); setTransferError('');
+    try {
+      const result = await AdminSystemBackupService.restoreSystemBackup(preview.input, phrase);
+      setPreview(null);
+      window.alert(`Restauração concluída: ${result.recordCount.toLocaleString('pt-BR')} registros importados.`);
+    } catch (error) {
+      setTransferError(error instanceof Error ? error.message : 'Não foi possível restaurar o backup. Nenhuma alteração parcial foi mantida.');
+    } finally { setTransferBusy(false); }
+  };
+
+  const clearAllSystemData = async () => {
+    if (transferBusy) return;
+    const confirmed = window.confirm('ATENÇÃO: esta ação é irreversível. Todos os cadastros e dados operacionais serão apagados. Usuários, logins, permissões administrativas, auditoria e SMTP serão preservados. Os binários de arquivos já armazenados também serão preservados.');
+    if (!confirmed) return;
+    const phrase = window.prompt('Para confirmar a exclusão, digite exatamente: APAGAR TODOS OS DADOS');
+    if (phrase === null) return;
+    setTransferBusy(true); setTransferError('');
+    try {
+      const result = await AdminSystemBackupService.clearSystemData(phrase);
+      setPreview(null);
+      window.alert(`Limpeza concluída. ${Object.values(result.deleted).reduce((sum, count) => sum + count, 0).toLocaleString('pt-BR')} registros operacionais removidos.`);
+    } catch (error) {
+      setTransferError(error instanceof Error ? error.message : 'Não foi possível apagar os dados do sistema.');
+    } finally { setTransferBusy(false); }
   };
 
   return (
@@ -183,11 +216,19 @@ export default function AdminSistema() {
             {preview.result.errors.length > 0 && <div><p className="text-sm font-semibold text-erro">Erros de validação</p><ul className="mt-1 list-disc space-y-1 pl-5 text-xs text-erro">{preview.result.errors.map((error, index) => <li key={`${index}-${error}`}>{error}</li>)}</ul></div>}
             {preview.result.warnings.length > 0 && <div><p className="text-sm font-semibold">Avisos</p><ul className="mt-1 list-disc space-y-1 pl-5 text-xs text-text-secondary">{preview.result.warnings.map((warning, index) => <li key={`${index}-${warning}`}>{warning}</li>)}</ul></div>}
             <p className="rounded-lg bg-aviso/10 p-3 text-xs text-text-secondary">{preview.result.blockedReason}</p>
-            <Button disabled title={preview.result.blockedReason}>{preview.result.canApply ? 'Importar dados' : 'Importação indisponível'}</Button>
+            <Button disabled={!preview.result.canApply || transferBusy} loading={transferBusy} onClick={() => void restoreBackup()} title={preview.result.blockedReason}>{preview.result.canApply ? 'Importar e substituir dados' : 'Importação indisponível'}</Button>
           </div>}
         </div>
         {transferError && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{transferError}</p>}
-        <p className="text-xs text-text-secondary">O backup exclui identidades, memberships, convites, autorização administrativa, auditoria e históricos. Metadados de arquivos não incluem binários do Storage. Nenhum dado é gravado durante a validação.</p>
+        <p className="text-xs text-text-secondary">O backup exclui identidades, memberships, convites, autorização administrativa, auditoria e históricos. Envelopes de assinatura e tokens privados também são excluídos. Os binários do Storage não são exportados; eles permanecem no mesmo ambiente durante a restauração. A prévia não grava dados.</p>
+      </Card>
+      <Card className="space-y-4 border border-erro/40 bg-erro/5 p-5">
+        <div>
+          <h2 className="font-semibold text-erro">Apagar dados operacionais</h2>
+          <p className="mt-1 text-sm text-text-secondary">Remove empresas, clientes, serviços, contratos, assinaturas, agenda e lançamentos financeiros. A limpeza é irreversível e exige confirmação em duas etapas.</p>
+        </div>
+        <Button variant="danger" disabled={transferBusy} loading={transferBusy} onClick={() => void clearAllSystemData()}>Apagar todos os dados do sistema</Button>
+        <p className="text-xs text-text-secondary">Logins, perfis, permissões administrativas, auditoria, configuração SMTP e arquivos binários são preservados. Para remover logins ou arquivos, use seus módulos próprios.</p>
       </Card>
       <Card className="p-5 space-y-2 text-sm text-text-secondary">
         <h2 className="font-semibold text-text-primary">Notas</h2>

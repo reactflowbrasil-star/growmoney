@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:16:11.322Z",
+  "generated_at": "2026-10-23T04:21:30.167Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -805,6 +805,11 @@
       "label": "supabase/migrations/20261023040000_smtp_mailer_settings.sql"
     },
     {
+      "id": "file:supabase/migrations/20261023041851_admin_system_backup_restore.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023041851_admin_system_backup_restore.sql"
+    },
+    {
       "id": "file:tailwind.config.ts",
       "type": "file",
       "label": "tailwind.config.ts"
@@ -953,6 +958,16 @@
       "id": "rpc:admin_log_event",
       "type": "database-rpc",
       "label": "admin_log_event"
+    },
+    {
+      "id": "rpc:admin_restore_system_backup",
+      "type": "database-rpc",
+      "label": "admin_restore_system_backup"
+    },
+    {
+      "id": "rpc:admin_clear_operational_data",
+      "type": "database-rpc",
+      "label": "admin_clear_operational_data"
     },
     {
       "id": "table:auditoria",
@@ -3112,6 +3127,18 @@
       "from": "file:src/services/admin-system-backup-service.ts",
       "to": "file:src/services/admin-resource-service.ts",
       "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-system-backup-service.ts",
+      "to": "rpc:admin_restore_system_backup",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-system-backup-service.ts",
+      "to": "rpc:admin_clear_operational_data",
+      "type": "calls-rpc",
       "confidence": "EXTRACTED"
     },
     {
