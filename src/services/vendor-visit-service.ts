@@ -24,4 +24,3 @@ export class VendorVisitService {
     return VendorVisitRepository.updateLocation(id, latitude, longitude);
   }
 }
-

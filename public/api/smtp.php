@@ -188,4 +188,3 @@ try {
     reply(502, ['error' => 'O servidor SMTP recusou a conexão ou a mensagem.', 'code' => 'SMTP_BRIDGE_FAILURE']);
 }
 
-

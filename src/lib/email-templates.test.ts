@@ -64,4 +64,3 @@ describe('modelos de e-mail', () => {
     expect(templates.test_email).toEqual(DEFAULT_EMAIL_TEMPLATES.test_email);
   });
 });
-

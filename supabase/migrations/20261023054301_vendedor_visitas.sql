@@ -108,4 +108,3 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE public.vendedor_visitas;
   END IF;
 END $$;
-

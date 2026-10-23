@@ -31,4 +31,3 @@ export const navItems = [
   { label: 'Configurações', href: '/configuracoes', icon: Settings },
   { label: 'Perfil', href: '/perfil', icon: Users },
 ];
-

@@ -38,37 +38,45 @@ export function AppLayout() {
     }
   }, []);
 
-  const playLoudAlert = useCallback(() => {
+  const playNotificationChime = useCallback(() => {
     if (!soundEnabled) return;
-    enableAudioFromGesture();
-    const context = audioContextRef.current;
-    if (!context || context.state !== 'running') return;
-    const startAt = context.currentTime + 0.02;
-    [880, 1046].forEach((frequency, index) => {
-      const start = startAt + index * 0.25;
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.setValueAtTime(frequency, start);
-      gain.gain.setValueAtTime(0.001, start);
-      gain.gain.exponentialRampToValueAtTime(0.95, start + 0.025);
-      gain.gain.setValueAtTime(0.95, start + 0.14);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(start);
-      oscillator.stop(start + 0.23);
-    });
-  }, [enableAudioFromGesture, soundEnabled]);
+    void (async () => {
+      try {
+        if (!audioContextRef.current) audioContextRef.current = new AudioContext();
+        const context = audioContextRef.current;
+        if (context.state === 'suspended') await context.resume();
+        if (context.state !== 'running') return;
+
+        const startAt = context.currentTime + 0.02;
+        [659.25, 880].forEach((frequency, index) => {
+          const start = startAt + index * 0.16;
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          oscillator.type = 'sine';
+          oscillator.frequency.setValueAtTime(frequency, start);
+          gain.gain.setValueAtTime(0.001, start);
+          gain.gain.exponentialRampToValueAtTime(0.16, start + 0.035);
+          gain.gain.setValueAtTime(0.16, start + 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(start);
+          oscillator.stop(start + 0.29);
+        });
+      } catch {
+        // Browsers may block audio until the user interacts; the visual alert remains active.
+      }
+    })();
+  }, [soundEnabled]);
 
   const alertIncomingChatMessage = useCallback(() => {
-    playLoudAlert();
+    playNotificationChime();
     const now = new Date();
     const time = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium', timeZone: 'America/Sao_Paulo' }).format(now);
     setLiveAlert({ id: `chat-${now.getTime()}`, title: 'Nova mensagem no chat ao vivo', time });
     if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
     alertTimerRef.current = setTimeout(() => setLiveAlert(null), 5000);
-  }, [playLoudAlert]);
+  }, [playNotificationChime]);
 
   useEffect(() => {
     const unlockAudio = () => enableAudioFromGesture();
@@ -114,9 +122,9 @@ export function AppLayout() {
       setLiveAlert({ id: event.id, title: event.title, time });
       if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
       alertTimerRef.current = setTimeout(() => setLiveAlert(null), 5000);
-      playLoudAlert();
+      playNotificationChime();
     });
-  }, [empresaAtiva?.id, isAdmin, playLoudAlert, user?.id]);
+  }, [empresaAtiva?.id, isAdmin, playNotificationChime, user?.id]);
 
   useEffect(() => () => {
     if (alertTimerRef.current) clearTimeout(alertTimerRef.current);

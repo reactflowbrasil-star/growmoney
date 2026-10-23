@@ -22,4 +22,3 @@ export function moveShortcut(hrefs: string[], from: number, to: number) {
   reordered.splice(to, 0, item);
   return reordered;
 }
-

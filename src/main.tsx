@@ -172,4 +172,3 @@ if (!rootEl) {
 
 createRoot(rootEl).render(<App />);
 
-

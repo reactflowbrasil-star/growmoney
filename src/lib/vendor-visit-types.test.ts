@@ -15,4 +15,3 @@ describe('rotas de visita do vendedor', () => {
     expect(url.searchParams.get('destination')).toBe('São Paulo, SP');
   });
 });
-

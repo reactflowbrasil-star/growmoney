@@ -154,4 +154,3 @@ export function ensureEmailLink(html: string, url: string, escapeHtml: (text: st
   const bodyEnd = html.search(/<\/body\s*>/i);
   return bodyEnd >= 0 ? `${html.slice(0, bodyEnd)}${fallback}${html.slice(bodyEnd)}` : `${html}${fallback}`;
 }
-

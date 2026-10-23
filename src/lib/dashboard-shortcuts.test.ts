@@ -15,4 +15,3 @@ describe('atalhos rápidos do dashboard', () => {
       .toEqual(['/contratos', '/agenda', '/clientes']);
   });
 });
-

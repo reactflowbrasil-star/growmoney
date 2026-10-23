@@ -47,4 +47,3 @@ export function AdminAccordionList({ items, emptyMessage = 'Nenhum item para exi
   );
 }
 
-

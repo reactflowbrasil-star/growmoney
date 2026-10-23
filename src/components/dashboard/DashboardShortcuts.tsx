@@ -52,4 +52,3 @@ export function DashboardShortcuts({ userId }: { userId: string }) {
     </Card>
   );
 }
-

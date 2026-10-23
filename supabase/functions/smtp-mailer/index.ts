@@ -584,4 +584,3 @@ Deno.serve(async (request: Request) => {
     return respond({ error: failure.message }, 502, origin);
   }
 });
-

@@ -50,4 +50,3 @@ export function getGoogleMapsDirectionsUrl(address: Endereco, origin?: { latitud
   if (origin) params.set('origin', `${origin.latitude},${origin.longitude}`);
   return `https://www.google.com/maps/dir/?${params.toString()}`;
 }
-
