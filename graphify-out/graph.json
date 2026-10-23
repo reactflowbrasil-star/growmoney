@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-23T04:39:22.950Z",
+  "generated_at": "2026-10-23T04:44:54.429Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -338,6 +338,11 @@
       "id": "file:src/lib/contrato-types.ts",
       "type": "file",
       "label": "src/lib/contrato-types.ts"
+    },
+    {
+      "id": "file:src/lib/contratos-store.test.ts",
+      "type": "file",
+      "label": "src/lib/contratos-store.test.ts"
     },
     {
       "id": "file:src/lib/contratos-store.ts",
@@ -825,6 +830,11 @@
       "label": "supabase/migrations/20261023043612_realtime_dashboard_notifications.sql"
     },
     {
+      "id": "file:supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql"
+    },
+    {
       "id": "file:tailwind.config.ts",
       "type": "file",
       "label": "tailwind.config.ts"
@@ -908,6 +918,11 @@
       "id": "table:gm_contracts",
       "type": "database-table",
       "label": "gm_contracts"
+    },
+    {
+      "id": "rpc:empresa_role",
+      "type": "database-rpc",
+      "label": "empresa_role"
     },
     {
       "id": "table:agenda",
@@ -1651,6 +1666,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/lib/contratos-store.test.ts",
+      "to": "file:src/lib/contratos-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/lib/contratos-store.ts",
       "to": "file:src/lib/supabase/client.ts",
       "type": "imports",
@@ -1660,6 +1681,18 @@
       "from": "file:src/lib/contratos-store.ts",
       "to": "table:gm_contracts",
       "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/lib/contratos-store.ts",
+      "to": "rpc:is_platform_admin",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/lib/contratos-store.ts",
+      "to": "rpc:empresa_role",
+      "type": "calls-rpc",
       "confidence": "EXTRACTED"
     },
     {

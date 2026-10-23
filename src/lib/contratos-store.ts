@@ -250,7 +250,7 @@ function fromRemote(row: ContratoRemoto): ContratoLocal {
 export async function listContratosRemotos(): Promise<ContratoLocal[]> {
   const userId = await currentUserId();
   const legacy = read<ContratoLocal[]>(K_CONTRATOS, []);
-  if (legacy.length) {
+  if (legacy.length && await canImportLegacyContracts()) {
     const rows = legacy.map((contrato) => ({
       id: /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(contrato.id) ? contrato.id : crypto.randomUUID(),
       user_id: userId,
@@ -271,6 +271,21 @@ export async function listContratosRemotos(): Promise<ContratoLocal[]> {
     .order('numero', { ascending: false });
   if (error) throw new Error(`Não foi possível carregar os contratos: ${error.message}`);
   return ((data || []) as ContratoRemoto[]).map(fromRemote);
+}
+
+/**
+ * Browser-local contracts predate per-user persistence and have no reliable
+ * owner. Only company managers/admins may migrate that shared legacy bucket;
+ * otherwise the first seller to sign in could claim every contract on device.
+ */
+async function canImportLegacyContracts(): Promise<boolean> {
+  const { data: platformAdmin, error: platformAdminError } = await supabase.rpc('is_platform_admin');
+  if (!platformAdminError && platformAdmin === true) return true;
+
+  const empresaId = localStorage.getItem('empresaAtiva');
+  if (!empresaId) return false;
+  const { data: role, error } = await supabase.rpc('empresa_role', { p_empresa_id: empresaId });
+  return !error && (role === 'admin' || role === 'gestor');
 }
 
 export async function saveContrato(

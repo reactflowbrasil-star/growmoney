@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>210 nós · 440 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>213 nós · 443 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -66,6 +66,7 @@
   "file:src/lib/client-types.ts"["src/lib/client-types.ts"]
   "file:src/lib/contrato-template.ts"["src/lib/contrato-template.ts"]
   "file:src/lib/contrato-types.ts"["src/lib/contrato-types.ts"]
+  "file:src/lib/contratos-store.test.ts"["src/lib/contratos-store.test.ts"]
   "file:src/lib/contratos-store.ts"["src/lib/contratos-store.ts"]
   "file:src/lib/dashboard-types.ts"["src/lib/dashboard-types.ts"]
   "file:src/lib/empresa-types.ts"["src/lib/empresa-types.ts"]
@@ -163,6 +164,7 @@
   "file:supabase/migrations/20261023040000_smtp_mailer_settings.sql"["supabase/migrations/20261023040000_smtp_mailer_settings.sql"]
   "file:supabase/migrations/20261023041851_admin_system_backup_restore.sql"["supabase/migrations/20261023041851_admin_system_backup_restore.sql"]
   "file:supabase/migrations/20261023043612_realtime_dashboard_notifications.sql"["supabase/migrations/20261023043612_realtime_dashboard_notifications.sql"]
+  "file:supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql"["supabase/migrations/20261023044321_restrict_vendor_contract_visibility.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
@@ -180,6 +182,7 @@
   "rpc:mark_signature_envelope_viewed"["mark_signature_envelope_viewed"]
   "rpc:apply_signature_to_envelope"["apply_signature_to_envelope"]
   "table:gm_contracts"["gm_contracts"]
+  "rpc:empresa_role"["empresa_role"]
   "table:agenda"["agenda"]
   "table:gm_financial_entries"["gm_financial_entries"]
   "table:vendedores"["vendedores"]
@@ -308,8 +311,11 @@
   "file:src/lib/assinatura-store.ts" -->|calls-rpc| "rpc:mark_signature_envelope_viewed"
   "file:src/lib/assinatura-store.ts" -->|calls-rpc| "rpc:apply_signature_to_envelope"
   "file:src/lib/contrato-template.ts" -->|imports| "file:src/lib/contratos-store.ts"
+  "file:src/lib/contratos-store.test.ts" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/lib/contratos-store.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/lib/contratos-store.ts" -->|reads-or-writes| "table:gm_contracts"
+  "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:is_platform_admin"
+  "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:empresa_role"
   "file:src/main.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/main.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/main.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
