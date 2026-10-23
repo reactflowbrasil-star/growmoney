@@ -23,14 +23,15 @@ export class VendorVisitRepository {
   }
 
   static async updateStatus(id: string, status: VendorVisitStatus) {
-    const { error } = await supabase.from('vendedor_visitas').update({ status }).eq('id', id);
+    const { error } = await supabase.from('vendedor_visitas').update({ status })
+      .eq('id', id).select('id').single();
     if (error) throw new Error(`Falha ao atualizar a visita: ${error.message}`);
   }
 
   static async updateLocation(id: string, latitude: number, longitude: number) {
     const { error } = await supabase.from('vendedor_visitas').update({
       latitude_atual: latitude, longitude_atual: longitude, localizacao_atualizada_em: new Date().toISOString(),
-    }).eq('id', id);
+    }).eq('id', id).select('id').single();
     if (error) throw new Error(`Falha ao enviar a localização: ${error.message}`);
   }
 
