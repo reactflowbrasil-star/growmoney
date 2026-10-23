@@ -14,6 +14,7 @@ import {
   FolderOpen,
   Wallet,
   ArrowLeft,
+  CircleUserRound,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -39,6 +40,7 @@ export function AdminLayout() {
   const { session, logout } = useAdminAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const handleLogout = () => {
     setMenuOpen(false);
@@ -46,6 +48,11 @@ export function AdminLayout() {
   };
 
   const closeMenu = () => setMenuOpen(false);
+
+  const handleAdminLogout = () => {
+    setProfileOpen(false);
+    handleLogout();
+  };
 
   const sidebar = (
     <>
@@ -147,6 +154,51 @@ export function AdminLayout() {
               <ArrowLeft aria-hidden="true" className="h-5 w-5" />
               <span className="hidden text-xs font-semibold sm:inline">Voltar ao sistema</span>
             </Link>
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="Perfil do administrador"
+                aria-haspopup="menu"
+                aria-expanded={profileOpen}
+                aria-controls="admin-profile-menu"
+                title="Perfil do administrador"
+                onClick={() => setProfileOpen((open) => !open)}
+                className="min-h-11 min-w-11 flex items-center justify-center rounded-full text-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              >
+                <CircleUserRound aria-hidden="true" className="h-6 w-6" />
+              </button>
+              {profileOpen && (
+                <div
+                  id="admin-profile-menu"
+                  role="menu"
+                  aria-label="Opções do perfil do administrador"
+                  className="absolute right-0 z-50 mt-2 w-64 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-border-color bg-bg-primary py-2 shadow-xl"
+                >
+                  <div className="border-b border-border-color px-4 py-2">
+                    <p className="truncate text-sm font-semibold text-text-primary">
+                      {session?.username || 'Administrador'}
+                    </p>
+                    <p className="truncate text-xs text-text-secondary">{session?.email}</p>
+                  </div>
+                  <Link
+                    to="/admin/seguranca"
+                    role="menuitem"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex min-h-11 items-center gap-2 px-4 py-2.5 text-sm text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
+                  >
+                    <Shield aria-hidden="true" className="h-4 w-4" /> Segurança da conta
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleAdminLogout}
+                    className="flex min-h-11 w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-erro hover:bg-erro/10"
+                  >
+                    <LogOut aria-hidden="true" className="h-4 w-4" /> Sair
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -166,4 +218,5 @@ export function AdminLayout() {
     </div>
   );
 }
+
 
