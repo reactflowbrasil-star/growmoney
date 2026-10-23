@@ -276,9 +276,9 @@ export default function AdminRecursos({ resource }: { resource: keyof typeof def
                 value: displayValue(row[key]),
               })),
               actions: <>
-                <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} aria-label="Visualizar registro" onClick={() => setViewing(row)}>Visualizar</Button>
+                {(resource !== 'empresas' || isAdmin) && <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} aria-label={resource === 'empresas' ? 'Visualizar cadastro da empresa' : 'Visualizar registro'} onClick={() => setViewing(row)}>{resource === 'empresas' ? 'Visualizar cadastro' : 'Visualizar'}</Button>}
                 <Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} aria-label={showHidden ? 'Reexibir registro' : 'Ocultar registro'} onClick={() => toggleHidden(row.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>
-                {isAdmin && !definition.readOnly && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label="Editar registro" onClick={() => openEdit(row)}>Editar</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label="Excluir registro" onClick={() => void remove(row)}>Excluir</Button></>}
+                {isAdmin && !definition.readOnly && <><Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} aria-label={resource === 'empresas' ? 'Editar cadastro da empresa' : 'Editar registro'} onClick={() => openEdit(row)}>{resource === 'empresas' ? 'Editar cadastro' : 'Editar'}</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} aria-label="Excluir registro" onClick={() => void remove(row)}>Excluir</Button></>}
               </>,
             }))} />
           </>
