@@ -14,7 +14,7 @@ export function FloatingThemeSwitcher() {
 
   return (
     <div
-      className="fixed right-0 top-1/2 z-[45] flex h-14 w-12 -translate-y-1/2 items-center justify-end"
+      className="fixed right-3 top-1/2 z-[45] flex h-14 w-12 -translate-y-1/2 items-center justify-end"
       role="group"
       aria-label="Seletor de tema"
     >
@@ -54,7 +54,7 @@ export function FloatingThemeSwitcher() {
         aria-expanded={expanded}
         aria-controls="floating-theme-options"
         onClick={() => setExpanded((value) => !value)}
-        className={`relative z-10 flex h-14 w-12 shrink-0 items-center justify-center rounded-l-2xl border border-border-color bg-bg-primary/95 text-text-primary shadow-xl backdrop-blur-md transition-[transform,color,background-color] duration-300 ease-out hover:bg-bg-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset motion-reduce:transition-none ${expanded ? 'translate-x-0' : 'translate-x-1/2'}`}
+        className={`relative z-10 flex h-14 w-12 shrink-0 items-center justify-center rounded-l-2xl border border-border-color bg-bg-primary/95 text-text-primary shadow-xl backdrop-blur-md transition-[transform,color,background-color] duration-300 ease-out hover:bg-bg-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset motion-reduce:transition-none ${expanded ? 'translate-x-0' : 'theme-switcher-pulse translate-x-1/4'}`}
       >
         {theme === 'light' ? <Sun aria-hidden="true" className="size-5" /> : <Moon aria-hidden="true" className="size-5" />}
       </button>
