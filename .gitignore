@@ -24,3 +24,5 @@ yarn-error.log*
 # Supabase
 .supabase/
 supabase/.temp/
+public/api/smtp-config.php
+
