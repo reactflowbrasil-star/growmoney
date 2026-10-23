@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +25,7 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
   const widths = {
     sm: 'max-w-md',
@@ -33,7 +34,7 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
     xl: 'max-w-4xl',
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-0 sm:p-4">
       <button
         type="button"
@@ -71,7 +72,8 @@ export function Modal({ open, onClose, title, children, size = 'md', footer }: M
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
