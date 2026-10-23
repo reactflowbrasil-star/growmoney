@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getRecentDashboardActivity, type DashboardActivity } from '@/services/dashboard-activity-service';
 import { getDashboardOverview, type DashboardOverview } from '@/services/dashboard-overview-service';
 import { formatBRL } from '@/lib/export';
+import { DashboardShortcuts } from '@/components/dashboard/DashboardShortcuts';
 
 const entityLabels: Record<string, string> = {
   clients: 'cliente', client_historico: 'histórico de cliente', contratos: 'contrato', gm_contracts: 'contrato', contrato_historico: 'histórico de contrato',
@@ -19,7 +20,7 @@ const formatExactTime = (value: string) => new Intl.DateTimeFormat('pt-BR', { da
 const currencyTooltip = (value: number) => formatBRL(Number(value));
 
 export default function Dashboard() {
-  const { empresaAtiva } = useAuth();
+  const { user, empresaAtiva } = useAuth();
   const [activity, setActivity] = useState<DashboardActivity[]>([]);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,6 +59,8 @@ export default function Dashboard() {
 
       {error && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{error}</p>}
       {!empresaAtiva && <p className="rounded-lg border border-border-color bg-bg-secondary p-3 text-sm text-text-secondary">Selecione ou cadastre uma empresa para visualizar indicadores detalhados.</p>}
+
+      {user?.id && <DashboardShortcuts userId={user.id} />}
 
       <section aria-label="Indicadores principais" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {metrics.map((metric) => (
@@ -115,3 +118,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

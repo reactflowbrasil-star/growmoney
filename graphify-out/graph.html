@@ -1,4 +1,7 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>232 nós · 510 relações</p><pre class="mermaid">flowchart LR
+Warning: truncated output (original token count: 16416)
+Total output lines: 752
+
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>235 nós · 516 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -24,6 +27,7 @@
   "file:src/components/dashboard/ChartContainer.tsx"["src/components/dashboard/ChartContainer.tsx"]
   "file:src/components/dashboard/ContratosStatusChart.tsx"["src/components/dashboard/ContratosStatusChart.tsx"]
   "file:src/components/dashboard/DashboardFilters.tsx"["src/components/dashboard/DashboardFilters.tsx"]
+  "file:src/components/dashboard/DashboardShortcuts.tsx"["src/components/dashboard/DashboardShortcuts.tsx"]
   "file:src/components/dashboard/KPICard.tsx"["src/components/dashboard/KPICard.tsx"]
   "file:src/components/dashboard/RecebimentosChart.tsx"["src/components/dashboard/RecebimentosChart.tsx"]
   "file:src/components/dashboard/VendedoresChart.tsx"["src/components/dashboard/VendedoresChart.tsx"]
@@ -70,6 +74,8 @@
   "file:src/lib/contrato-types.ts"["src/lib/contrato-types.ts"]
   "file:src/lib/contratos-store.test.ts"["src/lib/contratos-store.test.ts"]
   "file:src/lib/contratos-store.ts"["src/lib/contratos-store.ts"]
+  "file:src/lib/dashboard-shortcuts.test.ts"["src/lib/dashboard-shortcuts.test.ts"]
+  "file:src/lib/dashboard-shortcuts.ts"["src/lib/dashboard-shortcuts.ts"]
   "file:src/lib/dashboard-types.ts"["src/lib/dashboard-types.ts"]
   "file:src/lib/empresa-types.ts"["src/lib/empresa-types.ts"]
   "file:src/lib/export.ts"["src/lib/export.ts"]
@@ -257,6 +263,9 @@
   "file:src/components/dashboard/DashboardFilters.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/dashboard/DashboardFilters.tsx" -->|imports| "file:src/components/ui/Button.tsx"
   "file:src/components/dashboard/DashboardFilters.tsx" -->|imports| "file:src/components/ui/Input.tsx"
+  "file:src/components/dashboard/DashboardShortcuts.tsx" -->|imports| "file:src/config/nav.ts"
+  "file:src/components/dashboard/DashboardShortcuts.tsx" -->|imports| "file:src/lib/dashboard-shortcuts.ts"
+  "file:src/components/dashboard/DashboardShortcuts.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/components/dashboard/KPICard.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/dashboard/RecebimentosChart.tsx" -->|imports| "file:src/components/dashboard/ChartContainer.tsx"
   "file:src/components/dashboard/VendedoresChart.tsx" -->|imports| "file:src/components/dashboard/ChartContainer.tsx"
@@ -341,6 +350,8 @@
   "file:src/lib/contratos-store.ts" -->|reads-or-writes| "table:gm_contracts"
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/lib/contratos-store.ts" -->|calls-rpc| "rpc:empresa_role"
+  "file:src/lib/dashboard-shortcuts.test.ts" -->|imports| "file:src/lib/dashboard-shortcuts.ts"
+  "file:src/lib/dashboard-shortcuts.ts" -->|imports| "file:src/config/nav.ts"
   "file:src/lib/vendedor-validation.test.ts" -->|imports| "file:src/lib/vendedor-validation.ts"
   "file:src/lib/vendor-visit-types.test.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/lib/vendor-visit-types.ts" -->|imports| "file:src/lib/client-types.ts"
@@ -357,77 +368,7 @@
   "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Visitas.tsx"
   "file:src/main.tsx" -->|imports| "file:src/components/layout/GlobalFooter.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/public/LandingPage.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/auth/Login.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/auth/Cadastro.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/auth/AuthCallback.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/auth/RecuperacaoSenha.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/auth/TermosUso.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/auth/Privacidade.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Dashboard.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/DashboardExecutivo.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Clientes.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Contratos.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/ContratoNovo.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Servicos.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Vendedores.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Agenda.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Financeiro.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Relatorios.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Auditoria.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Configuracoes.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Perfil.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Empresas.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Assinaturas.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/AssinaturaDetalhe.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/public/AssinarDocumento.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminLogin.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminDashboard.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminEmpresas.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminUsuarios.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminArquivos.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminSistema.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminAuditoria.tsx"
-  "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminSeguranca.tsx"
-  "file:src/main.tsx" -->|route:/| "file:src/pages/public/LandingPage.tsx"
-  "file:src/main.tsx" -->|route:/auth| "file:src/pages/auth/Login.tsx"
-  "file:src/main.tsx" -->|route:/login| "file:src/pages/auth/Login.tsx"
-  "file:src/main.tsx" -->|route:/cadastro| "file:src/pages/auth/Cadastro.tsx"
-  "file:src/main.tsx" -->|route:/auth/callback| "file:src/pages/auth/AuthCallback.tsx"
-  "file:src/main.tsx" -->|route:/recuperar-senha| "file:src/pages/auth/RecuperacaoSenha.tsx"
-  "file:src/main.tsx" -->|route:/termos| "file:src/pages/auth/TermosUso.tsx"
-  "file:src/main.tsx" -->|route:/privacidade| "file:src/pages/auth/Privacidade.tsx"
-  "file:src/main.tsx" -->|route:/assinar/:token| "file:src/pages/public/AssinarDocumento.tsx"
-  "file:src/main.tsx" -->|route:/admin/login| "file:src/pages/admin/AdminLogin.tsx"
-  "file:src/main.tsx" -->|route:/admin| "file:src/components/admin/AdminLayout.tsx"
-  "file:src/main.tsx" -->|route:empresas| "file:src/pages/admin/AdminEmpresas.tsx"
-  "file:src/main.tsx" -->|route:usuarios| "file:src/pages/admin/AdminUsuarios.tsx"
-  "file:src/main.tsx" -->|route:clientes| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:contratos| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:assinaturas| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:arquivos| "file:src/pages/admin/AdminArquivos.tsx"
-  "file:src/main.tsx" -->|route:financeiro| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:sistema| "file:src/pages/admin/AdminSistema.tsx"
-  "file:src/main.tsx" -->|route:auditoria| "file:src/pages/admin/AdminAuditoria.tsx"
-  "file:src/main.tsx" -->|route:seguranca| "file:src/pages/admin/AdminSeguranca.tsx"
-  "file:src/main.tsx" -->|route:/vendedor| "file:src/pages/dashboard/VendedorWorkspace.tsx"
-  "file:src/main.tsx" -->|route:/dashboard| "file:src/pages/dashboard/Dashboard.tsx"
-  "file:src/main.tsx" -->|route:/dashboard/executivo| "file:src/pages/dashboard/DashboardExecutivo.tsx"
-  "file:src/main.tsx" -->|route:/clientes| "file:src/pages/dashboard/Clientes.tsx"
-  "file:src/main.tsx" -->|route:/clients| "file:src/pages/dashboard/Clientes.tsx"
-  "file:src/main.tsx" -->|route:/contratos| "file:src/pages/dashboard/Contratos.tsx"
-  "file:src/main.tsx" -->|route:/contratos/novo| "file:src/pages/dashboard/ContratoNovo.tsx"
-  "file:src/main.tsx" -->|route:/assinaturas| "file:src/pages/dashboard/Assinaturas.tsx"
-  "file:src/main.tsx" -->|route:/assinaturas/:id| "file:src/pages/dashboard/AssinaturaDetalhe.tsx"
-  "file:src/main.tsx" -->|route:/servicos| "file:src/pages/dashboard/Servicos.tsx"
-  "file:src/main.tsx" -->|route:/vendedores| "file:src/pages/dashboard/Vendedores.tsx"
-  "file:src/main.tsx" -->|route:/agenda| "file:src/pages/dashboard/Agenda.tsx"
-  "file:src/main.tsx" -->|route:/visitas| "file:src/pages/dashboard/Visitas.tsx"
-  "file:src/main.tsx" -->|route:/financeiro| "file:src/pages/dashboard/Financeiro.tsx"
-  "file:src/main.tsx" -->|route:/relatorios| "file:src/pages/dashboard/Relatorios.tsx"
-  "file:src/main.tsx" -->|route:/auditoria| "file:src/pages/dashboard/Auditoria.tsx"
-  "file:src/main.tsx" -->|route:/configuracoes| "file:src/pages/dashboard/Configuracoes.tsx"
-  "file:src/main.tsx" -->|route:/perfil| "file:src/pages/dashboard/Perfil.tsx"
+  "file:src/main.tsx" …1416 tokens truncated…-->|route:/perfil| "file:src/pages/dashboard/Perfil.tsx"
   "file:src/main.tsx" -->|route:/empresas| "file:src/pages/dashboard/Empresas.tsx"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/services/admin-file-service.ts"
@@ -532,6 +473,7 @@
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-overview-service.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/export.ts"
+  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/dashboard/DashboardShortcuts.tsx"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Empresas.tsx" -->|imports| "file:src/components/ui/index.ts"
