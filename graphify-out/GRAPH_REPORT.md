@@ -1,13 +1,13 @@
 # GrowMoney — grafo do projeto
 
-> Gerado por `npm run graphify` em 2026-10-23T07:00:03.033Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
+> Gerado por `npm run graphify` em 2026-10-23T08:43:42.167Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
 
 ## Escopo
 
-- 188 arquivos de código, schema, documentação e configuração.
+- 187 arquivos de código, schema, documentação e configuração.
 - 32 tabelas identificadas.
 - 10 RPCs identificadas.
-- 518 relações explícitas.
+- 516 relações explícitas.
 - Saída detalhada: `graph.json`; visualização: `graph.html`.
 
 ## Direção arquitetural
@@ -16,7 +16,7 @@
 
 ## Arquivos mais conectados
 
-- `src/main.tsx` — 86 relações de saída
+- `src/main.tsx` — 85 relações de saída
 - `supabase/migrations/20261021000000_init_schema.sql` — 19 relações de saída
 - `src/pages/dashboard/Vendedores.tsx` — 10 relações de saída
 - `supabase/functions/smtp-mailer/index.ts` — 10 relações de saída
@@ -40,3 +40,4 @@
 7. O grafo pode ficar desatualizado ou conter relações incompletas; regenere antes de tomar decisões de alto impacto.
 
 > O mapa e as verificações reduzem risco, mas nenhuma instrução consegue garantir matematicamente que toda IA ou alteração futura nunca causará dano.
+
