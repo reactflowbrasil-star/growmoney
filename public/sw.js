@@ -1,4 +1,6 @@
-const CACHE = 'grow-v4';
+// Bump this value whenever the app shell changes so installed PWAs discard
+// stale cached assets and load the current branding and interface.
+const CACHE = 'grow-v5';
 const APP_BASE = new URL(self.registration.scope).pathname;
 const shell = [APP_BASE, `${APP_BASE}index.html`, `${APP_BASE}manifest.webmanifest`, `${APP_BASE}assets/pwa-icon.svg`];
 
