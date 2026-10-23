@@ -7,7 +7,7 @@ import { AdminSystemBackupService, type ImportPreview } from '@/services/admin-s
 import { AdminSmtpService, type SmtpSettings } from '@/services/admin-smtp-service';
 
 type SmtpForm = Omit<SmtpSettings, 'passwordConfigured'> & { password: string };
-const emptySmtp: SmtpForm = { host: '', port: 465, secure: true, username: '', password: '', fromEmail: '', fromName: 'GrowMoney', enabled: false };
+const emptySmtp: SmtpForm = { host: '', port: 587, secure: false, username: '', password: '', fromEmail: '', fromName: 'GrowMoney', enabled: false };
 
 export default function AdminSistema() {
   const envOk = Boolean(import.meta.env.VITE_SUPABASE_URL);
@@ -32,7 +32,7 @@ export default function AdminSistema() {
     try {
       const settings = await AdminSmtpService.getSettings();
       if (settings) {
-        setSmtp({ host: settings.host, port: settings.port, secure: settings.secure, username: settings.username, password: '', fromEmail: settings.fromEmail, fromName: settings.fromName, enabled: settings.enabled });
+        setSmtp({ host: settings.host, port: 587, secure: false, username: settings.username, password: '', fromEmail: settings.fromEmail, fromName: settings.fromName, enabled: settings.enabled });
         setPasswordConfigured(settings.passwordConfigured);
         setSmtpCanValidate(settings.passwordConfigured);
       } else {
@@ -173,12 +173,12 @@ export default function AdminSistema() {
         {smtpLoading ? <p className="py-5 text-center text-sm text-text-secondary">Carregando configuração segura…</p> : <>
           <form onSubmit={saveSmtp} className="grid gap-4 sm:grid-cols-2">
             <Input label="Servidor SMTP" placeholder="smtp.exemplo.com" autoComplete="off" required value={smtp.host} onChange={(event) => updateSmtp('host', event.target.value)} />
-            <Input label="Porta" type="number" min={1} max={65535} required hint="Na hospedagem Supabase, use 465 com TLS direto. As portas 25 e 587 são bloqueadas para conexões de saída das Edge Functions." value={smtp.port} onChange={(event) => updateSmtp('port', Number(event.target.value))} />
+            <Input label="Porta" type="number" min={1} max={65535} required hint="A hospedagem envia por SMTP autenticado com STARTTLS na porta 587." value={smtp.port} onChange={(event) => updateSmtp('port', Number(event.target.value))} />
             <Input label="Usuário SMTP" autoComplete="username" required value={smtp.username} onChange={(event) => updateSmtp('username', event.target.value)} />
             <Input label={passwordConfigured ? 'Nova senha SMTP (opcional)' : 'Senha SMTP'} type="password" autoComplete="new-password" required={!passwordConfigured} hint={passwordConfigured ? 'Deixe em branco para manter a senha armazenada.' : 'A senha será transmitida somente ao serviço seguro.'} value={smtp.password} onChange={(event) => updateSmtp('password', event.target.value)} />
             <Input label="E-mail remetente" type="email" required value={smtp.fromEmail} onChange={(event) => updateSmtp('fromEmail', event.target.value)} />
             <Input label="Nome remetente" required value={smtp.fromName} onChange={(event) => updateSmtp('fromName', event.target.value)} />
-            <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={smtp.secure} onChange={(event) => updateSmtp('secure', event.target.checked)} className="h-4 w-4 accent-brand" /><span><span className="block font-medium">TLS direto (SSL)</span><span className="text-xs text-text-secondary">Ative para servidores que usam TLS desde a conexão inicial, normalmente porta 465.</span></span></label>
+            <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={smtp.secure} onChange={(event) => updateSmtp('secure', event.target.checked)} className="h-4 w-4 accent-brand" /><span><span className="block font-medium">TLS direto (SSL)</span><span className="text-xs text-text-secondary">Desativado para STARTTLS na porta 587. Ative apenas se o servidor exigir TLS desde a conexão inicial.</span></span></label>
             <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={smtp.enabled} onChange={(event) => updateSmtp('enabled', event.target.checked)} className="h-4 w-4 accent-brand" /><span><span className="block font-medium">SMTP ativo</span><span className="text-xs text-text-secondary">Desative para interromper novos envios do sistema.</span></span></label>
             <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
               <Button type="submit" loading={smtpSaving}>Salvar configuração</Button>
@@ -246,3 +246,4 @@ export default function AdminSistema() {
     </div>
   );
 }
+
