@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 export interface AdminAccordionItem {
@@ -10,13 +10,20 @@ export interface AdminAccordionItem {
 }
 
 export function AdminAccordionList({ items, emptyMessage = 'Nenhum item para exibir.' }: { items: AdminAccordionItem[]; emptyMessage?: string }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   if (!items.length) return <p className="p-4 text-center text-sm text-text-secondary">{emptyMessage}</p>;
 
   return (
     <div className="space-y-2 p-3" aria-label="Registros em lista expansível">
       {items.map((item) => (
-        <details key={item.id} className="admin-accordion-card group min-w-0 overflow-hidden rounded-xl border border-border-color bg-bg-primary transition-[border-color,box-shadow] duration-200">
-          <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
+        <details key={item.id} open={expandedId === item.id} onToggle={(event) => {
+          if (event.currentTarget.open) setExpandedId(item.id);
+          else if (expandedId === item.id) setExpandedId(null);
+        }} className="admin-accordion-card group min-w-0 overflow-hidden rounded-xl border border-border-color bg-bg-primary transition-[border-color,box-shadow] duration-200">
+          <summary onClick={(event) => {
+            event.preventDefault();
+            setExpandedId((current) => current === item.id ? null : item.id);
+          }} className="flex min-h-14 cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
             <span className="min-w-0 flex-1">
               <span className="block break-words text-sm font-semibold text-text-primary">{item.title}</span>
               {item.subtitle && <span className="mt-0.5 block break-all text-xs text-text-secondary">{item.subtitle}</span>}
@@ -39,4 +46,5 @@ export function AdminAccordionList({ items, emptyMessage = 'Nenhum item para exi
     </div>
   );
 }
+
 
