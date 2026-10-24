@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Plus, Check, RefreshCw } from 'lucide-react';
 import { Button, Input, Card, PageHeader, Modal } from '@/components/ui';
@@ -25,6 +25,7 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
   const navigate = useNavigate();
   const { user, empresas, empresaAtiva } = useAuth();
   const [step, setStep] = useState(1);
+  const stepTopRef = useRef<HTMLDivElement>(null);
   const [clientes, setClientes] = useState<ClienteLocal[]>([]);
   const [loadingClientes, setLoadingClientes] = useState(false);
   const servicos = useMemo(() => listServicosCatalogo(), []);
@@ -74,6 +75,10 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
   }, [empresaAtiva?.id, empresaAtiva?.role, empresas.length]);
 
   useEffect(() => { void carregarClientes(); }, [carregarClientes]);
+
+  useEffect(() => {
+    stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [step]);
 
   const cliente = clientes.find((c) => c.id === clientId);
 
@@ -263,7 +268,7 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
         }
       />
 
-      <div className="flex gap-2 mb-2">
+      <div ref={stepTopRef} className="scroll-mt-4 flex gap-2 mb-2">
         {STEPS.map((label, i) => {
           const n = i + 1;
           const active = step === n;
