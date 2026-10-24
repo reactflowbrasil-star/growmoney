@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-24T15:59:22.636Z",
+  "generated_at": "2026-10-24T16:03:17.182Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -998,6 +998,11 @@
       "id": "file:supabase/migrations/20261024152503_audit_all_company_actions.sql",
       "type": "migration",
       "label": "supabase/migrations/20261024152503_audit_all_company_actions.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261024160233_allow_pending_signature_contracts.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261024160233_allow_pending_signature_contracts.sql"
     },
     {
       "id": "file:tailwind.config.ts",
