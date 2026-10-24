@@ -91,7 +91,7 @@ export type ContratoLocal = {
   pagamento_observacao?: string;
   pagamento_status?: 'pendente' | 'pago';
   observacoes?: string;
-  status: 'rascunho' | 'enviado' | 'assinado' | 'cancelado';
+  status: 'rascunho' | 'pendente_assinatura' | 'enviado' | 'assinado' | 'cancelado';
   created_at: string;
 };
 

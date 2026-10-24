@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Plus, Check, RefreshCw } from 'lucide-react';
 import { Button, Input, Card, PageHeader, Modal } from '@/components/ui';
@@ -10,10 +10,13 @@ import {
   formatBRL,
   addMonths,
   type ClienteLocal,
+  type ContratoLocal,
   type ServicoCatalogo,
 } from '@/lib/contratos-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { loadClientesEmpresa, saveClienteEmpresa } from '@/services/contrato-wizard-data';
+import { createEnvelope, sendEnvelope } from '@/lib/assinatura-store';
+import { EMPRESA_CONTRATO, gerarContratoHtml } from '@/lib/contrato-template';
 
 const STEPS = ['Cliente', 'Serviços', 'Condições', 'Revisão'] as const;
 
@@ -25,7 +28,7 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
   const navigate = useNavigate();
   const { user, empresas, empresaAtiva } = useAuth();
   const [step, setStep] = useState(1);
-  const stepTopRef = useRef<HTMLDivElement>(null);
+  const [pendingSignature, setPendingSignature] = useState<{ envelopeId?: string; contract: ContratoLocal } | null>(null);
   const [clientes, setClientes] = useState<ClienteLocal[]>([]);
   const [loadingClientes, setLoadingClientes] = useState(false);
   const servicos = useMemo(() => listServicosCatalogo(), []);
@@ -77,7 +80,9 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
   useEffect(() => { void carregarClientes(); }, [carregarClientes]);
 
   useEffect(() => {
-    stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
   }, [step]);
 
   const cliente = clientes.find((c) => c.id === clientId);
@@ -170,6 +175,37 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
     }
   };
 
+  const criarEnvelopeContrato = async (contrato: ContratoLocal) => {
+    const contractHtml = gerarContratoHtml(contrato);
+    const contractText = contractHtml
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+      .replace(/<\/(?:p|div|h[1-6]|tr|li|article|section)>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&#39;/gi, "'")
+      .replace(/&quot;/gi, '"')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    return createEnvelope({
+      empresa_id: contrato.empresa_id || empresaAtiva?.id,
+      titulo: `Contrato CT-${String(contrato.numero).padStart(4, '0')} · ${contrato.cliente_nome}`,
+      descricao: 'Contrato comercial para assinatura do cliente e da empresa.',
+      documentoTexto: contractText,
+      createdBy: user?.email || user?.nome || 'sistema',
+      messageToSigners: 'Este contrato foi encaminhado para assinatura eletrônica das duas partes. Revise o documento completo antes de assinar.',
+      signers: [
+        { nome: contrato.cliente_nome, email: contrato.cliente_email || '', role: 'sign' },
+        { nome: EMPRESA_CONTRATO.razaoSocial, email: EMPRESA_CONTRATO.email, role: 'sign' },
+      ],
+    });
+  };
+
   const canNext = () => {
     if (step === 1) return !!clientId;
     if (step === 2) return selecionados.length > 0;
@@ -178,6 +214,16 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
 
   const salvar = async () => {
     setError('');
+    if (!cliente?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cliente.email.trim())) {
+      setError('Para enviar o contrato para assinatura, informe um e-mail válido para o cliente. Volte à etapa Cliente e atualize o cadastro.');
+      setStep(1);
+      return;
+    }
+    if (cliente.email.trim().toLowerCase() === EMPRESA_CONTRATO.email.toLowerCase()) {
+      setError('O e-mail do cliente deve ser diferente do e-mail do representante da empresa para que cada parte receba seu link pessoal.');
+      setStep(1);
+      return;
+    }
     if (!isValidCurrencyInput(valorNegociado)) {
       setError('Informe um valor negociado válido, usando no máximo duas casas decimais.');
       setStep(3);
@@ -215,6 +261,17 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
     }
     setSaving(true);
     try {
+      if (pendingSignature) {
+        const envelope = pendingSignature.envelopeId
+          ? null
+          : await criarEnvelopeContrato(pendingSignature.contract);
+        const envelopeId = pendingSignature.envelopeId || envelope?.id;
+        if (!envelopeId) throw new Error('Não foi possível preparar os links de assinatura. Tente novamente.');
+        if (envelope) setPendingSignature({ ...pendingSignature, envelopeId });
+        await sendEnvelope(envelopeId, user?.email || 'sistema');
+        navigate(vendedorMode ? '/vendedor?contrato=criado' : `/contratos?criado=${pendingSignature.contract.id}&assinatura=enviada`);
+        return;
+      }
       const contrato = await saveContrato({
         empresa_id: empresaAtiva?.id,
         client_id: clientId,
@@ -246,11 +303,15 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
         pagamento_observacao: obsPagamento || undefined,
         pagamento_status: 'pendente',
         observacoes: obsInternas || undefined,
-        status: 'rascunho',
+        status: 'pendente_assinatura',
       });
-      navigate(vendedorMode ? '/vendedor?contrato=criado' : `/contratos?criado=${contrato.id}`);
+      setPendingSignature({ contract: contrato });
+      const envelope = await criarEnvelopeContrato(contrato);
+      setPendingSignature({ contract: contrato, envelopeId: envelope.id });
+      await sendEnvelope(envelope.id, user?.email || 'sistema');
+      navigate(vendedorMode ? '/vendedor?contrato=criado' : `/contratos?criado=${contrato.id}&assinatura=enviada`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Não foi possível criar o contrato.');
+      setError(e instanceof Error ? `${e.message} Se o contrato já foi salvo, tente concluir novamente para retomar o envio sem duplicá-lo.` : 'Não foi possível criar e enviar o contrato para assinatura.');
     } finally {
       setSaving(false);
     }
@@ -268,7 +329,7 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
         }
       />
 
-      <div ref={stepTopRef} className="scroll-mt-4 flex gap-2 mb-2">
+      <div className="scroll-mt-4 flex gap-2 mb-2">
         {STEPS.map((label, i) => {
           const n = i + 1;
           const active = step === n;
@@ -599,6 +660,9 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
       {step === 4 && (
         <Card className="space-y-5 p-6">
           <h3 className="text-sm font-semibold">Revisar contrato</h3>
+          <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm text-text-primary">
+            Ao concluir, o sistema enviará automaticamente o contrato completo para assinatura eletrônica ao cliente ({cliente?.email || 'e-mail pendente'}) e à empresa ({EMPRESA_CONTRATO.email}). A conclusão do cadastro depende da confirmação de envio dos dois convites.
+          </div>
 
           <div className="rounded-xl border border-border-color p-4 space-y-3 text-sm">
             <div>
@@ -679,7 +743,7 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
               Voltar
             </Button>
             <Button loading={saving} disabled={saving} onClick={salvar}>
-              {saving ? 'Salvando...' : 'Salvar contrato'}
+              {saving ? (pendingSignature ? 'Reenviando convite pendente...' : 'Salvando e enviando para assinatura...') : 'Concluir e enviar para assinatura'}
             </Button>
           </div>
         </Card>

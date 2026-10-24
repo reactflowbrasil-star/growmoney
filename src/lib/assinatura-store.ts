@@ -69,6 +69,7 @@ export async function listEnvelopes(): Promise<Envelope[]> {
     const { error: importError } = await supabase.from('signature_envelopes').upsert(
       local.map((envelope) => ({
         id: envelope.id,
+        empresa_id: envelope.empresa_id || localStorage.getItem('empresaAtiva'),
         owner_id: user.id,
         payload: envelope,
         updated_at: envelope.updatedAt,
@@ -108,6 +109,7 @@ export async function saveEnvelope(envelope: Envelope): Promise<Envelope> {
   if (!user) throw new Error('Entre na sua conta para salvar o envelope.');
   const { error } = await supabase.from('signature_envelopes').upsert({
     id: envelope.id,
+    empresa_id: envelope.empresa_id || localStorage.getItem('empresaAtiva'),
     owner_id: user.id,
     payload: envelope,
     updated_at: envelope.updatedAt,
@@ -120,6 +122,7 @@ export async function createEnvelope(input: {
   titulo: string;
   descricao?: string;
   documentoTexto: string;
+  empresa_id?: string;
   createdBy: string;
   messageToSigners?: string;
   arquivoNome?: string;
@@ -145,6 +148,7 @@ export async function createEnvelope(input: {
   const now = new Date().toISOString();
   const envelope: Envelope = {
     id: uid(),
+    empresa_id: input.empresa_id || localStorage.getItem('empresaAtiva') || undefined,
     titulo: input.titulo,
     descricao: input.descricao || '',
     documentoTexto: input.documentoTexto,

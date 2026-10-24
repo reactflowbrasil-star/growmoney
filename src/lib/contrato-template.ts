@@ -1,7 +1,7 @@
 import { formatBRL, getContratoResumoFinanceiro, type ContratoLocal } from '@/lib/contratos-store';
 import { gerarCronogramaParcelas, mesesDaPeriodicidade } from '@/lib/contrato-calculo';
 
-const EMPRESA = {
+export const EMPRESA_CONTRATO = {
   razaoSocial: 'GROWMONEY DIGITAL LTDA',
   nomeFantasia: 'GROWMONEY DIGITAL',
   cnpj: '10.949.897/0001-58',
@@ -72,11 +72,11 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
 
   return `
   <article class="contract-document">
-    <header class="contract-brand"><img src="${logoUrl}" alt="${esc(EMPRESA.nomeFantasia)}" /><span>Contrato de serviço publicitário</span></header>
+    <header class="contract-brand"><img src="${logoUrl}" alt="${esc(EMPRESA_CONTRATO.nomeFantasia)}" /><span>Contrato de serviço publicitário</span></header>
     <h1>Contrato de serviço publicitário</h1>
     <p class="contract-number">Contrato #${String(contrato.numero || 0).padStart(4, '0')}</p>
     <h2>I – CONTRATADO</h2>
-    <p><strong>${esc(EMPRESA.razaoSocial)}</strong>, nome fantasia ${esc(EMPRESA.nomeFantasia)}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${esc(EMPRESA.cnpj)}, natureza jurídica ${esc(EMPRESA.naturezaJuridica)}, com sede em ${esc(EMPRESA.logradouro)}, nº ${esc(EMPRESA.numero)}, ${esc(EMPRESA.complemento)}, CEP ${esc(EMPRESA.cep)}, bairro ${esc(EMPRESA.bairro)}, ${esc(EMPRESA.municipio)} – ${esc(EMPRESA.uf)}, e-mail ${esc(EMPRESA.email)}, telefone ${esc(EMPRESA.telefone)}, doravante citada como CONTRATADA.</p>
+    <p><strong>${esc(EMPRESA_CONTRATO.razaoSocial)}</strong>, nome fantasia ${esc(EMPRESA_CONTRATO.nomeFantasia)}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº ${esc(EMPRESA_CONTRATO.cnpj)}, natureza jurídica ${esc(EMPRESA_CONTRATO.naturezaJuridica)}, com sede em ${esc(EMPRESA_CONTRATO.logradouro)}, nº ${esc(EMPRESA_CONTRATO.numero)}, ${esc(EMPRESA_CONTRATO.complemento)}, CEP ${esc(EMPRESA_CONTRATO.cep)}, bairro ${esc(EMPRESA_CONTRATO.bairro)}, ${esc(EMPRESA_CONTRATO.municipio)} – ${esc(EMPRESA_CONTRATO.uf)}, e-mail ${esc(EMPRESA_CONTRATO.email)}, telefone ${esc(EMPRESA_CONTRATO.telefone)}, doravante citada como CONTRATADA.</p>
     <h2>II – CONTRATANTE</h2>
     <table><tbody>
       <tr><th>Nome fantasia / Razão social</th><td>${esc(contrato.cliente_nome)}</td><th>CNPJ/CPF</th><td>${esc(contrato.cliente_documento)}</td></tr>
@@ -101,7 +101,7 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p><b>1.2.1</b> Os serviços descritos no item anterior, que são serviços de “meio”, têm como finalidade aprimorar as informações e a imagem da contratante junto ao Google, com vistas a melhorar sua visibilidade perante os usuários dos serviços oferecidos pelo Google.</p>
     <p><b>1.2.2</b> A contratante deverá apresentar para a contratada seu endereço completo, seus meios de contato, seus ramos de atuação profissional e/ou comercial e todas as informações que sejam possíveis de serem inseridas junto ao Google.</p>
     <p><b>1.2.3</b> Em razão do serviço prestado pela contratada, todas as pessoas que, dentro de um raio de 15 (quinze) quilômetros do estabelecimento comercial da contratante, realizarem pesquisas junto ao Google utilizando as palavras chaves de busca/engajamento indicadas encontrarão os dados e as informações da contratante.</p>
-    <p><b>1.3</b> A título de cortesia, a contratada dará suporte profissional de atualização para a contratante durante o período de 12 (doze) meses, a contar da assinatura e do efetivo pagamento deste contrato. Para acionar o suporte, a contratante deverá entrar em contato através do telefone/WhatsApp ${esc(EMPRESA.telefone)} e/ou do e-mail ${esc(EMPRESA.email)}.</p>
+    <p><b>1.3</b> A título de cortesia, a contratada dará suporte profissional de atualização para a contratante durante o período de 12 (doze) meses, a contar da assinatura e do efetivo pagamento deste contrato. Para acionar o suporte, a contratante deverá entrar em contato através do telefone/WhatsApp ${esc(EMPRESA_CONTRATO.telefone)} e/ou do e-mail ${esc(EMPRESA_CONTRATO.email)}.</p>
     <p><b>1.4</b> Fica certo e acordado entre as partes, ainda, que a contratada poderá, a seu exclusivo critério, contratar terceiros para a prestação dos serviços contratados, sendo que neste ato a contratante concede poderes à contratada para que esta conclua, por sua conta e ordem, todos os contratos necessários para a execução do objeto do presente instrumento.</p>
     <h2>CLÁUSULA SEGUNDA – DAS OBRIGAÇÕES DAS PARTES</h2>
     <p><b>2.1</b> As partes obrigam-se, na execução do presente contrato, a:</p>
@@ -141,9 +141,9 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p><b>7.1</b> As obrigações e/ou direitos decorrentes deste contrato não poderão ser cedidos ou transferidos por qualquer das partes, nem dados como garantia de obrigações sem a prévia e expressa anuência, por escrito, da outra parte.</p>
     <p><b>7.2</b> Fica expressamente estipulado que não se estabelece por força do presente contrato qualquer espécie de vínculo empregatício, associação e/ou parceria entre as partes.</p>
     <p><b>7.3</b> O presente contrato é celebrado em caráter irrevogável e irretratável, obrigando as partes, seus herdeiros e sucessores a qualquer título.</p>
-    <p><b>7.4</b> Fica desde já eleito o foro da comarca de ${esc(EMPRESA.municipio)} - ${esc(EMPRESA.uf)} para dirimir quaisquer litígios, contendas e/ou discussões oriundas deste contrato, com renúncia expressa a qualquer outro foro, por mais privilegiado que seja.</p>
+    <p><b>7.4</b> Fica desde já eleito o foro da comarca de ${esc(EMPRESA_CONTRATO.municipio)} - ${esc(EMPRESA_CONTRATO.uf)} para dirimir quaisquer litígios, contendas e/ou discussões oriundas deste contrato, com renúncia expressa a qualquer outro foro, por mais privilegiado que seja.</p>
     <p>E por estarem justas e contratadas, assine digitalmente o presente contrato.</p>
-    <p><strong>Contratada: ${esc(EMPRESA.razaoSocial)} — ${esc(EMPRESA.cnpj)}</strong></p>
+    <p><strong>Contratada: ${esc(EMPRESA_CONTRATO.razaoSocial)} — ${esc(EMPRESA_CONTRATO.cnpj)}</strong></p>
     <h2>RESUMO DA CONTRATAÇÃO</h2>
     <table><tbody>
       <tr><th>Prazo</th><td>${prazo} meses</td></tr>
@@ -160,10 +160,10 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p>O valor total do contrato é o valor da prestação de serviços durante todo o período de ${prazo} meses.</p>
     <p>O investimento em mídia das plataformas Google Ads e Meta Ads não está incluído nos valores acima e é pago separadamente pela CONTRATANTE.</p>
     <h2>LOCAL E MODALIDADE DA CONTRATAÇÃO</h2>
-    <p>A CONTRATANTE declara que a negociação, apresentação dos serviços, condições comerciais, valores, prazo contratual e demais condições deste instrumento foram apresentados e formalizados presencialmente no estabelecimento comercial da CONTRATADA, situado em ${esc(EMPRESA.logradouro)}, nº ${esc(EMPRESA.numero)}, ${esc(EMPRESA.complemento)}, ${esc(EMPRESA.municipio)} - ${esc(EMPRESA.uf)}, tendo a CONTRATANTE tido oportunidade de conhecer previamente o conteúdo deste contrato, esclarecer eventuais dúvidas e manifestar livremente sua concordância com a contratação.</p>
+    <p>A CONTRATANTE declara que a negociação, apresentação dos serviços, condições comerciais, valores, prazo contratual e demais condições deste instrumento foram apresentados e formalizados presencialmente no estabelecimento comercial da CONTRATADA, situado em ${esc(EMPRESA_CONTRATO.logradouro)}, nº ${esc(EMPRESA_CONTRATO.numero)}, ${esc(EMPRESA_CONTRATO.complemento)}, ${esc(EMPRESA_CONTRATO.municipio)} - ${esc(EMPRESA_CONTRATO.uf)}, tendo a CONTRATANTE tido oportunidade de conhecer previamente o conteúdo deste contrato, esclarecer eventuais dúvidas e manifestar livremente sua concordância com a contratação.</p>
     <div class="signatures">
       <div class="signature-party"><div class="signature-line"></div><strong>ASSINATURA DO CLIENTE</strong><span>${esc(contrato.cliente_nome)}</span><span>CPF/CNPJ: ${esc(contrato.cliente_documento)}</span><small>Assinatura manual ou eletrônica</small></div>
-      <div class="signature-party"><div class="signature-line"></div><strong>ASSINATURA DA EMPRESA</strong><span>${esc(EMPRESA.razaoSocial)}</span><span>CNPJ ${esc(EMPRESA.cnpj)}</span><small>Representante da CONTRATADA</small></div>
+      <div class="signature-party"><div class="signature-line"></div><strong>ASSINATURA DA EMPRESA</strong><span>${esc(EMPRESA_CONTRATO.razaoSocial)}</span><span>CNPJ ${esc(EMPRESA_CONTRATO.cnpj)}</span><small>Representante da CONTRATADA</small></div>
     </div>
   </article>
   <style>

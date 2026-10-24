@@ -12,6 +12,9 @@ export const EMAIL_TEMPLATE_KEYS = [
 
 export type EmailTemplateKey = typeof EMAIL_TEMPLATE_KEYS[number];
 
+export const EMAIL_BRAND_LOGO_ASSET = 'assets/agencia-africa-email.png';
+export const EMAIL_BRAND_LOGO_WIDTH = 260;
+
 export const EMAIL_TEMPLATE_INFO: Record<EmailTemplateKey, { name: string; description: string; variables: string[] }> = {
   vendor_activation: {
     name: 'Ativação de vendedor',
@@ -26,7 +29,7 @@ export const EMAIL_TEMPLATE_INFO: Record<EmailTemplateKey, { name: string; descr
   signature: {
     name: 'Assinatura de documento',
     description: 'Convite enviado aos signatários de um contrato ou documento.',
-    variables: ['nome', 'titulo', 'mensagem', 'link', 'logoUrl', 'appUrl'],
+    variables: ['nome', 'titulo', 'mensagem', 'documento', 'link', 'logoUrl', 'appUrl'],
   },
   test_email: {
     name: 'Teste de envio',
@@ -52,7 +55,7 @@ const shell = (content: string) => `<!doctype html>
       .email-shell{width:100%!important;max-width:100%!important}
       .email-gutter{padding-left:20px!important;padding-right:20px!important}
       .email-content{padding:26px 20px!important}
-      .email-logo{width:118px!important;max-width:118px!important}
+      .email-logo{width:220px!important;max-width:100%!important}
       .email-footer{padding:20px!important}
     }
   </style>
@@ -63,8 +66,8 @@ const shell = (content: string) => `<!doctype html>
       <tr><td align="center" class="email-gutter" style="padding:32px 16px">
         <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
         <table role="presentation" class="email-shell" width="100%" align="center" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="width:100%;max-width:600px;margin:0 auto;background-color:#ffffff;border:1px solid #e6e8eb;border-radius:14px;overflow:hidden">
-          <tr><td class="email-gutter" style="padding:24px 32px;border-bottom:3px solid #ff6a00">
-            <a href="{{appUrl}}" style="text-decoration:none"><img class="email-logo" src="{{logoUrl}}" width="132" alt="GrowMoney" style="display:block;width:132px;max-width:132px;height:auto;margin:0"></a>
+          <tr><td class="email-gutter" style="padding:24px 32px;border-bottom:3px solid #ff6a00;text-align:center">
+            <a href="{{appUrl}}" style="text-decoration:none"><img class="email-logo" src="{{logoUrl}}" width="260" alt="Agência AFRICA" style="display:block;width:260px;max-width:100%;height:auto;margin:0"></a>
           </td></tr>
           <tr><td class="email-content" style="padding:32px;font-family:Arial,Helvetica,sans-serif;color:#17202a;font-size:15px;line-height:1.6">${content}</td></tr>
           <tr><td class="email-footer" bgcolor="#f8f9fb" style="padding:20px 32px;background-color:#f8f9fb;border-top:1px solid #e6e8eb;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.65;color:#68717d;overflow-wrap:anywhere;word-break:break-word">
@@ -105,6 +108,8 @@ export const DEFAULT_EMAIL_TEMPLATES: Record<EmailTemplateKey, EmailTemplate> = 
       <h2 style="font-size:17px;margin:20px 0 8px">{{titulo}}</h2>
       <div style="font-size:15px;line-height:1.7;white-space:pre-line">{{mensagem}}</div>
       <p style="margin:24px 0 20px"><a href="{{link}}" style="display:inline-block;background:#ff6a00;color:#fff;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:8px">Revisar e assinar</a></p>
+      <h2 style="font-size:17px;margin:24px 0 8px">Contrato completo</h2>
+      <div style="font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #e6e8eb;border-radius:8px;padding:16px;background:#f8f9fb">{{documento}}</div>
       <p style="font-size:12px;line-height:1.5;color:#68717d;margin:0">Se você não esperava este e-mail, entre em contato com quem enviou o documento.</p>`),
   },
   test_email: {
@@ -118,12 +123,28 @@ export const DEFAULT_EMAIL_TEMPLATES: Record<EmailTemplateKey, EmailTemplate> = 
 export const EMAIL_TEMPLATE_PREVIEW_VALUES: Record<EmailTemplateKey, Record<string, string>> = {
   vendor_activation: { nome: 'Maria Silva', empresa: 'Empresa Exemplo', link: 'https://growmoneydigital.com.br/grow/ativar/abc123', logoUrl: '/logo-grow-dark.svg', appUrl: 'https://growmoneydigital.com.br/grow' },
   vendor_activation_admin_notice: { nome: 'Maria Silva', email: 'maria@exemplo.com.br', empresa: 'Empresa Exemplo', logoUrl: '/logo-grow-dark.svg', appUrl: 'https://growmoneydigital.com.br/grow' },
-  signature: { nome: 'Maria Silva', titulo: 'Contrato de prestação de serviços', mensagem: 'Revise os dados e assine o documento para concluir o processo.', link: 'https://growmoneydigital.com.br/grow/assinar/abc123', logoUrl: '/logo-grow-dark.svg', appUrl: 'https://growmoneydigital.com.br/grow' },
+  signature: { nome: 'Maria Silva', titulo: 'Contrato de prestação de serviços', mensagem: 'Revise os dados e assine o documento para concluir o processo.', documento: 'CONTRATO DE PRESTAÇÃO DE SERVIÇOS\n\nCláusulas e condições comerciais do contrato.', link: 'https://growmoneydigital.com.br/grow/assinar/abc123', logoUrl: '/logo-grow-dark.svg', appUrl: 'https://growmoneydigital.com.br/grow' },
   test_email: { logoUrl: '/logo-grow-dark.svg', appUrl: 'https://growmoneydigital.com.br/grow' },
 };
 
 export function renderEmailTemplate(value: string, variables: Record<string, string>, escapeHtml: (text: string) => string): string {
   return value.replace(/\{\{\s*([a-zA-Z][a-zA-Z0-9]*)\s*\}\}/g, (_match, key: string) => escapeHtml(variables[key] ?? ''));
+}
+
+/** Render HTML email content and enforce the AFRICA brand mark in its header. */
+export function renderEmailHtmlTemplate(value: string, variables: Record<string, string>, escapeHtml: (text: string) => string): string {
+  const rendered = renderEmailTemplate(value, variables, escapeHtml);
+  const logoUrl = escapeHtml(variables.logoUrl || `https://canal360.run.place/grow/${EMAIL_BRAND_LOGO_ASSET}`);
+  const appUrl = escapeHtml(variables.appUrl || 'https://canal360.run.place/grow');
+  const logo = `<img class="email-logo" src="${logoUrl}" width="${EMAIL_BRAND_LOGO_WIDTH}" alt="Agência AFRICA" style="display:block;width:${EMAIL_BRAND_LOGO_WIDTH}px;max-width:100%;height:auto;margin:0 auto">`;
+  const existingBrandLogo = /<img\b(?=[^>]*\bclass\s*=\s*["'][^"']*\bemail-logo\b)[^>]*>/i;
+
+  if (existingBrandLogo.test(rendered)) return rendered.replace(existingBrandLogo, logo);
+
+  const header = `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="width:100%;max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e6e8eb;border-bottom:3px solid #ff6a00;border-radius:14px 14px 0 0"><tr><td align="center" style="padding:24px 28px"><a href="${appUrl}" style="display:inline-block;text-decoration:none">${logo}</a></td></tr></table>`;
+  const bodyTag = /<body\b[^>]*>/i;
+  if (bodyTag.test(rendered)) return rendered.replace(bodyTag, (match) => `${match}${header}`);
+  return `${header}${rendered}`;
 }
 
 export function validateEmailTemplate(template: unknown): string | null {

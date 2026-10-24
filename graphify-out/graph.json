@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-24T15:47:39.675Z",
+  "generated_at": "2026-10-24T15:59:22.636Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -3209,6 +3209,18 @@
     {
       "from": "file:src/pages/dashboard/ContratoNovo.tsx",
       "to": "file:src/services/contrato-wizard-data.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/ContratoNovo.tsx",
+      "to": "file:src/lib/assinatura-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/ContratoNovo.tsx",
+      "to": "file:src/lib/contrato-template.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },

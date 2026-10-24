@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_EMAIL_TEMPLATES,
+  EMAIL_BRAND_LOGO_WIDTH,
   EMAIL_TEMPLATE_KEYS,
   ensureEmailLink,
   mergeEmailTemplates,
+  renderEmailHtmlTemplate,
   renderEmailTemplate,
   validateEmailTemplate,
 } from './email-templates';
@@ -19,7 +21,8 @@ describe('modelos de e-mail', () => {
       expect(template.html).toContain('10.949.897/0001-58');
       expect(template.html).toContain('class="email-shell" width="100%"');
       expect(template.html).toContain('@media screen and (max-width:620px)');
-      expect(template.html).toContain('display:block;width:132px');
+      expect(template.html).toContain('display:block;width:260px');
+      expect(template.html).toContain('alt="Agência AFRICA"');
     }
   });
 
@@ -28,6 +31,13 @@ describe('modelos de e-mail', () => {
     expect(activation).toContain('Confirme seu e-mail e defina sua senha');
     expect(activation).toContain('href="{{link}}"');
     expect(activation).toContain('Ativar e definir senha');
+  });
+
+  it('inclui o contrato completo no convite de assinatura', () => {
+    const signature = DEFAULT_EMAIL_TEMPLATES.signature;
+    expect(signature.html).toContain('{{documento}}');
+    expect(signature.html).toContain('Contrato completo');
+    expect(EMAIL_TEMPLATE_KEYS).toContain('signature');
   });
 
   it('mantém o link de ativação visível mesmo se o modelo editável não tiver o botão', () => {
@@ -49,6 +59,28 @@ describe('modelos de e-mail', () => {
   it('substitui variáveis escapando valores fornecidos pelo usuário', () => {
     expect(renderEmailTemplate('<p>{{nome}}</p>', { nome: '<script>alert(1)</script>' }, escapeHtml))
       .toBe('<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>');
+  });
+
+  it('inclui a logo AFRICA em tamanho médio/grande no cabeçalho de modelos personalizados', () => {
+    const html = renderEmailHtmlTemplate('<html><body><p>Conteúdo</p></body></html>', {
+      logoUrl: 'https://canal360.run.place/grow/assets/agencia-africa-email.png',
+      appUrl: 'https://canal360.run.place/grow',
+    }, escapeHtml);
+
+    expect(html.indexOf('alt="Agência AFRICA"')).toBeLessThan(html.indexOf('<p>Conteúdo</p>'));
+    expect(html).toContain(`width="${EMAIL_BRAND_LOGO_WIDTH}"`);
+    expect(html).toContain('https://canal360.run.place/grow/assets/agencia-africa-email.png');
+  });
+
+  it('substitui pela logo oficial a imagem de cabeçalho de modelos personalizados', () => {
+    const html = renderEmailHtmlTemplate('<html><body><img class="email-logo" src="logo-antiga.png" width="80"><p>Conteúdo</p></body></html>', {
+      logoUrl: 'https://canal360.run.place/grow/assets/agencia-africa-email.png',
+      appUrl: 'https://canal360.run.place/grow',
+    }, escapeHtml);
+
+    expect(html).toContain('alt="Agência AFRICA"');
+    expect(html).toContain('width="260"');
+    expect(html).not.toContain('logo-antiga.png');
   });
 
   it('rejeita HTML executável e assuntos ou corpos fora do limite', () => {

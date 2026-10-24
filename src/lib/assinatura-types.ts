@@ -37,6 +37,7 @@ export interface EnvelopeEvent {
 
 export interface Envelope {
   id: string;
+  empresa_id?: string;
   titulo: string;
   descricao: string;
   documentoTexto: string;

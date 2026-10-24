@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Search, Download, FileText, Trash2, Send, Eye, EyeOff, Pencil } from 'lucide-react';
+import { Plus, Search, Download, FileText, Trash2, Send, Eye, EyeOff, Pencil, MessageCircle, Check } from 'lucide-react';
 import { Button, Input, Card, EmptyState, PageHeader, Modal } from '@/components/ui';
 import { AdminAccordionList } from '@/components/admin/AdminAccordionList';
 import { useAdminHiddenRecords } from '@/hooks/useAdminHiddenRecords';
@@ -11,10 +11,12 @@ import {
   updateContrato,
   deleteContrato,
   formatBRL,
+  getContratoResumoFinanceiro,
   type ContratoLocal,
 } from '@/lib/contratos-store';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { gerarContratoHtml } from '@/lib/contrato-template';
 
 export default function Contratos() {
   const { isAdmin: isPlatformAdmin } = useAdminAuth();
@@ -31,6 +33,7 @@ export default function Contratos() {
   const canEdit = canManage;
   const [params] = useSearchParams();
   const criado = params.get('criado');
+  const assinaturaEnviada = params.get('assinatura') === 'enviada';
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -77,6 +80,9 @@ export default function Contratos() {
     const centavos = Math.round(Math.max(0, total - entrada) * 100);
     const parcela = Math.floor(centavos / quantidade) / 100;
     const ultima = (centavos - parcela * 100 * (quantidade - 1)) / 100;
+    const valorSemBeneficios = editing.valor_sem_beneficios ?? (editing.valor_bruto + editing.bonus_total);
+    const economiaTotal = Math.max(0, valorSemBeneficios - total);
+    const descontoValor = Math.max(0, editing.valor_bruto - total);
     try {
       await updateContrato(editing.id, {
       cliente_nome: String(form.get('cliente_nome') || '').trim(),
@@ -86,6 +92,10 @@ export default function Contratos() {
       parcelas: quantidade,
       valor_parcela: parcela,
       valor_ultima_parcela: ultima,
+      desconto_valor: descontoValor,
+      desconto_percentual: editing.valor_bruto > 0 ? descontoValor / editing.valor_bruto * 100 : 0,
+      valor_sem_beneficios: valorSemBeneficios,
+      economia_total: economiaTotal,
       data_inicio: String(form.get('data_inicio') || ''),
       pagamento_observacao: String(form.get('pagamento_observacao') || '').trim(),
       observacoes: String(form.get('observacoes') || '').trim(),
@@ -96,6 +106,34 @@ export default function Contratos() {
     } catch (cause) {
       setEditError(cause instanceof Error ? cause.message : 'Não foi possível atualizar o contrato.');
     }
+  };
+
+  const compartilharWhatsApp = (contrato: ContratoLocal) => {
+    const financeiro = getContratoResumoFinanceiro(contrato);
+    const numero = (contrato.cliente_whatsapp || contrato.cliente_telefone || '').replace(/\D/g, '');
+    const mensagem = [
+      `Olá, ${contrato.cliente_nome}! Segue o resumo do contrato CT-${String(contrato.numero).padStart(4, '0')}.`,
+      `Valor de tabela: ${formatBRL(financeiro.valorSemBeneficios)}.`,
+      `Valor final: ${formatBRL(financeiro.valorFinal)}.`,
+      financeiro.economia > 0 ? `Sua economia: ${formatBRL(financeiro.economia)} (${financeiro.economiaPercentual.toFixed(1)}%).` : '',
+      `Pagamento: ${contrato.pagamento_status === 'pago' ? 'realizado' : 'pendente'}.`,
+      `${contrato.parcelas} parcela(s) de ${formatBRL(contrato.valor_parcela)}.`,
+    ].filter(Boolean).join('\n');
+    const query = new URLSearchParams({ text: mensagem });
+    window.open(`https://wa.me/${numero}?${query.toString()}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const imprimirContrato = (contrato: ContratoLocal) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      setError('Permita a abertura de janelas para imprimir ou salvar o contrato em PDF.');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contrato CT-${String(contrato.numero).padStart(4, '0')}</title></head><body>${gerarContratoHtml(contrato)}</body></html>`);
+    printWindow.document.close();
+    printWindow.opener = null;
+    printWindow.setTimeout(() => printWindow.print(), 700);
   };
 
   return (
@@ -156,7 +194,9 @@ export default function Contratos() {
 
       {criado && (
         <div className="rounded-xl border border-brand/40 bg-brand/10 px-4 py-3 text-sm text-brand">
-          Contrato criado com sucesso. Você pode enviá-lo para assinatura quando estiver pronto.
+          {assinaturaEnviada
+            ? 'Contrato criado e convites de assinatura enviados para o cliente e para a empresa.'
+            : 'Contrato criado com sucesso.'}
         </div>
       )}
 
@@ -190,8 +230,12 @@ export default function Contratos() {
           <AdminAccordionList items={filtered.map((r) => ({
             id: r.id,
             title: `${r.cliente_nome} · CT-${String(r.numero).padStart(4, '0')}`,
-            subtitle: `${formatBRL(r.valor)} · ${r.status}`,
+            subtitle: `${formatBRL(r.valor)} · ${r.status} · pagamento ${r.pagamento_status || 'pendente'}`,
             details: [
+              { label: 'Valor de tabela (sem bônus/descontos)', value: formatBRL(getContratoResumoFinanceiro(r).valorSemBeneficios) },
+              { label: 'Valor final', value: formatBRL(r.valor) },
+              { label: 'Economia', value: `${formatBRL(getContratoResumoFinanceiro(r).economia)} (${getContratoResumoFinanceiro(r).economiaPercentual.toFixed(1)}%)` },
+              { label: 'Pagamento', value: r.pagamento_status === 'pago' ? 'Realizado' : 'Pendente' },
               { label: 'CPF/CNPJ', value: r.cliente_documento },
               { label: 'Parcelas', value: `${r.parcelas}x ${formatBRL(r.valor_parcela)}${r.valor_ultima_parcela && r.valor_ultima_parcela !== r.valor_parcela ? ` · última ${formatBRL(r.valor_ultima_parcela)}` : ''}` },
               { label: 'Vigência', value: `${r.data_inicio || '—'}${r.data_termino ? ` → ${r.data_termino}` : ''}` },
@@ -200,8 +244,9 @@ export default function Contratos() {
             ],
             actions: <>
               <Button variant="outline" size="sm" leftIcon={<Eye className="h-4 w-4" />} onClick={() => setViewing(r)}>Visualizar</Button>
+              <Button variant="outline" size="sm" leftIcon={<MessageCircle className="h-4 w-4" />} onClick={() => compartilharWhatsApp(r)}>WhatsApp</Button>
               <Button variant="ghost" size="sm" leftIcon={<EyeOff className="h-4 w-4" />} onClick={() => toggleHidden(r.id)}>{showHidden ? 'Reexibir' : 'Ocultar'}</Button>
-              {canManage && <>{canEdit && <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => { setEditing(r); setEditError(''); }}>Editar</Button>}<Button variant="outline" size="sm" leftIcon={<Send className="h-4 w-4" />} onClick={() => void runAction(() => updateContratoStatus(r.id, 'enviado'))}>Enviar</Button><Button variant="outline" size="sm" onClick={() => void runAction(() => updateContratoStatus(r.id, 'assinado'))}>Marcar assinado</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void runAction(() => deleteContrato(r.id))}>Excluir</Button></>}
+              {canManage && <>{canEdit && <Button variant="outline" size="sm" leftIcon={<Pencil className="h-4 w-4" />} onClick={() => { setEditing(r); setEditError(''); }}>Editar</Button>}<Button variant="outline" size="sm" leftIcon={<Check className="h-4 w-4" />} onClick={() => void runAction(() => updateContrato(r.id, { pagamento_status: r.pagamento_status === 'pago' ? 'pendente' : 'pago' }))}>{r.pagamento_status === 'pago' ? 'Marcar pendente' : 'Marcar pago'}</Button><Button variant="outline" size="sm" leftIcon={<Send className="h-4 w-4" />} onClick={() => void runAction(() => updateContratoStatus(r.id, 'enviado'))}>Enviar</Button><Button variant="outline" size="sm" onClick={() => void runAction(() => updateContratoStatus(r.id, 'assinado'))}>Marcar assinado</Button><Button variant="ghost" size="sm" leftIcon={<Trash2 className="h-4 w-4 text-erro" />} onClick={() => void runAction(() => deleteContrato(r.id))}>Excluir</Button></>}
             </>,
           }))} />
         )}
@@ -227,8 +272,8 @@ export default function Contratos() {
           </div>
         </form>}
       </Modal>}
-      <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar contrato" footer={<Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button>}>
-        {viewing && <dl className="grid gap-3 sm:grid-cols-2">{[['Número', `CT-${String(viewing.numero).padStart(4, '0')}`], ['Cliente', viewing.cliente_nome], ['CPF/CNPJ', viewing.cliente_documento], ['Valor total', formatBRL(viewing.valor)], ['Entrada', formatBRL(viewing.entrada_valor)], ['Parcelas', `${viewing.parcelas}x ${formatBRL(viewing.valor_parcela)}`], ['Status', viewing.status], ['Início', viewing.data_inicio], ['Término', viewing.data_termino], ['Condições', viewing.pagamento_observacao], ['Observações', viewing.observacoes]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-words text-sm text-text-primary">{value || '—'}</dd></div>)}</dl>}
+      <Modal open={!!viewing} onClose={() => setViewing(null)} title="Visualizar contrato" footer={<div className="flex flex-wrap justify-end gap-2"><Button variant="outline" disabled={!viewing} onClick={() => viewing && imprimirContrato(viewing)}>Imprimir / salvar PDF</Button><Button variant="outline" onClick={() => setViewing(null)}>Fechar</Button></div>}>
+        {viewing && <><dl className="grid gap-3 sm:grid-cols-2">{[['Número', `CT-${String(viewing.numero).padStart(4, '0')}`], ['Cliente', viewing.cliente_nome], ['CPF/CNPJ', viewing.cliente_documento], ['Valor de tabela', formatBRL(getContratoResumoFinanceiro(viewing).valorSemBeneficios)], ['Valor final', formatBRL(viewing.valor)], ['Economia', `${formatBRL(getContratoResumoFinanceiro(viewing).economia)} (${getContratoResumoFinanceiro(viewing).economiaPercentual.toFixed(1)}%)`], ['Pagamento', viewing.pagamento_status === 'pago' ? 'Realizado' : 'Pendente'], ['Entrada', formatBRL(viewing.entrada_valor)], ['Parcelas', `${viewing.parcelas}x ${formatBRL(viewing.valor_parcela)}`], ['Status', viewing.status], ['Início', viewing.data_inicio], ['Término', viewing.data_termino], ['Condições', viewing.pagamento_observacao], ['Observações', viewing.observacoes]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg bg-bg-secondary p-3"><dt className="text-xs font-medium uppercase text-text-secondary">{label}</dt><dd className="mt-1 break-words text-sm text-text-primary">{value || '—'}</dd></div>)}</dl><div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" leftIcon={<MessageCircle className="h-4 w-4" />} onClick={() => compartilharWhatsApp(viewing)}>Compartilhar no WhatsApp</Button><a className="inline-flex min-h-9 items-center rounded-xl border border-border-color px-3 text-sm font-medium hover:bg-bg-secondary" href="https://assinador.iti.br/" target="_blank" rel="noopener noreferrer">Assinatura Gov.br (opcional)</a></div><p className="mt-3 rounded-lg bg-bg-secondary p-3 text-xs text-text-secondary">Para usar Gov.br, salve o contrato em PDF e as duas partes assinam o mesmo arquivo no portal oficial. Depois, mantenham o PDF assinado. A confirmação dessas assinaturas externas não é sincronizada automaticamente no GrowMoney.</p></>}
       </Modal>
     </div>
   );

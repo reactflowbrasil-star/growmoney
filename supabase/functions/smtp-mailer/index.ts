@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { EMAIL_TEMPLATE_KEYS, ensureEmailLink, mergeEmailTemplates, renderEmailTemplate, validateEmailTemplate, type EmailTemplateKey } from "../../../src/lib/email-templates.ts";
+import { EMAIL_TEMPLATE_KEYS, EMAIL_BRAND_LOGO_ASSET, ensureEmailLink, mergeEmailTemplates, renderEmailHtmlTemplate, renderEmailTemplate, validateEmailTemplate, type EmailTemplateKey } from "../../../src/lib/email-templates.ts";
 
 type Settings = {
   host: string;
@@ -277,10 +277,10 @@ Deno.serve(async (request: Request) => {
       const template = (await loadEmailTemplates(clients.serviceClient)).vendor_activation;
       const templateVariables = {
         nome, empresa: company?.nome || "a empresa", link: activationLink,
-        appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
+        appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/${EMAIL_BRAND_LOGO_ASSET}`,
       };
       const activationHtml = ensureEmailLink(
-        renderEmailTemplate(template.html, templateVariables, escapeHtml),
+        renderEmailHtmlTemplate(template.html, templateVariables, escapeHtml),
         activationLink,
         escapeHtml,
         "Ativar e definir senha",
@@ -353,14 +353,14 @@ Deno.serve(async (request: Request) => {
         const template = (await loadEmailTemplates(clients.serviceClient)).vendor_activation_admin_notice;
         const templateVariables = {
           nome: seller.nome, email: seller.email, empresa: companyName.data?.nome || "—",
-          appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
+          appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/${EMAIL_BRAND_LOGO_ASSET}`,
         };
         await transport.sendMail({
           from: { name: settings.from_name, address: settings.from_email },
           to: recipients.map((recipient) => recipient.email),
           subject: renderSubject(template.subject, templateVariables, `Cadastro de vendedor ativado: ${safeHeader(seller.nome, "Vendedor")}`),
           text: `O vendedor ${seller.nome} (${seller.email}) confirmou o e-mail e ativou o cadastro em ${companyName.data?.nome || "sua empresa"}.`,
-          html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
+          html: renderEmailHtmlTemplate(template.html, templateVariables, escapeHtml),
         });
         await clients.serviceClient.from("gm_vendor_activation_events").update({ status: "sent", notified_at: new Date().toISOString(), updated_at: new Date().toISOString(), last_error_code: null }).eq("id", event.id);
         await logMail(clients.serviceClient, confirmedUser.id, "vendor_activation_admin_notice", recipients.map((recipient) => recipient.email).join(", "), true, { empresaId: seller.empresa_id, vendedorId: seller.id });
@@ -501,26 +501,29 @@ Deno.serve(async (request: Request) => {
         if (!emailIsValid(signer.email)) continue;
         const signingUrl = `${appUrl.replace(/\/$/, "")}/assinar/${encodeURIComponent(String(signer.token || ""))}`;
         const message = typeof envelope.messageToSigners === "string" ? envelope.messageToSigners : "";
+        const contractDocument = typeof envelope.documentoTexto === "string" ? envelope.documentoTexto : "";
         const signerName = safeHeader(signer.nome, "");
         const title = safeHeader(envelope.titulo, "Documento");
-        const text = `Olá ${signerName},\n\nVocê recebeu o documento “${title}” para revisar e assinar.\n\n${message}\n\nAcesse seu link pessoal: ${signingUrl}\n\nSe você não esperava este e-mail, entre em contato com quem enviou o documento.`;
+        const text = `Olá ${signerName},\n\nVocê recebeu o documento “${title}” para revisar e assinar.\n\n${message}\n\nCONTRATO COMPLETO\n\n${contractDocument}\n\nAcesse seu link pessoal para revisar e registrar sua assinatura: ${signingUrl}\n\nSe você não esperava este e-mail, entre em contato com quem enviou o documento.`;
         const template = (await loadEmailTemplates(clients.serviceClient)).signature;
         const templateVariables = {
-          nome: signerName, titulo: title, mensagem: message, link: signingUrl,
-          appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png`,
+          nome: signerName, titulo: title, mensagem: message, documento: contractDocument, link: signingUrl,
+          appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/${EMAIL_BRAND_LOGO_ASSET}`,
         };
         await transport.sendMail({
           from: { name: settings.from_name, address: settings.from_email },
           to: String(signer.email),
           subject: renderSubject(template.subject, templateVariables, `Assinatura: ${title}`),
           text,
-          html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
+          html: renderEmailHtmlTemplate(template.html, templateVariables, escapeHtml),
         });
         signer.emailSentAt = new Date().toISOString();
         accepted.push(String(signer.email));
         envelope.signers = signers;
         envelope.updatedAt = new Date().toISOString();
-        const { error: persistError } = await clients.userClient.from("signature_envelopes")
+        // Ownership was checked with the caller's JWT above; service-role persistence
+        // is needed because tenant RLS intentionally restricts client-side updates.
+        const { error: persistError } = await clients.serviceClient.from("signature_envelopes")
           .update({ payload: envelope, updated_at: envelope.updatedAt }).eq("id", envelopeId);
         if (persistError) throw new Error("E-mail enviado, mas não foi possível registrar o envio no envelope. Confira a auditoria antes de reenviar.");
       }
@@ -530,7 +533,7 @@ Deno.serve(async (request: Request) => {
       const events = Array.isArray(envelope.events) ? envelope.events as Array<Record<string, unknown>> : [];
       events.push({ id: crypto.randomUUID(), at: envelope.updatedAt, type: "sent", message: `Convites enviados por SMTP para ${accepted.length} signatário(s)`, actor: actorId });
       envelope.events = events;
-      const { error: finalPersistError } = await clients.userClient.from("signature_envelopes")
+      const { error: finalPersistError } = await clients.serviceClient.from("signature_envelopes")
         .update({ payload: envelope, updated_at: envelope.updatedAt }).eq("id", envelopeId);
       if (finalPersistError) throw new Error("Convites enviados, mas não foi possível finalizar o registro do envelope.");
       await logMail(clients.serviceClient, actorId, "signature_email", accepted.join(", "), true, { envelopeId, sentCount: accepted.length });
@@ -567,12 +570,12 @@ Deno.serve(async (request: Request) => {
       await transport.verify();
       const appUrl = Deno.env.get("APP_BASE_URL") || "https://canal360.run.place/grow";
       const template = (await loadEmailTemplates(clients.serviceClient)).test_email;
-      const templateVariables = { appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/assets/grow-logo-black.png` };
+      const templateVariables = { appUrl, logoUrl: `${appUrl.replace(/\/$/, "")}/${EMAIL_BRAND_LOGO_ASSET}` };
       await transport.sendMail({
         from: { name: settings.from_name, address: settings.from_email }, to,
         subject: renderSubject(template.subject, templateVariables, "Teste de envio — GrowMoney"),
         text: "O envio de e-mails do GrowMoney está configurado e funcionando.",
-        html: renderEmailTemplate(template.html, templateVariables, escapeHtml),
+        html: renderEmailHtmlTemplate(template.html, templateVariables, escapeHtml),
       });
       await logMail(clients.serviceClient, actorId, "test_email", to, true, {});
       return respond({ sent: true, message: `E-mail de teste enviado para ${to}.` }, 200, origin);
