@@ -14,7 +14,7 @@ type Settings = {
   enabled: boolean;
 };
 
-type Action = "get_settings" | "save_settings" | "get_templates" | "save_template" | "test_connection" | "test_email" | "send_signature" | "check_vendor_mail" | "send_vendor_activation" | "notify_vendor_activated";
+type Action = "get_settings" | "save_settings" | "get_templates" | "save_template" | "sync_mailchimp_templates" | "test_mailchimp_connection" | "test_connection" | "test_email" | "send_signature" | "check_vendor_mail" | "send_vendor_activation" | "notify_vendor_activated";
 
 const corsHeaders = (origin: string | null) => {
   const configured = Deno.env.get("APP_ORIGIN") || "https://canal360.run.place";
@@ -220,12 +220,12 @@ Deno.serve(async (request: Request) => {
     return respond({ error: "Corpo da solicitação inválido." }, 400, origin);
   }
   const action = input.action as Action;
-  if (!["get_settings", "save_settings", "get_templates", "save_template", "test_connection", "test_email", "send_signature", "check_vendor_mail", "send_vendor_activation", "notify_vendor_activated"].includes(action)) {
+  if (!["get_settings", "save_settings", "get_templates", "save_template", "sync_mailchimp_templates", "test_mailchimp_connection", "test_connection", "test_email", "send_signature", "check_vendor_mail", "send_vendor_activation", "notify_vendor_activated"].includes(action)) {
     return respond({ error: "Ação inválida." }, 400, origin);
   }
 
   const platformAdmin = await isPlatformAdmin(clients.userClient);
-  const platformAdminOnlyAction = ["get_settings", "save_settings", "get_templates", "save_template", "test_connection", "test_email"].includes(action);
+  const platformAdminOnlyAction = ["get_settings", "save_settings", "get_templates", "save_template", "sync_mailchimp_templates", "test_mailchimp_connection", "test_connection", "test_email"].includes(action);
   if (platformAdminOnlyAction && !platformAdmin) {
     return respond({ error: "Acesso restrito ao administrador da plataforma." }, 403, origin);
   }
@@ -406,6 +406,80 @@ Deno.serve(async (request: Request) => {
       return respond({ saved: true }, 200, origin);
     } catch (error) {
       return respond({ error: error instanceof Error ? error.message : "Falha ao salvar modelo de e-mail." }, 500, origin);
+    }
+  }
+
+  if (action === "sync_mailchimp_templates") {
+    try {
+      const settings = await loadSettings(clients.serviceClient);
+      if (!settings || settings.host !== "smtp.mandrillapp.com") {
+        return respond({ error: "Selecione Mailchimp Transactional no provedor SMTP e salve a chave de API antes de sincronizar os modelos." }, 409, origin);
+      }
+      const key = await decryptPassword(settings);
+      const response = await fetch("https://mandrillapp.com/api/1.0/mctemplates/list.json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+        signal: AbortSignal.timeout(20_000),
+      });
+      const payload: unknown = await response.json().catch(() => null);
+      if (!response.ok || !Array.isArray(payload)) {
+        const detail = payload && typeof payload === "object" && "message" in payload && typeof payload.message === "string"
+          ? payload.message.slice(0, 240)
+          : "Confira se a chave é do Mailchimp Transactional e se o recurso está habilitado na conta.";
+        await logMail(clients.serviceClient, actorId, "connection_test", null, false, { provider: "mailchimp_transactional", status: response.status });
+        return respond({ error: `Não foi possível conectar ao Mailchimp Transactional. ${detail}` }, 502, origin);
+      }
+      const templates = payload.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const row = item as Record<string, unknown>;
+        const html = typeof row.publish_code === "string" && row.publish_code.trim() ? row.publish_code : row.code;
+        if (typeof row.mc_template_id !== "number" || typeof row.mc_template_name !== "string" || typeof html !== "string") return [];
+        return [{
+          id: row.mc_template_id,
+          name: row.mc_template_name.slice(0, 120),
+          subject: typeof row.subject === "string" ? row.subject.slice(0, 180) : "",
+          html: html.slice(0, 50_000),
+          published: typeof row.publish_code === "string" && !!row.publish_code.trim(),
+        }];
+      });
+      await logMail(clients.serviceClient, actorId, "connection_test", null, true, { provider: "mailchimp_transactional", templateCount: templates.length });
+      return respond({ templates }, 200, origin);
+    } catch (error) {
+      const message = error instanceof Error && error.name === "TimeoutError"
+        ? "A conexão com o Mailchimp excedeu o tempo limite. Tente novamente."
+        : "Não foi possível consultar os modelos do Mailchimp Transactional.";
+      await logMail(clients.serviceClient, actorId, "connection_test", null, false, { provider: "mailchimp_transactional" });
+      return respond({ error: message }, 502, origin);
+    }
+  }
+
+  if (action === "test_mailchimp_connection") {
+    try {
+      const settings = await loadSettings(clients.serviceClient);
+      if (!settings || settings.host !== "smtp.mandrillapp.com") {
+        return respond({ error: "Selecione Mailchimp Transactional, informe a API key e salve a configuração antes do teste." }, 409, origin);
+      }
+      const key = await decryptPassword(settings);
+      const response = await fetch("https://mandrillapp.com/api/1.0/users/ping.json", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const pong: unknown = await response.json().catch(() => null);
+      if (!response.ok || pong !== "PONG!") {
+        await logMail(clients.serviceClient, actorId, "connection_test", null, false, { provider: "mailchimp_transactional", status: response.status });
+        return respond({ error: "A API key não foi validada pelo Mailchimp Transactional. Confirme a chave e se o recurso Transactional está habilitado na conta." }, 502, origin);
+      }
+      await logMail(clients.serviceClient, actorId, "connection_test", null, true, { provider: "mailchimp_transactional" });
+      return respond({ valid: true, message: "Conexão Mailchimp Transactional validada ao vivo pela API key." }, 200, origin);
+    } catch (error) {
+      const message = error instanceof Error && error.name === "TimeoutError"
+        ? "O teste de conexão com o Mailchimp excedeu o tempo limite. Tente novamente."
+        : "Não foi possível validar a conexão Mailchimp Transactional.";
+      await logMail(clients.serviceClient, actorId, "connection_test", null, false, { provider: "mailchimp_transactional" });
+      return respond({ error: message }, 502, origin);
     }
   }
 

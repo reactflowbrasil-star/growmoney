@@ -5,8 +5,8 @@ import { BRAND } from '@/lib/brand';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { AdminSystemBackupService, type ImportPreview } from '@/services/admin-system-backup-service';
 import { AdminHostingMigrationService } from '@/services/admin-hosting-migration-service';
-import { AdminSmtpService, type SmtpSettings } from '@/services/admin-smtp-service';
-import { DEFAULT_EMAIL_TEMPLATES, EMAIL_TEMPLATE_INFO, EMAIL_TEMPLATE_KEYS, EMAIL_TEMPLATE_PREVIEW_VALUES, renderEmailTemplate, type EmailTemplate, type EmailTemplateKey } from '@/lib/email-templates';
+import { AdminSmtpService, type MailchimpTemplate, type SmtpSettings } from '@/services/admin-smtp-service';
+import { DEFAULT_EMAIL_TEMPLATES, EMAIL_BRAND_LOGO_ASSET, EMAIL_TEMPLATE_INFO, EMAIL_TEMPLATE_KEYS, EMAIL_TEMPLATE_PREVIEW_VALUES, renderEmailHtmlTemplate, type EmailTemplate, type EmailTemplateKey } from '@/lib/email-templates';
 
 type SmtpForm = Omit<SmtpSettings, 'passwordConfigured'> & { password: string };
 const emptySmtp: SmtpForm = { host: '', port: 587, secure: false, username: '', password: '', fromEmail: '', fromName: 'GrowMoney', enabled: false };
@@ -28,10 +28,12 @@ export default function AdminSistema() {
   const [migrationNotice, setMigrationNotice] = useState('');
   const [migrationError, setMigrationError] = useState('');
   const [smtp, setSmtp] = useState<SmtpForm>(emptySmtp);
+  const [savedSmtpHost, setSavedSmtpHost] = useState('');
   const [passwordConfigured, setPasswordConfigured] = useState(false);
   const [smtpLoading, setSmtpLoading] = useState(true);
   const [smtpSaving, setSmtpSaving] = useState(false);
   const [smtpTesting, setSmtpTesting] = useState(false);
+  const [mailchimpTesting, setMailchimpTesting] = useState(false);
   const [smtpCanValidate, setSmtpCanValidate] = useState(false);
   const [testSending, setTestSending] = useState(false);
   const [testRecipient, setTestRecipient] = useState('');
@@ -43,6 +45,9 @@ export default function AdminSistema() {
   const [emailTemplateSaving, setEmailTemplateSaving] = useState(false);
   const [emailTemplateError, setEmailTemplateError] = useState('');
   const [emailTemplateNotice, setEmailTemplateNotice] = useState('');
+  const [mailchimpTemplates, setMailchimpTemplates] = useState<MailchimpTemplate[]>([]);
+  const [mailchimpTemplateId, setMailchimpTemplateId] = useState('');
+  const [mailchimpSyncing, setMailchimpSyncing] = useState(false);
 
   const loadEmailTemplates = useCallback(async () => {
     setEmailTemplatesLoading(true);
@@ -63,10 +68,12 @@ export default function AdminSistema() {
       const settings = await AdminSmtpService.getSettings();
       if (settings) {
         setSmtp({ host: settings.host, port: 587, secure: false, username: settings.username, password: '', fromEmail: settings.fromEmail, fromName: settings.fromName, enabled: settings.enabled });
+        setSavedSmtpHost(settings.host);
         setPasswordConfigured(settings.passwordConfigured);
         setSmtpCanValidate(settings.passwordConfigured);
       } else {
         setSmtp(emptySmtp);
+        setSavedSmtpHost('');
         setPasswordConfigured(false);
         setSmtpCanValidate(false);
       }
@@ -117,11 +124,89 @@ export default function AdminSistema() {
     setSmtp((current) => ({ ...current, [key]: value }));
   };
 
+  const configureMailchimp = () => {
+    setSmtpCanValidate(false);
+    setSmtp((current) => ({
+      ...current,
+      host: 'smtp.mandrillapp.com',
+      port: 587,
+      secure: false,
+      username: current.fromEmail || current.username,
+      password: '',
+    }));
+    setSmtpNotice('Informe a chave do Mailchimp Transactional no campo de senha e salve. A chave será armazenada criptografada no servidor.');
+    setSmtpError('');
+  };
+
+  const syncMailchimpTemplates = async () => {
+    setMailchimpSyncing(true);
+    setEmailTemplateError('');
+    setEmailTemplateNotice('');
+    try {
+      const templates = await AdminSmtpService.syncMailchimpTemplates();
+      setMailchimpTemplates(templates);
+      setMailchimpTemplateId(templates[0] ? String(templates[0].id) : '');
+      setEmailTemplateNotice(templates.length
+        ? `${templates.length} modelo(s) carregado(s) do Mailchimp Transactional. Escolha um modelo e importe para o tipo selecionado.`
+        : 'Conexão feita; nenhum modelo transacional foi encontrado na conta.');
+    } catch (error) {
+      setEmailTemplateError(error instanceof Error ? error.message : 'Não foi possível carregar os modelos do Mailchimp.');
+    } finally {
+      setMailchimpSyncing(false);
+    }
+  };
+
+  const testMailchimpConnection = async () => {
+    setMailchimpTesting(true);
+    setSmtpError('');
+    setSmtpNotice('');
+    try {
+      setSmtpNotice(await AdminSmtpService.testMailchimpConnection());
+    } catch (error) {
+      setSmtpError(error instanceof Error ? error.message : 'Falha ao validar a API key Mailchimp.');
+    } finally {
+      setMailchimpTesting(false);
+    }
+  };
+
+  const importMailchimpTemplate = async () => {
+    const remote = mailchimpTemplates.find((item) => String(item.id) === mailchimpTemplateId);
+    if (!remote) return;
+    setEmailTemplateSaving(true);
+    setEmailTemplateError('');
+    setEmailTemplateNotice('');
+    try {
+      const importedDocument = new DOMParser().parseFromString(remote.html, 'text/html');
+      const importedContent = importedDocument.querySelector('.email-content') || importedDocument.body;
+      const currentDocument = new DOMParser().parseFromString(emailTemplates[emailTemplateKey].html, 'text/html');
+      const currentContent = currentDocument.querySelector('.email-content');
+      if (!currentContent) throw new Error('O modelo GrowMoney atual não tem a área de conteúdo padrão.');
+      const content = importedContent.innerHTML
+        .replace(/\*\|\s*FNAME\s*\|\*/gi, '{{nome}}')
+        .replace(/\*\|\s*EMAIL\s*\|\*/gi, '{{email}}')
+        .replace(/\*\|\s*COMPANY\s*\|\*/gi, '{{empresa}}');
+      currentContent.innerHTML = content;
+      const html = `<!doctype html>\n${currentDocument.documentElement.outerHTML}`;
+      const candidate = { subject: remote.subject || emailTemplates[emailTemplateKey].subject, html };
+      await AdminSmtpService.saveEmailTemplate(emailTemplateKey, candidate);
+      setEmailTemplates((current) => ({ ...current, [emailTemplateKey]: candidate }));
+      setEmailTemplateNotice(`Modelo “${remote.name}” importado para ${EMAIL_TEMPLATE_INFO[emailTemplateKey].name}. O cabeçalho Agência AFRICA e o rodapé GrowMoney foram preservados.`);
+    } catch (error) {
+      setEmailTemplateError(error instanceof Error ? error.message : 'Não foi possível importar este modelo.');
+    } finally {
+      setEmailTemplateSaving(false);
+    }
+  };
+
   const saveSmtp = async (event: React.FormEvent) => {
     event.preventDefault();
     setSmtpSaving(true); setSmtpError(''); setSmtpNotice('');
     try {
+      if (smtp.host.trim().toLowerCase() !== savedSmtpHost && !smtp.password) {
+        throw new Error('Informe a nova senha ou chave de API ao trocar de provedor SMTP.');
+      }
       await AdminSmtpService.saveSettings({ ...smtp, clearPassword: false });
+      setSavedSmtpHost(smtp.host.trim().toLowerCase());
       setPasswordConfigured(true);
       setSmtpCanValidate(true);
       setSmtp((current) => ({ ...current, password: '' }));
@@ -261,13 +346,15 @@ export default function AdminSistema() {
             <Input label="Servidor SMTP" placeholder="smtp.exemplo.com" autoComplete="off" required value={smtp.host} onChange={(event) => updateSmtp('host', event.target.value)} />
             <Input label="Porta" type="number" min={1} max={65535} required hint="A hospedagem envia por SMTP autenticado com STARTTLS na porta 587." value={smtp.port} onChange={(event) => updateSmtp('port', Number(event.target.value))} />
             <Input label="Usuário SMTP" autoComplete="username" required value={smtp.username} onChange={(event) => updateSmtp('username', event.target.value)} />
-            <Input label={passwordConfigured ? 'Nova senha SMTP (opcional)' : 'Senha SMTP'} type="password" autoComplete="new-password" required={!passwordConfigured} hint={passwordConfigured ? 'Deixe em branco para manter a senha armazenada.' : 'A senha será transmitida somente ao serviço seguro.'} value={smtp.password} onChange={(event) => updateSmtp('password', event.target.value)} />
+            <Input label={smtp.host === 'smtp.mandrillapp.com' ? 'Chave API Mailchimp Transactional' : passwordConfigured ? 'Nova senha SMTP (opcional)' : 'Senha SMTP'} type="password" autoComplete="new-password" required={!passwordConfigured || (smtp.host !== savedSmtpHost && !smtp.password)} hint={smtp.host === 'smtp.mandrillapp.com' ? 'Use a chave do Mailchimp Transactional como senha SMTP. Ela será transmitida apenas ao serviço seguro e salva criptografada.' : passwordConfigured ? 'Deixe em branco para manter a senha armazenada.' : 'A senha será transmitida somente ao serviço seguro.'} value={smtp.password} onChange={(event) => updateSmtp('password', event.target.value)} />
             <Input label="E-mail remetente" type="email" required value={smtp.fromEmail} onChange={(event) => updateSmtp('fromEmail', event.target.value)} />
             <Input label="Nome remetente" required value={smtp.fromName} onChange={(event) => updateSmtp('fromName', event.target.value)} />
             <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={smtp.secure} onChange={(event) => updateSmtp('secure', event.target.checked)} className="h-4 w-4 accent-brand" /><span><span className="block font-medium">TLS direto (SSL)</span><span className="text-xs text-text-secondary">Desativado para STARTTLS na porta 587. Ative apenas se o servidor exigir TLS desde a conexão inicial.</span></span></label>
             <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={smtp.enabled} onChange={(event) => updateSmtp('enabled', event.target.checked)} className="h-4 w-4 accent-brand" /><span><span className="block font-medium">SMTP ativo</span><span className="text-xs text-text-secondary">Desative para interromper novos envios do sistema.</span></span></label>
             <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
               <Button type="submit" loading={smtpSaving}>Salvar configuração</Button>
+              <Button type="button" variant="outline" disabled={smtpSaving} onClick={configureMailchimp}>Usar Mailchimp Transactional</Button>
+              <Button type="button" variant="outline" loading={mailchimpTesting} disabled={smtp.host !== 'smtp.mandrillapp.com' || !passwordConfigured} onClick={() => void testMailchimpConnection()}>Testar conexão Mailchimp</Button>
               <Button type="button" variant="outline" leftIcon={<Server className="h-4 w-4" />} loading={smtpTesting} disabled={!smtpCanValidate} onClick={() => void testSmtp()}>Validar servidor SMTP</Button>
               <Badge variant={smtp.enabled && passwordConfigured ? 'success' : 'neutral'}>{smtp.enabled && passwordConfigured ? 'Ativo e configurado' : passwordConfigured ? 'Configurado, desativado' : 'Não configurado'}</Badge>
             </div>
@@ -279,17 +366,35 @@ export default function AdminSistema() {
         </>}
         {smtpError && <p className="rounded-lg border border-erro/30 bg-erro/10 p-3 text-sm text-erro" role="alert">{smtpError}</p>}
         {smtpNotice && <p className="rounded-lg border border-brand/30 bg-brand/10 p-3 text-sm" role="status">{smtpNotice}</p>}
-        <p className="text-xs text-text-secondary">A senha SMTP não é carregada de volta ao navegador. O fluxo transacional de convites de assinatura usa este serviço quando habilitado; mensagens de autenticação do Supabase Auth dependem da configuração própria de SMTP do Supabase.</p>
+        <p className="text-xs text-text-secondary">A senha SMTP não é carregada de volta ao navegador. Para Mailchimp, esta integração usa o produto Mailchimp Transactional (Mandrill), com host smtp.mandrillapp.com, porta 587 e a chave API no campo de senha. O fluxo de convites e outras mensagens usa o provedor salvo; mensagens de autenticação do Supabase Auth dependem da configuração própria de SMTP do Supabase.</p>
       </Card>
       <Card className="space-y-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2"><Mail className="h-5 w-5 text-brand" /><h2 className="font-semibold">Modelos de e-mail</h2></div>
-            <p className="mt-1 text-sm text-text-secondary">Edite o assunto e o HTML das mensagens transacionais. Os modelos padrão incluem a logo no topo e os dados da GrowMoney no rodapé.</p>
+            <p className="mt-1 text-sm text-text-secondary">Edite o assunto e o HTML das mensagens transacionais. A logo da Agência AFRICA aparece obrigatoriamente no cabeçalho de todos os envios; os dados da GrowMoney permanecem no rodapé.</p>
           </div>
           <Button type="button" size="sm" variant="outline" leftIcon={<RefreshCw className="h-4 w-4" />} loading={emailTemplatesLoading} onClick={() => void loadEmailTemplates()}>Atualizar modelos</Button>
         </div>
         {emailTemplatesLoading ? <p className="py-5 text-center text-sm text-text-secondary">Carregando modelos…</p> : <>
+          <div className="space-y-3 rounded-xl border border-border-color bg-bg-secondary/40 p-4">
+            <div>
+              <h3 className="text-sm font-semibold">Modelos do Mailchimp Transactional</h3>
+              <p className="mt-1 text-xs text-text-secondary">Salve primeiro a configuração usando o host smtp.mandrillapp.com e uma chave API Transactional. A consulta é feita pelo servidor; depois importe cada modelo para o tipo de mensagem selecionado. O layout GrowMoney, a logo e o rodapé da empresa permanecem no template.</p>
+            </div>
+            <div className="flex flex-wrap items-end gap-2">
+              <Button type="button" variant="outline" loading={mailchimpSyncing} disabled={smtp.host !== 'smtp.mandrillapp.com' || !passwordConfigured} onClick={() => void syncMailchimpTemplates()}>Conectar e carregar modelos</Button>
+              {mailchimpTemplates.length > 0 && <>
+                <label className="min-w-[220px] flex-1 space-y-1.5 text-sm font-medium" htmlFor="mailchimp-template-source">
+                  Modelo Mailchimp
+                  <select id="mailchimp-template-source" value={mailchimpTemplateId} onChange={(event) => setMailchimpTemplateId(event.target.value)} className="min-h-11 w-full rounded-lg border border-border-color bg-bg-primary px-3 py-2 text-text-primary">
+                    {mailchimpTemplates.map((template) => <option key={template.id} value={template.id}>{template.name}{template.published ? '' : ' (rascunho)'}</option>)}
+                  </select>
+                </label>
+                <Button type="button" loading={emailTemplateSaving} disabled={!mailchimpTemplateId} onClick={() => void importMailchimpTemplate()}>Importar para o modelo selecionado</Button>
+              </>}
+            </div>
+          </div>
           <label className="block space-y-1.5 text-sm font-medium" htmlFor="admin-email-template">
             Modelo para editar
             <select id="admin-email-template" value={emailTemplateKey} onChange={(event) => { setEmailTemplateKey(event.target.value as EmailTemplateKey); setEmailTemplateNotice(''); }} className="min-h-11 w-full rounded-lg border border-border-color bg-bg-primary px-3 py-2 text-text-primary">
@@ -314,9 +419,9 @@ export default function AdminSistema() {
               title={`Prévia do e-mail: ${EMAIL_TEMPLATE_INFO[emailTemplateKey].name}`}
               sandbox=""
               referrerPolicy="no-referrer"
-              srcDoc={renderEmailTemplate(emailTemplates[emailTemplateKey].html, {
+              srcDoc={renderEmailHtmlTemplate(emailTemplates[emailTemplateKey].html, {
                 ...EMAIL_TEMPLATE_PREVIEW_VALUES[emailTemplateKey],
-                logoUrl: `${window.location.origin}${import.meta.env.BASE_URL}assets/grow-logo-black.png`,
+                logoUrl: `${window.location.origin}${import.meta.env.BASE_URL}${EMAIL_BRAND_LOGO_ASSET}`,
               }, escapePreviewHtml)}
               className="h-[480px] w-full rounded-xl border border-border-color bg-white"
             />

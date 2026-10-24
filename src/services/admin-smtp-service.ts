@@ -18,6 +18,8 @@ export type SmtpSettingsInput = Omit<SmtpSettings, 'passwordConfigured'> & {
   clearPassword: boolean;
 };
 
+export type MailchimpTemplate = { id: number; name: string; subject: string; html: string; published: boolean };
+
 async function invoke<T>(action: string, fields: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await supabase.functions.invoke('smtp-mailer', { body: { action, ...fields } });
   if (error instanceof FunctionsHttpError) {
@@ -47,6 +49,14 @@ export const AdminSmtpService = {
   },
   async sendTestEmail(to: string): Promise<string> {
     const result = await invoke<{ sent: boolean; message: string }>('test_email', { to });
+    return result.message;
+  },
+  async syncMailchimpTemplates(): Promise<MailchimpTemplate[]> {
+    const result = await invoke<{ templates?: MailchimpTemplate[] }>('sync_mailchimp_templates');
+    return result.templates || [];
+  },
+  async testMailchimpConnection(): Promise<string> {
+    const result = await invoke<{ valid: boolean; message: string }>('test_mailchimp_connection');
     return result.message;
   },
   async getEmailTemplates(): Promise<Record<EmailTemplateKey, EmailTemplate>> {
