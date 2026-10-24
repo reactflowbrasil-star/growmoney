@@ -1,11 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Plus, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Check, RefreshCw } from 'lucide-react';
 import { Button, Input, Card, PageHeader, Modal } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
-  listClientes,
-  saveCliente,
   listServicosCatalogo,
   saveContrato,
   formatBRL,
@@ -13,6 +11,8 @@ import {
   type ClienteLocal,
   type ServicoCatalogo,
 } from '@/lib/contratos-store';
+import { useAuth } from '@/contexts/AuthContext';
+import { loadClientesEmpresa, saveClienteEmpresa } from '@/services/contrato-wizard-data';
 
 const STEPS = ['Cliente', 'Serviços', 'Condições', 'Revisão'] as const;
 
@@ -22,8 +22,10 @@ function today() {
 
 export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: boolean }) {
   const navigate = useNavigate();
+  const { user, empresas, empresaAtiva } = useAuth();
   const [step, setStep] = useState(1);
-  const [clientes, setClientes] = useState<ClienteLocal[]>(() => listClientes());
+  const [clientes, setClientes] = useState<ClienteLocal[]>([]);
+  const [loadingClientes, setLoadingClientes] = useState(false);
   const servicos = useMemo(() => listServicosCatalogo(), []);
 
   const [clientId, setClientId] = useState('');
@@ -51,6 +53,21 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
   const [obsInternas, setObsInternas] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const carregarClientes = useCallback(async () => {
+    if (!empresaAtiva?.id) return;
+    setLoadingClientes(true);
+    setError('');
+    try {
+      setClientes(await loadClientesEmpresa(empresaAtiva.id, empresaAtiva.role, empresas.length === 1));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível carregar os clientes da empresa.');
+    } finally {
+      setLoadingClientes(false);
+    }
+  }, [empresaAtiva?.id, empresaAtiva?.role, empresas.length]);
+
+  useEffect(() => { void carregarClientes(); }, [carregarClientes]);
 
   const cliente = clientes.find((c) => c.id === clientId);
 
@@ -125,13 +142,18 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
     setBonusIds((prev) => (prev.includes(s.id) ? prev.filter((id) => id !== s.id) : [...prev, s.id]));
   };
 
-  const salvarCliente = () => {
-    if (!clienteForm.razao_social.trim()) return;
-    const c = saveCliente({ ...clienteForm, razao_social: clienteForm.razao_social.trim() });
-    setClientes(listClientes());
-    setClientId(c.id);
-    setNovoClienteOpen(false);
-    setClienteForm({ razao_social: '', documento: '', email: '', telefone: '', cidade: '', tipo: 'PJ' });
+  const salvarCliente = async () => {
+    if (!clienteForm.razao_social.trim() || !empresaAtiva?.id || !user?.id) return;
+    setError('');
+    try {
+      const c = await saveClienteEmpresa(empresaAtiva.id, user.id, { ...clienteForm, razao_social: clienteForm.razao_social.trim() });
+      setClientes((current) => [c, ...current.filter((item) => item.id !== c.id)]);
+      setClientId(c.id);
+      setNovoClienteOpen(false);
+      setClienteForm({ razao_social: '', documento: '', email: '', telefone: '', cidade: '', tipo: 'PJ' });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível salvar o cliente.');
+    }
   };
 
   const canNext = () => {
@@ -239,8 +261,9 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
                 className="flex-1 rounded-xl border border-border-color bg-bg-primary px-3 py-2.5 text-sm text-text-primary"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
+                disabled={loadingClientes}
               >
-                <option value="">Selecione um cliente</option>
+                <option value="">{loadingClientes ? 'Carregando clientes…' : 'Selecione um cliente'}</option>
                 {clientes.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.razao_social}
@@ -248,11 +271,20 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
                   </option>
                 ))}
               </select>
-              <Button type="button" variant="outline" leftIcon={<Plus className="w-4 h-4" />} onClick={() => setNovoClienteOpen(true)}>
-                Novo cliente
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" leftIcon={<RefreshCw className="w-4 h-4" />} onClick={() => void carregarClientes()} disabled={!empresaAtiva?.id || loadingClientes}>
+                  Atualizar
+                </Button>
+                <Button type="button" variant="outline" leftIcon={<Plus className="w-4 h-4" />} onClick={() => setNovoClienteOpen(true)} disabled={!empresaAtiva?.id}>
+                  Novo cliente
+                </Button>
+              </div>
             </div>
-            <p className="mt-2 text-xs text-text-secondary">Não encontrou? Cadastre o cliente na hora.</p>
+            <p className="mt-2 text-xs text-text-secondary">
+              {clientes.length === 0 && !loadingClientes
+                ? 'Nenhum cliente cadastrado nesta empresa. Confira a empresa ativa ou cadastre um novo cliente.'
+                : 'A lista mostra clientes vinculados à empresa ativa. Use Atualizar para buscar os cadastros mais recentes.'}
+            </p>
           </div>
 
           {cliente && (
