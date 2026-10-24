@@ -1,4 +1,5 @@
-import { formatBRL, type ContratoLocal } from '@/lib/contratos-store';
+import { formatBRL, getContratoResumoFinanceiro, type ContratoLocal } from '@/lib/contratos-store';
+import { gerarCronogramaParcelas, mesesDaPeriodicidade } from '@/lib/contrato-calculo';
 
 const EMPRESA = {
   razaoSocial: 'GROWMONEY DIGITAL LTDA',
@@ -34,7 +35,21 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
   const logoUrl = esc(getLogoUrl());
   const prazo = contrato.prazo_meses || 12;
   const descontos = contrato.desconto_valor || 0;
-  const valorAntesDesconto = contrato.valor_bruto || contrato.valor;
+  const resumoFinanceiro = getContratoResumoFinanceiro(contrato);
+  const formaPagamentoLabel: Record<string, string> = {
+    cartao_credito: 'Cartão de crédito', pix: 'Pix', boleto: 'Boleto', transferencia: 'Transferência', outro: 'Outro',
+    entrada_parcelas: 'Entrada + parcelas', parcelas: 'Parcelas',
+  };
+  const formaPagamento = formaPagamentoLabel[contrato.forma_pagamento] || contrato.forma_pagamento || 'A combinar';
+  const periodicidade = contrato.periodicidade || 'mensal';
+  const intervaloMeses = mesesDaPeriodicidade(periodicidade);
+  const cronogramaParcelas = contrato.data_primeira_parcela
+    ? gerarCronogramaParcelas(contrato.data_primeira_parcela, contrato.parcelas || 1, contrato.valor_parcela, contrato.valor_ultima_parcela ?? contrato.valor_parcela, intervaloMeses)
+    : [];
+  const bonusConcedidos = contrato.itens.filter((item) => item.isBonus);
+  const bonusMarkup = bonusConcedidos.length
+    ? `<h3>Bônus concedidos sem cobrança</h3><ul>${bonusConcedidos.map((item) => `<li>${esc(item.nome)} — valor comercial ${formatBRL(item.valor_comercial_total || 0)}; cobrado ${formatBRL(0)}.</li>`).join('')}</ul>`
+    : '';
   const itens = contrato.itens
     .map((item) => {
       const periodo = item.tipo === 'mensal' ? ` × ${item.prazo_meses || prazo} mês(es)` : '';
@@ -72,7 +87,7 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <table><tbody>
       <tr><th>Consultor</th><td>${esc(contrato.vendedor || 'Renato Arantes')}</td><th>Cliente</th><td>${esc(contrato.cliente_nome)}</td></tr>
       <tr><th>Serviços</th><td colspan="3">${contrato.itens.filter((i) => !i.isBonus).map((i) => esc(i.nome)).join(', ') || '—'}</td></tr>
-      <tr><th>Valor do contrato</th><td>${formatBRL(contrato.valor)}</td><th>Meio de pagamento</th><td>${esc(contrato.forma_pagamento)}</td></tr>
+      <tr><th>Valor do contrato</th><td>${formatBRL(contrato.valor)}</td><th>Meio de pagamento</th><td>${esc(formaPagamento)}</td></tr>
       <tr><th>Prazo contratual</th><td>${prazo} (${prazo === 12 ? 'doze' : prazo}) meses</td><th>Modalidade</th><td>${esc(contrato.modalidade || 'Pagamento único')}</td></tr>
       <tr><th>Início da vigência</th><td>${dataBR(contrato.data_inicio)}</td><th>Término da vigência</th><td>${dataBR(contrato.data_termino)}</td></tr>
       <tr><th>Vendedor responsável</th><td>${esc(contrato.vendedor || 'Renato Arantes')}</td><th>Unidades atendidas</th><td>${contrato.unidades}</td></tr>
@@ -105,7 +120,7 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <p><b>3.1</b> O presente contrato entra em vigor em ${dataBR(contrato.data_inicio)}, com término em ${dataBR(contrato.data_termino)}, com prazo de vigência de ${prazo} meses, e se encerrará quando do adimplemento das obrigações aqui descritas, podendo ser prorrogado, de maneira expressa, por meio de termo aditivo celebrado pelas partes.</p>
     <h2>CLÁUSULA QUARTA – DO PAGAMENTO</h2>
     <p><b>4.1</b> A contratante pagará à contratada a importância descrita no item “III - ESPECIFICAÇÃO DO SERVIÇO:”, de acordo com o meio de pagamento ali previsto.</p>
-    <p><b>4.2</b> O valor total do presente contrato é de ${formatBRL(contrato.valor)}, a ser pago por meio de ${esc(contrato.forma_pagamento)}. ${contrato.parcelas > 1 ? `Pagamento em ${contrato.parcelas} parcelas de ${formatBRL(contrato.valor_parcela)}.` : ''} ${contrato.entrada_valor > 0 ? `Entrada de ${formatBRL(contrato.entrada_valor)}.` : ''}</p>
+    <p><b>4.2</b> O valor total do presente contrato é de ${formatBRL(contrato.valor)}, a ser pago por meio de ${esc(formaPagamento)}. ${contrato.parcelas > 1 ? `Pagamento em ${contrato.parcelas} parcelas, no valor de ${formatBRL(contrato.valor_parcela)}${contrato.valor_ultima_parcela !== contrato.valor_parcela ? `, com última parcela de ${formatBRL(contrato.valor_ultima_parcela || 0)}` : ''}.` : ''} ${contrato.entrada_valor > 0 ? `Entrada de ${formatBRL(contrato.entrada_valor)}.` : ''}</p>
     <h2>CLÁUSULA QUINTA – DA RESCISÃO, CANCELAMENTO E DEVOLUÇÃO DE VALORES</h2>
     <p><b>5.1</b> O presente contrato corresponde à contratação dos serviços pelo prazo e condições comerciais expressamente estabelecidos no campo de especificação e no resumo da contratação, sendo o valor contratado referente ao período contratual integral.</p>
     <p><b>5.2</b> Quando houver concessão de desconto comercial em razão da contratação por prazo determinado, referido desconto estará condicionado à manutenção da contratação durante o período contratado, conforme as condições estabelecidas neste instrumento.</p>
@@ -132,17 +147,24 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     <h2>RESUMO DA CONTRATAÇÃO</h2>
     <table><tbody>
       <tr><th>Prazo</th><td>${prazo} meses</td></tr>
-      <tr><th>Valor total do contrato antes do desconto</th><td>${formatBRL(valorAntesDesconto)}</td></tr>
-      <tr><th>Desconto por contrato de ${prazo} meses (${(contrato.desconto_percentual || 0).toFixed(1)}%)</th><td>- ${formatBRL(descontos)}</td></tr>
-      <tr><th>Valor comercial dos bônus</th><td>${formatBRL(contrato.bonus_total)}</td></tr>
-      <tr><th>Economia total do cliente</th><td>${formatBRL(contrato.economia_total || descontos + contrato.bonus_total)}</td></tr>
+      <tr><th>Valor de tabela sem bônus ou descontos</th><td>${formatBRL(resumoFinanceiro.valorSemBeneficios)}</td></tr>
+      <tr><th>Desconto comercial (${(contrato.desconto_percentual || 0).toFixed(1)}%)</th><td>- ${formatBRL(descontos)}</td></tr>
+      <tr><th>Bônus concedidos sem cobrança</th><td>- ${formatBRL(contrato.bonus_total)}</td></tr>
+      <tr><th>Economia total do cliente</th><td>${formatBRL(resumoFinanceiro.economia)} (${resumoFinanceiro.economiaPercentual.toFixed(1)}%)</td></tr>
       <tr><th>Valor final do contrato (${prazo} meses)</th><td><strong>${formatBRL(contrato.valor)}</strong></td></tr>
     </tbody></table>
+    <h3>Forma e calendário de pagamento</h3>
+    <p><strong>Forma:</strong> ${esc(formaPagamento)} · <strong>Periodicidade:</strong> ${esc(periodicidade)} · <strong>Cobranças:</strong> ${contrato.parcelas || 1} de ${formatBRL(contrato.valor_parcela || contrato.valor)}${contrato.valor_ultima_parcela !== contrato.valor_parcela ? ` (última de ${formatBRL(contrato.valor_ultima_parcela || 0)})` : ''}${contrato.entrada_valor > 0 ? ` · Entrada de ${formatBRL(contrato.entrada_valor)}` : ''}</p>
+    ${cronogramaParcelas.length ? `<table><thead><tr><th>Parcela</th><th>Data de pagamento</th><th>Valor</th></tr></thead><tbody>${cronogramaParcelas.map((parcela) => `<tr><td>${parcela.numero}ª</td><td>${dataBR(parcela.data)}</td><td>${formatBRL(parcela.valor)}</td></tr>`).join('')}</tbody></table>` : '<p>As datas de vencimento das parcelas serão combinadas entre as partes.</p>'}
+    ${bonusMarkup}
     <p>O valor total do contrato é o valor da prestação de serviços durante todo o período de ${prazo} meses.</p>
     <p>O investimento em mídia das plataformas Google Ads e Meta Ads não está incluído nos valores acima e é pago separadamente pela CONTRATANTE.</p>
     <h2>LOCAL E MODALIDADE DA CONTRATAÇÃO</h2>
     <p>A CONTRATANTE declara que a negociação, apresentação dos serviços, condições comerciais, valores, prazo contratual e demais condições deste instrumento foram apresentados e formalizados presencialmente no estabelecimento comercial da CONTRATADA, situado em ${esc(EMPRESA.logradouro)}, nº ${esc(EMPRESA.numero)}, ${esc(EMPRESA.complemento)}, ${esc(EMPRESA.municipio)} - ${esc(EMPRESA.uf)}, tendo a CONTRATANTE tido oportunidade de conhecer previamente o conteúdo deste contrato, esclarecer eventuais dúvidas e manifestar livremente sua concordância com a contratação.</p>
-    <div class="signatures"><div>CONTRATANTE</div><div><strong>${esc(EMPRESA.razaoSocial)}</strong><br/>CNPJ ${esc(EMPRESA.cnpj)}<br/>CONTRATADA</div></div>
+    <div class="signatures">
+      <div class="signature-party"><div class="signature-line"></div><strong>ASSINATURA DO CLIENTE</strong><span>${esc(contrato.cliente_nome)}</span><span>CPF/CNPJ: ${esc(contrato.cliente_documento)}</span><small>Assinatura manual ou eletrônica</small></div>
+      <div class="signature-party"><div class="signature-line"></div><strong>ASSINATURA DA EMPRESA</strong><span>${esc(EMPRESA.razaoSocial)}</span><span>CNPJ ${esc(EMPRESA.cnpj)}</span><small>Representante da CONTRATADA</small></div>
+    </div>
   </article>
   <style>
     .contract-document{max-width:860px;margin:0 auto;color:#1f2937;font-family:Arial,sans-serif;font-size:11pt;line-height:1.55}
@@ -155,9 +177,14 @@ export function gerarContratoHtml(contrato: ContratoLocal) {
     .contract-document th,.contract-document td{border:1px solid #cbd5e1;padding:6px;text-align:left;vertical-align:top}
     .contract-document th{background:#f1f5f9}
     .contract-document ul{padding-left:22px}.contract-document li{margin:5px 0}
+    .contract-document .signatures{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin:56px 0 24px;text-align:center;break-inside:avoid}
+    .contract-document .signature-party{display:flex;min-height:125px;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;font-size:10pt}
+    .contract-document .signature-line{width:100%;border-top:1px solid #1f2937;margin-bottom:8px}
+    .contract-document .signature-party small{font-size:8.5pt;color:#64748b}
     .contract-number{text-align:center!important;color:#475569}
     .signatures{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin:42px 8px 10px}
     .signatures div{border-top:1px solid #475569;padding-top:8px;text-align:center}
     @media print{.contract-document{max-width:none}.contract-document h2{break-after:avoid} .contract-document p,.contract-document li{orphans:3;widows:3}}
+    @media(max-width:600px){.contract-document .signatures{grid-template-columns:1fr;gap:24px}}
   </style>`;
 }

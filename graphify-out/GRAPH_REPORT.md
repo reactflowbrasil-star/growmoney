@@ -1,13 +1,13 @@
 # GrowMoney — grafo do projeto
 
-> Gerado por `npm run graphify` em 2026-10-24T14:39:39.461Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
+> Gerado por `npm run graphify` em 2026-10-24T15:43:36.070Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
 
 ## Escopo
 
-- 193 arquivos de código, schema, documentação e configuração.
-- 33 tabelas identificadas.
+- 201 arquivos de código, schema, documentação e configuração.
+- 34 tabelas identificadas.
 - 10 RPCs identificadas.
-- 534 relações explícitas.
+- 564 relações explícitas.
 - Saída detalhada: `graph.json`; visualização: `graph.html`.
 
 ## Direção arquitetural
@@ -16,18 +16,18 @@
 
 ## Arquivos mais conectados
 
-- `src/main.tsx` — 86 relações de saída
+- `src/main.tsx` — 97 relações de saída
 - `supabase/migrations/20261021000000_init_schema.sql` — 19 relações de saída
+- `src/pages/dashboard/VendedorWorkspace.tsx` — 12 relações de saída
 - `supabase/functions/smtp-mailer/index.ts` — 12 relações de saída
-- `src/pages/dashboard/VendedorWorkspace.tsx` — 11 relações de saída
 - `src/pages/dashboard/Vendedores.tsx` — 10 relações de saída
 - `src/components/layout/AppLayout.tsx` — 9 relações de saída
 - `src/components/ui/index.ts` — 9 relações de saída
+- `src/pages/dashboard/Clientes.tsx` — 9 relações de saída
+- `src/pages/dashboard/Financeiro.tsx` — 9 relações de saída
 - `src/pages/dashboard/Visitas.tsx` — 9 relações de saída
 - `src/contexts/AuthContext.tsx` — 8 relações de saída
 - `src/pages/admin/AdminRecursos.tsx` — 8 relações de saída
-- `src/pages/dashboard/Clientes.tsx` — 8 relações de saída
-- `src/pages/dashboard/Financeiro.tsx` — 8 relações de saída
 
 ## Diretrizes obrigatórias para assistentes
 

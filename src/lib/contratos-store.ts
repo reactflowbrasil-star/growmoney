@@ -51,12 +51,14 @@ export type ContratoItem = {
 
 export type ContratoLocal = {
   id: string;
+  empresa_id?: string;
   numero: number;
   client_id: string;
   cliente_nome: string;
   cliente_documento?: string;
   cliente_email?: string;
   cliente_telefone?: string;
+  cliente_whatsapp?: string;
   cliente_endereco?: string;
   cliente_numero_endereco?: string;
   cliente_bairro?: string;
@@ -73,6 +75,7 @@ export type ContratoLocal = {
   desconto_percentual: number;
   bonus_total: number;
   economia_total?: number;
+  valor_sem_beneficios?: number;
   prazo_meses?: number;
   modalidade?: string;
   data_primeira_parcela?: string;
@@ -86,6 +89,7 @@ export type ContratoLocal = {
   data_inicio: string;
   data_termino?: string;
   pagamento_observacao?: string;
+  pagamento_status?: 'pendente' | 'pago';
   observacoes?: string;
   status: 'rascunho' | 'enviado' | 'assinado' | 'cancelado';
   created_at: string;
@@ -235,7 +239,7 @@ export function deleteServico(id: string) {
   );
 }
 
-type ContratoRemoto = { id: string; numero: number; status: ContratoLocal['status']; payload: ContratoLocal; created_at: string };
+type ContratoRemoto = { id: string; numero: number; empresa_id?: string | null; status: ContratoLocal['status']; payload: ContratoLocal; created_at: string };
 
 async function currentUserId() {
   const { data: { user }, error } = await supabase.auth.getUser();
@@ -249,11 +253,16 @@ function fromRemote(row: ContratoRemoto): ContratoLocal {
 
 export async function listContratosRemotos(): Promise<ContratoLocal[]> {
   const userId = await currentUserId();
+  const empresaId = localStorage.getItem('empresaAtiva');
+  const { data: isPlatformAdmin, error: platformCheckError } = await supabase.rpc('is_platform_admin');
+  if (platformCheckError) throw new Error(`Não foi possível validar o acesso administrativo: ${platformCheckError.message}`);
+  const role = empresaId ? await currentCompanyRole(empresaId) : null;
   const legacy = read<ContratoLocal[]>(K_CONTRATOS, []);
   if (legacy.length && await canImportLegacyContracts()) {
     const rows = legacy.map((contrato) => ({
       id: /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(contrato.id) ? contrato.id : crypto.randomUUID(),
       user_id: userId,
+      empresa_id: isPlatformAdmin === true ? contrato.empresa_id || null : empresaId && (role === 'admin' || role === 'gestor') ? empresaId : null,
       status: contrato.status,
       payload: contrato,
       created_at: contrato.created_at || new Date().toISOString(),
@@ -264,11 +273,14 @@ export async function listContratosRemotos(): Promise<ContratoLocal[]> {
     localStorage.removeItem(K_CONTRATOS);
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('gm_contracts')
-    .select('id, numero, status, payload, created_at')
-    .eq('user_id', userId)
-    .order('numero', { ascending: false });
+    .select('id, numero, empresa_id, status, payload, created_at');
+  if (isPlatformAdmin !== true) {
+    if (empresaId && (role === 'admin' || role === 'gestor')) query = query.eq('empresa_id', empresaId);
+    else query = query.eq('user_id', userId);
+  }
+  const { data, error } = await query.order('numero', { ascending: false });
   if (error) throw new Error(`Não foi possível carregar os contratos: ${error.message}`);
   return ((data || []) as ContratoRemoto[]).map(fromRemote);
 }
@@ -284,14 +296,21 @@ async function canImportLegacyContracts(): Promise<boolean> {
 
   const empresaId = localStorage.getItem('empresaAtiva');
   if (!empresaId) return false;
-  const { data: role, error } = await supabase.rpc('empresa_role', { p_empresa_id: empresaId });
-  return !error && (role === 'admin' || role === 'gestor');
+  const role = await currentCompanyRole(empresaId);
+  return role === 'admin' || role === 'gestor';
+}
+
+async function currentCompanyRole(empresaId: string): Promise<string | null> {
+  const { data, error } = await supabase.rpc('empresa_role', { p_empresa_id: empresaId });
+  return error || typeof data !== 'string' ? null : data;
 }
 
 export async function saveContrato(
-  c: Omit<ContratoLocal, 'id' | 'numero' | 'created_at'> & { id?: string; numero?: number }
+  c: Omit<ContratoLocal, 'id' | 'numero' | 'created_at'> & { empresa_id?: string; id?: string; numero?: number }
 ): Promise<ContratoLocal> {
   const userId = await currentUserId();
+  const empresaId = c.empresa_id || localStorage.getItem('empresaAtiva');
+  if (!empresaId) throw new Error('Selecione uma empresa para criar o contrato.');
   const id = c.id || crypto.randomUUID();
   const item: ContratoLocal = {
     ...c,
@@ -301,16 +320,16 @@ export async function saveContrato(
   };
   const { data, error } = await supabase
     .from('gm_contracts')
-    .insert({ id, user_id: userId, status: item.status, payload: item })
-    .select('id, numero, status, payload, created_at')
+    .insert({ id, user_id: userId, empresa_id: empresaId, status: item.status, payload: { ...item, empresa_id: empresaId } })
+    .select('id, numero, empresa_id, status, payload, created_at')
     .single();
   if (error) throw new Error(`Não foi possível salvar o contrato no servidor: ${error.message}`);
   return fromRemote(data as ContratoRemoto);
 }
 
 export async function updateContratoStatus(id: string, status: ContratoLocal['status']) {
-  const userId = await currentUserId();
-  const { error } = await supabase.from('gm_contracts').update({ status, updated_at: new Date().toISOString() }).eq('id', id).eq('user_id', userId);
+  await currentUserId();
+  const { error } = await supabase.from('gm_contracts').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
   if (error) throw new Error(`Não foi possível atualizar o contrato: ${error.message}`);
 }
 
@@ -318,35 +337,41 @@ export async function updateContrato(
   id: string,
   changes: Partial<Omit<ContratoLocal, 'id' | 'numero' | 'created_at'>>
 ): Promise<ContratoLocal> {
-  const userId = await currentUserId();
+  await currentUserId();
   const { data: existing, error: readError } = await supabase
     .from('gm_contracts')
-    .select('payload,status')
+    .select('payload,status,empresa_id')
     .eq('id', id)
     .maybeSingle();
   if (readError) throw new Error(`Não foi possível carregar o contrato: ${readError.message}`);
   if (!existing) throw new Error('Contrato não encontrado ou sem permissão para alterá-lo.');
 
-  const payload = { ...(existing.payload as ContratoLocal), ...changes };
+  const payload = { ...(existing.payload as ContratoLocal), ...changes, empresa_id: existing.empresa_id || (existing.payload as ContratoLocal).empresa_id };
   const { data, error } = await supabase
     .from('gm_contracts')
     .update({ payload, status: payload.status, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .eq('user_id', userId)
-    .select('id, numero, status, payload, created_at')
+    .select('id, numero, empresa_id, status, payload, created_at')
     .single();
   if (error) throw new Error(`Não foi possível atualizar o contrato: ${error.message}`);
   return fromRemote(data as ContratoRemoto);
 }
 
 export async function deleteContrato(id: string) {
-  const userId = await currentUserId();
-  const { error } = await supabase.from('gm_contracts').delete().eq('id', id).eq('user_id', userId);
+  await currentUserId();
+  const { error } = await supabase.from('gm_contracts').delete().eq('id', id);
   if (error) throw new Error(`Não foi possível excluir o contrato: ${error.message}`);
 }
 
 export function formatBRL(n: number) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export function getContratoResumoFinanceiro(contrato: Pick<ContratoLocal, 'valor' | 'valor_bruto' | 'bonus_total' | 'valor_sem_beneficios' | 'economia_total'>) {
+  const valorSemBeneficios = Math.max(0, Number(contrato.valor_sem_beneficios ?? (Number(contrato.valor_bruto || contrato.valor) + Number(contrato.bonus_total || 0))) || 0);
+  const valorFinal = Math.max(0, Number(contrato.valor) || 0);
+  const economia = Math.max(0, Number(contrato.economia_total ?? (valorSemBeneficios - valorFinal)) || 0);
+  return { valorSemBeneficios, valorFinal, economia, economiaPercentual: valorSemBeneficios > 0 ? economia / valorSemBeneficios * 100 : 0 };
 }
 
 export function formatValorCobranca(n: number, tipo: 'unico' | 'mensal') {

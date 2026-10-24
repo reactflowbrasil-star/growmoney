@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>244 nós · 534 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>256 nós · 564 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -19,6 +19,7 @@
   "file:src/components/assinatura/SignaturePad.tsx"["src/components/assinatura/SignaturePad.tsx"]
   "file:src/components/auth/GoogleButton.tsx"["src/components/auth/GoogleButton.tsx"]
   "file:src/components/auth/ProtectedRoute.tsx"["src/components/auth/ProtectedRoute.tsx"]
+  "file:src/components/brand/AgencyAfricaLogo.tsx"["src/components/brand/AgencyAfricaLogo.tsx"]
   "file:src/components/brand/BrandLogo.tsx"["src/components/brand/BrandLogo.tsx"]
   "file:src/components/brand/FirstVisitIntro.tsx"["src/components/brand/FirstVisitIntro.tsx"]
   "file:src/components/chat/LiveChat.tsx"["src/components/chat/LiveChat.tsx"]
@@ -68,6 +69,8 @@
   "file:src/lib/auth-types.ts"["src/lib/auth-types.ts"]
   "file:src/lib/brand.ts"["src/lib/brand.ts"]
   "file:src/lib/client-types.ts"["src/lib/client-types.ts"]
+  "file:src/lib/contrato-calculo.test.ts"["src/lib/contrato-calculo.test.ts"]
+  "file:src/lib/contrato-calculo.ts"["src/lib/contrato-calculo.ts"]
   "file:src/lib/contrato-template.ts"["src/lib/contrato-template.ts"]
   "file:src/lib/contrato-types.ts"["src/lib/contrato-types.ts"]
   "file:src/lib/contratos-store.test.ts"["src/lib/contratos-store.test.ts"]
@@ -156,6 +159,7 @@
   "file:src/services/servico-service.ts"["src/services/servico-service.ts"]
   "file:src/services/vendedor-service.ts"["src/services/vendedor-service.ts"]
   "file:src/services/vendor-chat-service.ts"["src/services/vendor-chat-service.ts"]
+  "file:src/services/vendor-expense-service.ts"["src/services/vendor-expense-service.ts"]
   "file:src/services/vendor-visit-service.ts"["src/services/vendor-visit-service.ts"]
   "file:src/test/InstallPwaButton.test.tsx"["src/test/InstallPwaButton.test.tsx"]
   "file:src/test/setup.ts"["src/test/setup.ts"]
@@ -190,11 +194,18 @@
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql"["supabase/migrations/20261023050243_vendedor_empresa_chat.sql"]
   "file:supabase/migrations/20261023054301_vendedor_visitas.sql"["supabase/migrations/20261023054301_vendedor_visitas.sql"]
   "file:supabase/migrations/20261023090501_admin_email_templates.sql"["supabase/migrations/20261023090501_admin_email_templates.sql"]
+  "file:supabase/migrations/20261023135923_vendor_expenses.sql"["supabase/migrations/20261023135923_vendor_expenses.sql"]
+  "file:supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql"["supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql"]
+  "file:supabase/migrations/20261023160000_company_contract_management.sql"["supabase/migrations/20261023160000_company_contract_management.sql"]
+  "file:supabase/migrations/20261024152503_audit_all_company_actions.sql"["supabase/migrations/20261024152503_audit_all_company_actions.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
   "asset:public/api/.htaccess"["public/api/.htaccess"]
   "asset:public/api/smtp.php"["public/api/smtp.php"]
+  "asset:public/assets/agencia-africa-email.png"["public/assets/agencia-africa-email.png"]
+  "asset:public/assets/agencia-africa-mark.png"["public/assets/agencia-africa-mark.png"]
+  "asset:public/assets/agencia-africa.png"["public/assets/agencia-africa.png"]
   "asset:public/assets/canal360-logo.png"["public/assets/canal360-logo.png"]
   "asset:public/assets/grow-logo-black.png"["public/assets/grow-logo-black.png"]
   "asset:public/assets/logo.png"["public/assets/logo.png"]
@@ -224,6 +235,7 @@
   "table:comissoes"["comissoes"]
   "table:gm_files"["gm_files"]
   "rpc:admin_log_event"["admin_log_event"]
+  "table:vendedor_despesas"["vendedor_despesas"]
   "rpc:admin_restore_system_backup"["admin_restore_system_backup"]
   "rpc:admin_clear_operational_data"["admin_clear_operational_data"]
   "table:auditoria"["auditoria"]
@@ -255,6 +267,7 @@
   "file:src/components/auth/GoogleButton.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/auth/ProtectedRoute.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/components/auth/ProtectedRoute.tsx" -->|imports| "file:src/components/ui/index.ts"
+  "file:src/components/brand/AgencyAfricaLogo.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
@@ -303,6 +316,7 @@
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/config/nav.ts"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/components/chat/LiveChat.tsx"
+  "file:src/components/layout/GlobalFooter.tsx" -->|imports| "file:src/components/brand/AgencyAfricaLogo.tsx"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -351,7 +365,11 @@
   "file:src/lib/assinatura-store.ts" -->|calls-rpc| "rpc:get_signature_envelope_by_token"
   "file:src/lib/assinatura-store.ts" -->|calls-rpc| "rpc:mark_signature_envelope_viewed"
   "file:src/lib/assinatura-store.ts" -->|calls-rpc| "rpc:apply_signature_to_envelope"
+  "file:src/lib/contrato-calculo.test.ts" -->|imports| "file:src/lib/contrato-calculo.ts"
+  "file:src/lib/contrato-calculo.test.ts" -->|imports| "file:src/lib/contratos-store.ts"
+  "file:src/lib/contrato-calculo.ts" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/lib/contrato-template.ts" -->|imports| "file:src/lib/contratos-store.ts"
+  "file:src/lib/contrato-template.ts" -->|imports| "file:src/lib/contrato-calculo.ts"
   "file:src/lib/contratos-store.test.ts" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/lib/contratos-store.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/lib/contratos-store.ts" -->|reads-or-writes| "table:gm_contracts"
@@ -427,6 +445,17 @@
   "file:src/main.tsx" -->|route:assinaturas| "file:src/pages/admin/AdminRecursos.tsx"
   "file:src/main.tsx" -->|route:arquivos| "file:src/pages/admin/AdminArquivos.tsx"
   "file:src/main.tsx" -->|route:financeiro| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:contratos-empresa| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:assinaturas-empresa| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:servicos| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:vendedores| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:agenda| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:visitas| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:despesas| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:comissoes| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:parcelas| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:lancamentos| "file:src/pages/admin/AdminRecursos.tsx"
+  "file:src/main.tsx" -->|route:estornos| "file:src/pages/admin/AdminRecursos.tsx"
   "file:src/main.tsx" -->|route:sistema| "file:src/pages/admin/AdminSistema.tsx"
   "file:src/main.tsx" -->|route:auditoria| "file:src/pages/admin/AdminAuditoria.tsx"
   "file:src/main.tsx" -->|route:seguranca| "file:src/pages/admin/AdminSeguranca.tsx"
@@ -535,6 +564,7 @@
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/lib/client-types.ts"
+  "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/lib/supabase/client.ts"
@@ -542,6 +572,7 @@
   "file:src/pages/dashboard/Configuracoes.tsx" -->|reads-or-writes| "table:empresas"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/lib/utils.ts"
+  "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/lib/contrato-calculo.ts"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/ContratoNovo.tsx" -->|imports| "file:src/services/contrato-wizard-data.ts"
@@ -552,6 +583,7 @@
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/dashboard/Contratos.tsx" -->|imports| "file:src/lib/contrato-template.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
@@ -559,6 +591,7 @@
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-overview-service.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/dashboard/DashboardShortcuts.tsx"
+  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Empresas.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -573,6 +606,7 @@
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
+  "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/services/vendor-expense-service.ts"
   "file:src/pages/dashboard/Financeiro.tsx" -->|reads-or-writes| "table:gm_financial_entries"
   "file:src/pages/dashboard/Perfil.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Perfil.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
@@ -594,6 +628,7 @@
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/services/vendor-visit-service.ts"
+  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/services/vendor-expense-service.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:agenda"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -623,6 +658,7 @@
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
+  "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/brand/AgencyAfricaLogo.tsx"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:src/repositories/admin-audit-repository.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/repositories/admin-audit-repository.ts" -->|calls-rpc| "rpc:admin_list_audit"
@@ -665,6 +701,8 @@
   "file:src/services/admin-hosting-migration-service.ts" -->|imports| "file:src/services/admin-system-backup-service.ts"
   "file:src/services/admin-resource-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:empresas"
+  "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:vendedor_despesas"
+  "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:gm_files"
   "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:empresa_members"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:admin_log_event"
@@ -713,6 +751,9 @@
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/servico-types.ts"
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/permissions.ts"
   "file:src/services/vendor-chat-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/vendor-expense-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/vendor-expense-service.ts" -->|imports| "file:src/services/file-storage.ts"
+  "file:src/services/vendor-expense-service.ts" -->|reads-or-writes| "table:vendedor_despesas"
   "file:src/services/vendor-visit-service.ts" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
   "file:src/services/vendor-visit-service.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/test/InstallPwaButton.test.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
@@ -776,4 +817,5 @@
   "file:supabase/migrations/20261023044825_vendor_activation_email_tracking.sql" -->|defines-table| "table:gm_vendor_activation_events"
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql" -->|defines-table| "table:gm_chat_messages"
   "file:supabase/migrations/20261023054301_vendedor_visitas.sql" -->|defines-table| "table:vendedor_visitas"
-  "file:supabase/migrations/20261023090501_admin_email_templates.sql" -->|defines-table| "table:gm_email_templates"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>
+  "file:supabase/migrations/20261023090501_admin_email_templates.sql" -->|defines-table| "table:gm_email_templates"
+  "file:supabase/migrations/20261023135923_vendor_expenses.sql" -->|defines-table| "table:vendedor_despesas"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>

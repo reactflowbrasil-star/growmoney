@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-24T14:39:39.461Z",
+  "generated_at": "2026-10-24T15:43:36.070Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -103,6 +103,11 @@
       "id": "file:src/components/auth/ProtectedRoute.tsx",
       "type": "file",
       "label": "src/components/auth/ProtectedRoute.tsx"
+    },
+    {
+      "id": "file:src/components/brand/AgencyAfricaLogo.tsx",
+      "type": "file",
+      "label": "src/components/brand/AgencyAfricaLogo.tsx"
     },
     {
       "id": "file:src/components/brand/BrandLogo.tsx",
@@ -348,6 +353,16 @@
       "id": "file:src/lib/client-types.ts",
       "type": "file",
       "label": "src/lib/client-types.ts"
+    },
+    {
+      "id": "file:src/lib/contrato-calculo.test.ts",
+      "type": "file",
+      "label": "src/lib/contrato-calculo.test.ts"
+    },
+    {
+      "id": "file:src/lib/contrato-calculo.ts",
+      "type": "file",
+      "label": "src/lib/contrato-calculo.ts"
     },
     {
       "id": "file:src/lib/contrato-template.ts",
@@ -790,6 +805,11 @@
       "label": "src/services/vendor-chat-service.ts"
     },
     {
+      "id": "file:src/services/vendor-expense-service.ts",
+      "type": "file",
+      "label": "src/services/vendor-expense-service.ts"
+    },
+    {
       "id": "file:src/services/vendor-visit-service.ts",
       "type": "file",
       "label": "src/services/vendor-visit-service.ts"
@@ -960,6 +980,26 @@
       "label": "supabase/migrations/20261023090501_admin_email_templates.sql"
     },
     {
+      "id": "file:supabase/migrations/20261023135923_vendor_expenses.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023135923_vendor_expenses.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261023160000_company_contract_management.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261023160000_company_contract_management.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261024152503_audit_all_company_actions.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261024152503_audit_all_company_actions.sql"
+    },
+    {
       "id": "file:tailwind.config.ts",
       "type": "file",
       "label": "tailwind.config.ts"
@@ -983,6 +1023,21 @@
       "id": "asset:public/api/smtp.php",
       "type": "static-asset",
       "label": "public/api/smtp.php"
+    },
+    {
+      "id": "asset:public/assets/agencia-africa-email.png",
+      "type": "static-asset",
+      "label": "public/assets/agencia-africa-email.png"
+    },
+    {
+      "id": "asset:public/assets/agencia-africa-mark.png",
+      "type": "static-asset",
+      "label": "public/assets/agencia-africa-mark.png"
+    },
+    {
+      "id": "asset:public/assets/agencia-africa.png",
+      "type": "static-asset",
+      "label": "public/assets/agencia-africa.png"
     },
     {
       "id": "asset:public/assets/canal360-logo.png",
@@ -1128,6 +1183,11 @@
       "id": "rpc:admin_log_event",
       "type": "database-rpc",
       "label": "admin_log_event"
+    },
+    {
+      "id": "table:vendedor_despesas",
+      "type": "database-table",
+      "label": "vendedor_despesas"
     },
     {
       "id": "rpc:admin_restore_system_backup",
@@ -1295,6 +1355,12 @@
     {
       "from": "file:src/components/auth/ProtectedRoute.tsx",
       "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/components/brand/AgencyAfricaLogo.tsx",
+      "to": "file:src/contexts/ThemeContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -1587,6 +1653,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/components/layout/GlobalFooter.tsx",
+      "to": "file:src/components/brand/AgencyAfricaLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/lib/utils.ts",
       "type": "imports",
@@ -1875,8 +1947,32 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/lib/contrato-calculo.test.ts",
+      "to": "file:src/lib/contrato-calculo.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/lib/contrato-calculo.test.ts",
+      "to": "file:src/lib/contratos-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/lib/contrato-calculo.ts",
+      "to": "file:src/lib/contratos-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/lib/contrato-template.ts",
       "to": "file:src/lib/contratos-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/lib/contrato-template.ts",
+      "to": "file:src/lib/contrato-calculo.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -2328,6 +2424,72 @@
       "from": "file:src/main.tsx",
       "to": "file:src/pages/admin/AdminRecursos.tsx",
       "type": "route:financeiro",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:contratos-empresa",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:assinaturas-empresa",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:servicos",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:vendedores",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:agenda",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:visitas",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:despesas",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:comissoes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:parcelas",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:lancamentos",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/admin/AdminRecursos.tsx",
+      "type": "route:estornos",
       "confidence": "EXTRACTED"
     },
     {
@@ -2979,6 +3141,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/dashboard/Clientes.tsx",
+      "to": "file:src/lib/contratos-store.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/dashboard/Configuracoes.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3017,6 +3185,12 @@
     {
       "from": "file:src/pages/dashboard/ContratoNovo.tsx",
       "to": "file:src/lib/utils.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/ContratoNovo.tsx",
+      "to": "file:src/lib/contrato-calculo.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3081,6 +3255,12 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/dashboard/Contratos.tsx",
+      "to": "file:src/lib/contrato-template.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/dashboard/Dashboard.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3119,6 +3299,12 @@
     {
       "from": "file:src/pages/dashboard/Dashboard.tsx",
       "to": "file:src/components/dashboard/DashboardShortcuts.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Dashboard.tsx",
+      "to": "file:src/lib/contratos-store.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3203,6 +3389,12 @@
     {
       "from": "file:src/pages/dashboard/Financeiro.tsx",
       "to": "file:src/contexts/AdminAuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/Financeiro.tsx",
+      "to": "file:src/services/vendor-expense-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3329,6 +3521,12 @@
     {
       "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
       "to": "file:src/services/vendor-visit-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
+      "to": "file:src/services/vendor-expense-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3503,6 +3701,12 @@
     {
       "from": "file:src/pages/public/LandingPage.tsx",
       "to": "file:src/components/brand/BrandLogo.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/public/LandingPage.tsx",
+      "to": "file:src/components/brand/AgencyAfricaLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3755,6 +3959,18 @@
     {
       "from": "file:src/services/admin-resource-service.ts",
       "to": "table:empresas",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-resource-service.ts",
+      "to": "table:vendedor_despesas",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/admin-resource-service.ts",
+      "to": "table:gm_files",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
@@ -4044,6 +4260,24 @@
       "from": "file:src/services/vendor-chat-service.ts",
       "to": "file:src/lib/supabase/client.ts",
       "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/vendor-expense-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/vendor-expense-service.ts",
+      "to": "file:src/services/file-storage.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/vendor-expense-service.ts",
+      "to": "table:vendedor_despesas",
+      "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
     {
@@ -4427,6 +4661,12 @@
     {
       "from": "file:supabase/migrations/20261023090501_admin_email_templates.sql",
       "to": "table:gm_email_templates",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261023135923_vendor_expenses.sql",
+      "to": "table:vendedor_despesas",
       "type": "defines-table",
       "confidence": "EXTRACTED"
     }

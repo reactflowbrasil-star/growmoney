@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Plus, Check, RefreshCw } from 'lucide-react';
 import { Button, Input, Card, PageHeader, Modal } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { calcularDescontoComercial, calcularItensContrato, gerarCronogramaParcelas, isValidCurrencyInput, mesesDaPeriodicidade, parseCurrencyInput } from '@/lib/contrato-calculo';
 import {
   listServicosCatalogo,
   saveContrato,
@@ -44,10 +45,13 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
   const [unidades, setUnidades] = useState(1);
 
   const [valorNegociado, setValorNegociado] = useState('');
+  const [descontoManual, setDescontoManual] = useState('');
+  const [modoDesconto, setModoDesconto] = useState<'valor' | 'percentual'>('valor');
   const [entrada, setEntrada] = useState('');
   const [parcelas, setParcelas] = useState(1);
+  const [formaPagamento, setFormaPagamento] = useState<'cartao_credito' | 'pix' | 'boleto' | 'transferencia' | 'outro'>('cartao_credito');
+  const [dataPrimeiraParcela, setDataPrimeiraParcela] = useState(today());
   const [periodicidade, setPeriodicidade] = useState<'mensal' | 'trimestral' | 'semestral' | 'anual'>('mensal');
-  const [recorrente, setRecorrente] = useState(false);
   const [dataInicio, setDataInicio] = useState(today());
   const [obsPagamento, setObsPagamento] = useState('');
   const [obsInternas, setObsInternas] = useState('');
@@ -59,6 +63,8 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
     setLoadingClientes(true);
     setError('');
     try {
+      // The old browser-only client list had no company identifier. Import it
+      // automatically only when the account has one company, avoiding cross-tenant data mixing.
       setClientes(await loadClientesEmpresa(empresaAtiva.id, empresaAtiva.role, empresas.length === 1));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Não foi possível carregar os clientes da empresa.');
@@ -73,41 +79,36 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
 
   const calc = useMemo(() => {
     const u = Math.max(1, unidades || 1);
-    let cobradoBruto = 0;
-    let bonusTotal = 0;
-    const itens = servicos
-      .filter((s) => selecionados.includes(s.id) || bonusIds.includes(s.id))
-      .map((s) => {
-        const isBonus = bonusIds.includes(s.id) && !selecionados.includes(s.id);
-        const valorUnit = isBonus ? 0 : s.valor;
-        const total = valorUnit * u;
-        if (isBonus) bonusTotal += s.valor * u;
-        else cobradoBruto += total;
-        return {
-          servico_id: s.id,
-          nome: s.nome,
-          valor: valorUnit,
-          tipo: s.tipo,
-          isBonus,
-          quantidade: u,
-        };
-      });
-
+    const nParc = Math.min(99, Math.max(1, Number(parcelas) || 1));
+    const mesesPeriodicidade = mesesDaPeriodicidade(periodicidade);
+    // Cada cobrança cobre o intervalo selecionado; o prazo e o calendário
+    // acompanham a quantidade de cobranças e a periodicidade.
+    const prazoMeses = Math.max(1, nParc * mesesPeriodicidade);
+    const { itens, cobradoBruto, bonusTotal } = calcularItensContrato(servicos, selecionados, bonusIds, u, prazoMeses);
+    const valorMensalBase = itens.reduce((sum, item) => sum + (!item.isBonus && item.tipo === 'mensal' ? item.valor * item.quantidade : 0), 0);
     const valorComercial = cobradoBruto;
-    const negociado = valorNegociado.trim()
-      ? Number(String(valorNegociado).replace(/\./g, '').replace(',', '.')) || valorComercial
-      : valorComercial;
+    const descontoInput = descontoManual.trim() ? calcularDescontoComercial(valorComercial, parseCurrencyInput(descontoManual), modoDesconto) : null;
+    const negociado = descontoInput !== null
+      ? Math.max(0, valorComercial - descontoInput)
+      : valorNegociado.trim() ? parseCurrencyInput(valorNegociado) : valorComercial;
     const descontoValor = Math.max(0, valorComercial - negociado);
     const descontoPercentual = valorComercial > 0 ? (descontoValor / valorComercial) * 100 : 0;
-    const entradaVal = Number(String(entrada).replace(/\./g, '').replace(',', '.')) || 0;
+    const valorSemBeneficios = Math.round((cobradoBruto + bonusTotal) * 100) / 100;
+    const economiaTotal = Math.round(Math.max(0, valorSemBeneficios - negociado) * 100) / 100;
+    const economiaPercentual = valorSemBeneficios > 0 ? (economiaTotal / valorSemBeneficios) * 100 : 0;
+    const entradaVal = parseCurrencyInput(entrada);
     const resto = Math.max(0, negociado - entradaVal);
-    const nParc = Math.max(1, Number(parcelas) || 1);
     const totalCentavos = Math.round(resto * 100);
     const valorParcela = Math.floor(totalCentavos / nParc) / 100;
     const valorUltimaParcela = (totalCentavos - valorParcela * 100 * (nParc - 1)) / 100;
-    const mesesPeriodo =
-      periodicidade === 'trimestral' ? 3 : periodicidade === 'semestral' ? 6 : periodicidade === 'anual' ? 12 : 1;
-    const termino = addMonths(dataInicio, Math.max(1, nParc) * (recorrente ? mesesPeriodo : 1));
+    const cronogramaParcelas = gerarCronogramaParcelas(
+      dataPrimeiraParcela,
+      nParc,
+      valorParcela,
+      valorUltimaParcela,
+      mesesPeriodicidade,
+    );
+    const termino = addMonths(dataInicio, prazoMeses);
 
     return {
       itens,
@@ -116,14 +117,22 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
       negociado,
       descontoValor,
       descontoPercentual,
+      valorSemBeneficios,
+      economiaTotal,
+      economiaPercentual,
       bonusTotal,
+      valorMensalBase,
+      valorAnual: valorMensalBase * 12,
+      prazoMeses,
       entradaVal,
       valorParcela,
       valorUltimaParcela,
+      cronogramaParcelas,
       nParc,
+      mesesPeriodicidade,
       termino,
     };
-  }, [servicos, selecionados, bonusIds, unidades, valorNegociado, entrada, parcelas, dataInicio, periodicidade, recorrente]);
+  }, [servicos, selecionados, bonusIds, unidades, valorNegociado, descontoManual, modoDesconto, entrada, parcelas, dataInicio, dataPrimeiraParcela, periodicidade]);
 
   const toggleServico = (s: ServicoCatalogo) => {
     setSelecionados((prev) => {
@@ -164,6 +173,31 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
 
   const salvar = async () => {
     setError('');
+    if (!isValidCurrencyInput(valorNegociado)) {
+      setError('Informe um valor negociado válido, usando no máximo duas casas decimais.');
+      setStep(3);
+      return;
+    }
+    if (!isValidCurrencyInput(descontoManual) || parseCurrencyInput(descontoManual) > calc.valorComercial) {
+      setError('O desconto deve ser válido e não pode superar o valor comercial do contrato.');
+      setStep(3);
+      return;
+    }
+    if (!isValidCurrencyInput(entrada)) {
+      setError('Informe uma entrada válida, usando no máximo duas casas decimais.');
+      setStep(3);
+      return;
+    }
+    if (calc.entradaVal > calc.negociado) {
+      setError('A entrada não pode ser maior que o valor final do contrato.');
+      setStep(3);
+      return;
+    }
+    if (!dataPrimeiraParcela) {
+      setError('Informe a data de vencimento da primeira parcela.');
+      setStep(3);
+      return;
+    }
     if (!clientId || !cliente) {
       setError('Selecione um cliente.');
       setStep(1);
@@ -177,9 +211,13 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
     setSaving(true);
     try {
       const contrato = await saveContrato({
+        empresa_id: empresaAtiva?.id,
         client_id: clientId,
         cliente_nome: cliente.razao_social,
         cliente_documento: cliente.documento,
+        cliente_email: cliente.email,
+        cliente_telefone: cliente.telefone,
+        cliente_whatsapp: cliente.whatsapp,
         itens: calc.itens,
         unidades: Math.max(1, unidades),
         valor_bruto: calc.cobradoBruto,
@@ -187,16 +225,21 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
         desconto_valor: calc.descontoValor,
         desconto_percentual: calc.descontoPercentual,
         bonus_total: calc.bonusTotal,
-        forma_pagamento: calc.entradaVal > 0 ? 'entrada_parcelas' : 'parcelas',
+        valor_sem_beneficios: calc.valorSemBeneficios,
+        economia_total: calc.economiaTotal,
+        prazo_meses: calc.prazoMeses,
+        forma_pagamento: formaPagamento,
+        data_primeira_parcela: dataPrimeiraParcela,
         parcelas: calc.nParc,
         valor_parcela: calc.valorParcela,
         valor_ultima_parcela: calc.valorUltimaParcela,
         entrada_valor: calc.entradaVal,
-        periodicidade: recorrente ? periodicidade : null,
-        plano_recorrente: recorrente,
+        periodicidade,
+        plano_recorrente: true,
         data_inicio: dataInicio,
         data_termino: calc.termino,
         pagamento_observacao: obsPagamento || undefined,
+        pagamento_status: 'pendente',
         observacoes: obsInternas || undefined,
         status: 'rascunho',
       });
@@ -317,37 +360,37 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
               const checked = selecionados.includes(s.id);
               const asBonus = bonusIds.includes(s.id);
               return (
-                <label
+                <div
                   key={s.id}
                   className={cn(
                     'flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors',
                     checked || asBonus ? 'border-brand/50 bg-brand/5' : 'border-border-color hover:bg-bg-tertiary/50'
                   )}
                 >
-                  <input type="checkbox" className="mt-1 accent-brand" checked={checked} onChange={() => toggleServico(s)} />
+                  <input id={`servico-${s.id}`} type="checkbox" className="mt-1 accent-brand" checked={checked} onChange={() => toggleServico(s)} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="font-medium text-sm">{s.nome}</span>
+                      <label htmlFor={`servico-${s.id}`} className="cursor-pointer font-medium text-sm">{s.nome}</label>
                       <span className="text-sm tabular-nums text-text-secondary">
-                        {formatBRL(s.valor)}
-                        {s.tipo === 'mensal' ? '/mês' : ''}
+                        {formatBRL(s.valor)}{s.tipo === 'mensal' ? '/mês' : ' · cobrança única'}
                       </span>
                     </div>
                     <p className="text-xs text-text-secondary">{s.categoria}</p>
                     {s.bonus_permitido !== false && (
-                      <label className="mt-2 inline-flex items-center gap-2 text-xs text-text-secondary">
+                      <label htmlFor={`bonus-${s.id}`} className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-text-secondary">
                         <input
+                          id={`bonus-${s.id}`}
                           type="checkbox"
                           className="accent-brand"
                           checked={asBonus}
                           disabled={checked}
                           onChange={() => toggleBonus(s)}
                         />
-                        Incluir como bônus (R$ 0,00)
+                        Incluir como bônus (cobrado R$ 0,00)
                       </label>
                     )}
                   </div>
-                </label>
+                </div>
               );
             })}
           </div>
@@ -367,11 +410,12 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
               <p className="mt-1 text-xs text-text-secondary">Todos os valores são multiplicados por esta quantidade.</p>
             </div>
             <div className="rounded-xl border border-border-color p-4">
-              <p className="text-xs font-semibold uppercase text-text-secondary">Valor dos serviços</p>
+              <p className="text-xs font-semibold uppercase text-text-secondary">Total dos serviços no contrato</p>
               <p className="mt-1 text-2xl font-bold tabular-nums">{formatBRL(calc.cobradoBruto)}</p>
-              <p className="mt-1 text-xs text-text-secondary">Valor comercial antes da negociação</p>
+              <p className="mt-1 text-xs text-text-secondary">Prazo de {calc.prazoMeses} meses. Serviços mensais são multiplicados pelo prazo; itens únicos entram uma vez.</p>
+              {calc.valorMensalBase > 0 && <p className="mt-2 text-xs text-text-secondary">Base mensal: {formatBRL(calc.valorMensalBase)} · valor anual: {formatBRL(calc.valorAnual)}</p>}
               {calc.bonusTotal > 0 && (
-                <p className="mt-2 text-xs text-brand">Bônus (tabela): {formatBRL(calc.bonusTotal)} · cobrado R$ 0,00</p>
+                <p className="mt-2 text-xs text-brand">Bônus no prazo: {formatBRL(calc.bonusTotal)} · cobrado R$ 0,00</p>
               )}
             </div>
           </div>
@@ -393,11 +437,11 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-sm font-medium">Valor comercial (negociado)</label>
+              <label className="text-sm font-medium">Valor final negociado (R$)</label>
               <Input
                 placeholder={formatBRL(calc.valorComercial)}
                 value={valorNegociado}
-                onChange={(e) => setValorNegociado(e.target.value)}
+                onChange={(e) => { setValorNegociado(e.target.value); setDescontoManual(''); }}
               />
               <p className="mt-1 text-xs text-text-secondary">
                 Valor de tabela: {formatBRL(calc.valorComercial)}
@@ -409,11 +453,37 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
               </p>
             </div>
             <div>
+              <label className="text-sm font-medium" htmlFor="modo-desconto">Adicionar desconto</label>
+              <div className="mt-1 grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-2">
+                <select
+                  id="modo-desconto"
+                  className="min-w-0 rounded-xl border border-border-color bg-bg-primary px-3 py-2.5 text-sm"
+                  value={modoDesconto}
+                  onChange={(e) => {
+                    setModoDesconto(e.target.value as typeof modoDesconto);
+                    setDescontoManual('');
+                    setValorNegociado('');
+                  }}
+                >
+                  <option value="valor">Valor (R$)</option>
+                  <option value="percentual">Percentual (%)</option>
+                </select>
+                <Input
+                  value={descontoManual}
+                  onChange={(e) => { setDescontoManual(e.target.value); setValorNegociado(''); }}
+                  placeholder={modoDesconto === 'percentual' ? 'Ex.: 10' : '0,00'}
+                  inputMode="decimal"
+                  aria-label={modoDesconto === 'percentual' ? 'Desconto comercial em percentual' : 'Desconto comercial em reais'}
+                />
+              </div>
+              <p className="mt-1 text-xs text-text-secondary">{descontoManual && modoDesconto === 'percentual' ? `Desconto aplicado: ${formatBRL(calc.descontoValor)}` : 'O valor final e a economia são recalculados automaticamente.'}</p>
+            </div>
+            <div>
               <label className="text-sm font-medium">Entrada (R$)</label>
               <Input value={entrada} onChange={(e) => setEntrada(e.target.value)} placeholder="0,00" />
             </div>
             <div>
-              <label className="text-sm font-medium">{calc.entradaVal > 0 ? 'Cobranças após a entrada' : 'Parcelas'}</label>
+              <label className="text-sm font-medium">{calc.entradaVal > 0 ? 'Cobranças após a entrada' : 'Número de cobranças'}</label>
               <Input
                 type="number"
                 min={1}
@@ -432,28 +502,40 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
               <Input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
               <p className="mt-1 text-xs text-text-secondary">Término previsto: {calc.termino}</p>
             </div>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" className="accent-brand" checked={recorrente} onChange={(e) => setRecorrente(e.target.checked)} />
-            Plano recorrente
-          </label>
-
-          {recorrente && (
             <div>
-              <label className="text-sm font-medium">Periodicidade</label>
+              <label className="text-sm font-medium">Forma de pagamento</label>
               <select
                 className="mt-1 w-full rounded-xl border border-border-color bg-bg-primary px-3 py-2.5 text-sm"
-                value={periodicidade}
-                onChange={(e) => setPeriodicidade(e.target.value as typeof periodicidade)}
+                value={formaPagamento}
+                onChange={(e) => setFormaPagamento(e.target.value as typeof formaPagamento)}
               >
-                <option value="mensal">Mensal</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="semestral">Semestral</option>
-                <option value="anual">Anual</option>
+                <option value="cartao_credito">Cartão de crédito</option>
+                <option value="pix">Pix</option>
+                <option value="boleto">Boleto</option>
+                <option value="transferencia">Transferência</option>
+                <option value="outro">Outro</option>
               </select>
             </div>
-          )}
+            <div>
+              <label className="text-sm font-medium">Vencimento da primeira parcela</label>
+              <Input type="date" value={dataPrimeiraParcela} onChange={(e) => setDataPrimeiraParcela(e.target.value)} />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Periodicidade da cobrança</label>
+            <select
+              className="mt-1 w-full rounded-xl border border-border-color bg-bg-primary px-3 py-2.5 text-sm"
+              value={periodicidade}
+              onChange={(e) => setPeriodicidade(e.target.value as typeof periodicidade)}
+            >
+              <option value="mensal">Mensal</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="semestral">Semestral</option>
+              <option value="anual">Anual</option>
+            </select>
+            <p className="mt-1 text-xs text-text-secondary">Cada cobrança cobre {calc.mesesPeriodicidade} {calc.mesesPeriodicidade === 1 ? 'mês' : 'meses'}. O prazo, o valor por cobrança e os vencimentos são calculados automaticamente.</p>
+          </div>
 
           <div>
             <label className="text-sm font-medium">Observação de pagamento</label>
@@ -469,9 +551,24 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
           </div>
 
           <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 text-sm space-y-1">
-            <div className="flex justify-between">
-              <span>Total negociado</span>
-              <strong className="tabular-nums">{formatBRL(calc.negociado)}</strong>
+            <div className="flex justify-between"><span>Valor de tabela sem bônus ou descontos</span><strong className="tabular-nums">{formatBRL(calc.valorSemBeneficios)}</strong></div>
+            {calc.bonusTotal > 0 && <div className="flex justify-between text-text-secondary"><span>Bônus incluídos</span><span>− {formatBRL(calc.bonusTotal)}</span></div>}
+            {calc.descontoValor > 0 && <div className="flex justify-between text-text-secondary"><span>Desconto comercial</span><span>− {formatBRL(calc.descontoValor)}</span></div>}
+            <div className="flex justify-between border-t border-brand/20 pt-2"><span>Valor final no fechamento</span><strong className="tabular-nums">{formatBRL(calc.negociado)}</strong></div>
+            {calc.economiaTotal > 0 && <div className="flex justify-between font-semibold text-brand"><span>Economia do cliente</span><span>{formatBRL(calc.economiaTotal)} ({calc.economiaPercentual.toFixed(1)}%)</span></div>}
+            {calc.valorMensalBase > 0 && <div className="flex justify-between text-text-secondary"><span>Valor anual dos serviços mensais</span><span>{formatBRL(calc.valorAnual)}</span></div>}
+            <div className="flex justify-between text-text-secondary"><span>Prazo</span><span>{calc.prazoMeses} meses · término previsto {calc.termino}</span></div>
+            <div className="flex justify-between text-text-secondary"><span>Pagamento</span><span>{formaPagamento === 'cartao_credito' ? 'Cartão de crédito' : formaPagamento === 'pix' ? 'Pix' : formaPagamento === 'boleto' ? 'Boleto' : formaPagamento === 'transferencia' ? 'Transferência' : 'Outro'} · {periodicidade} · {calc.nParc} cobranças de {formatBRL(calc.valorParcela)}</span></div>
+            <div className="border-t border-brand/20 pt-2">
+              <p className="font-semibold">Vencimento de cada parcela</p>
+              <ul className="mt-1 grid gap-1 sm:grid-cols-2">
+                {calc.cronogramaParcelas.map((parcela) => (
+                  <li key={parcela.numero} className="flex justify-between gap-2 text-text-secondary">
+                    <span>{parcela.numero}ª parcela · {new Date(`${parcela.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                    <span className="tabular-nums">{formatBRL(parcela.valor)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
             {calc.descontoValor > 0 && (
               <div className="flex justify-between text-text-secondary">
@@ -515,7 +612,7 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
                       {it.quantidade > 1 ? ` × ${it.quantidade}` : ''}
                     </span>
                     <span className="tabular-nums text-text-secondary">
-                      {it.isBonus ? 'R$ 0,00' : formatBRL(it.valor * it.quantidade)}
+                      {it.isBonus ? 'R$ 0,00' : formatBRL(it.valor_total ?? it.valor * it.quantidade)}
                     </span>
                   </li>
                 ))}
@@ -523,17 +620,45 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
             </div>
             <div className="border-t border-border-color pt-3 space-y-1">
               <div className="flex justify-between">
-                <span>Valor</span>
-                <strong className="tabular-nums">{formatBRL(calc.negociado)}</strong>
+                <span>Valor de tabela sem bônus ou descontos</span>
+                <strong className="tabular-nums">{formatBRL(calc.valorSemBeneficios)}</strong>
               </div>
+              {calc.bonusTotal > 0 && <div className="flex justify-between text-text-secondary"><span>Bônus incluídos</span><span>− {formatBRL(calc.bonusTotal)}</span></div>}
+              {calc.descontoValor > 0 && <div className="flex justify-between text-text-secondary"><span>Desconto comercial</span><span>− {formatBRL(calc.descontoValor)}</span></div>}
+              <div className="flex justify-between"><span>Valor final do contrato</span><strong className="tabular-nums">{formatBRL(calc.negociado)}</strong></div>
+              {calc.economiaTotal > 0 && <div className="flex justify-between font-semibold text-brand"><span>Economia do cliente</span><span>{formatBRL(calc.economiaTotal)} ({calc.economiaPercentual.toFixed(1)}%)</span></div>}
+              {calc.valorMensalBase > 0 && <div className="flex justify-between text-text-secondary"><span>Serviços mensais (12 meses)</span><span>{formatBRL(calc.valorAnual)}</span></div>}
+              {calc.bonusTotal > 0 && <div className="flex justify-between text-text-secondary"><span>Bônus incluídos (sem cobrança)</span><span>{formatBRL(calc.bonusTotal)}</span></div>}
+              {calc.itens.some((item) => item.isBonus) && (
+                <div className="rounded-lg bg-brand/5 p-3 text-text-secondary">
+                  <p className="font-semibold text-text-primary">Bônus acrescentados</p>
+                  <ul className="mt-1 list-inside list-disc">
+                    {calc.itens.filter((item) => item.isBonus).map((item) => (
+                      <li key={item.servico_id}>{item.nome} · {formatBRL(item.valor_comercial_total || 0)} sem cobrança</li>
+                    ))}
+                  </ul>
+                  <button type="button" className="mt-1 text-brand hover:underline" onClick={() => setStep(2)}>Editar bônus</button>
+                </div>
+              )}
               <div className="flex justify-between text-text-secondary">
-                <span>Pagamento</span>
+                <span>Forma e condição de pagamento</span>
                 <span>
+                  {formaPagamento === 'cartao_credito' ? 'Cartão de crédito' : formaPagamento === 'pix' ? 'Pix' : formaPagamento === 'boleto' ? 'Boleto' : formaPagamento === 'transferencia' ? 'Transferência' : 'Outro'} ·{' '}
                   {calc.entradaVal > 0 && `Entrada ${formatBRL(calc.entradaVal)} + `}
-                  {calc.nParc}x {formatBRL(calc.valorParcela)}
+                  {calc.nParc} cobranças {periodicidade} de {formatBRL(calc.valorParcela)}
                   {calc.valorUltimaParcela !== calc.valorParcela && ` (última ${formatBRL(calc.valorUltimaParcela)})`}
-                  {recorrente ? ` · ${periodicidade}` : ''}
                 </span>
+              </div>
+              <div className="rounded-lg bg-bg-secondary p-3">
+                <p className="font-semibold">Resumo de vencimentos</p>
+                <ul className="mt-1 grid gap-1 sm:grid-cols-2">
+                  {calc.cronogramaParcelas.map((parcela) => (
+                    <li key={parcela.numero} className="flex justify-between gap-2 text-text-secondary">
+                      <span>{parcela.numero}ª parcela · {new Date(`${parcela.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                      <span className="tabular-nums">{formatBRL(parcela.valor)}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
               <div className="flex justify-between text-text-secondary">
                 <span>Vigência</span>
@@ -602,4 +727,3 @@ export default function ContratoNovo({ vendedorMode = false }: { vendedorMode?: 
     </div>
   );
 }
-
