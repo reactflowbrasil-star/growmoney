@@ -1,13 +1,13 @@
 # GrowMoney — grafo do projeto
 
-> Gerado por `npm run graphify` em 2026-10-24T16:10:14.182Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
+> Gerado por `npm run graphify` em 2026-10-25T19:21:59.046Z. Relações com confiança `EXTRACTED` derivam de imports, rotas, chamadas ao Supabase e migrations.
 
 ## Escopo
 
-- 203 arquivos de código, schema, documentação e configuração.
-- 34 tabelas identificadas.
-- 10 RPCs identificadas.
-- 566 relações explícitas.
+- 201 arquivos de código, schema, documentação e configuração.
+- 49 tabelas identificadas.
+- 14 RPCs identificadas.
+- 583 relações explícitas.
 - Saída detalhada: `graph.json`; visualização: `graph.html`.
 
 ## Direção arquitetural
@@ -16,17 +16,17 @@
 
 ## Arquivos mais conectados
 
-- `src/main.tsx` — 97 relações de saída
+- `src/main.tsx` — 88 relações de saída
 - `supabase/migrations/20261021000000_init_schema.sql` — 19 relações de saída
-- `src/pages/dashboard/VendedorWorkspace.tsx` — 12 relações de saída
+- `src/services/marketing-service.ts` — 17 relações de saída
+- `supabase/migrations/20261024180000_marketing_operations.sql` — 16 relações de saída
 - `supabase/functions/smtp-mailer/index.ts` — 12 relações de saída
+- `src/pages/dashboard/VendedorWorkspace.tsx` — 11 relações de saída
 - `src/pages/dashboard/Vendedores.tsx` — 10 relações de saída
 - `src/components/layout/AppLayout.tsx` — 9 relações de saída
 - `src/components/ui/index.ts` — 9 relações de saída
-- `src/pages/dashboard/Clientes.tsx` — 9 relações de saída
-- `src/pages/dashboard/Financeiro.tsx` — 9 relações de saída
+- `src/contexts/AuthContext.tsx` — 9 relações de saída
 - `src/pages/dashboard/Visitas.tsx` — 9 relações de saída
-- `src/contexts/AuthContext.tsx` — 8 relações de saída
 - `src/pages/admin/AdminRecursos.tsx` — 8 relações de saída
 
 ## Diretrizes obrigatórias para assistentes
@@ -40,3 +40,4 @@
 7. O grafo pode ficar desatualizado ou conter relações incompletas; regenere antes de tomar decisões de alto impacto.
 
 > O mapa e as verificações reduzem risco, mas nenhuma instrução consegue garantir matematicamente que toda IA ou alteração futura nunca causará dano.
+

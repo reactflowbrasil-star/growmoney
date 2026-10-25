@@ -42,6 +42,7 @@ import Empresas from '@/pages/dashboard/Empresas';
 import Assinaturas from '@/pages/dashboard/Assinaturas';
 import AssinaturaDetalhe from '@/pages/dashboard/AssinaturaDetalhe';
 import AssinarDocumento from '@/pages/public/AssinarDocumento';
+import MarketingWorkspace from '@/pages/marketing/MarketingWorkspace';
 
 import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -139,6 +140,7 @@ function App() {
                       <Route path="/configuracoes" element={<Configuracoes />} />
                       <Route path="/perfil" element={<Perfil />} />
                       <Route path="/empresas" element={<Empresas />} />
+                      <Route path="/marketing" element={<MarketingWorkspace />} />
                     </Route>
                     </Route>
                   </Route>
@@ -179,5 +181,6 @@ if (!rootEl) {
 }
 
 createRoot(rootEl).render(<App />);
+
 
 

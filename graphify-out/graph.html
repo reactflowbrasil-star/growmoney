@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>258 nós · 566 relações</p><pre class="mermaid">flowchart LR
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Grafo GrowMoney</title><body><h1>Grafo GrowMoney</h1><p>274 nós · 583 relações</p><pre class="mermaid">flowchart LR
   "file:AGENTS.md"["AGENTS.md"]
   "file:README.md"["README.md"]
   "file:docs/ADMIN_SECURITY.md"["docs/ADMIN_SECURITY.md"]
@@ -19,7 +19,6 @@
   "file:src/components/assinatura/SignaturePad.tsx"["src/components/assinatura/SignaturePad.tsx"]
   "file:src/components/auth/GoogleButton.tsx"["src/components/auth/GoogleButton.tsx"]
   "file:src/components/auth/ProtectedRoute.tsx"["src/components/auth/ProtectedRoute.tsx"]
-  "file:src/components/brand/AgencyAfricaLogo.tsx"["src/components/brand/AgencyAfricaLogo.tsx"]
   "file:src/components/brand/BrandLogo.tsx"["src/components/brand/BrandLogo.tsx"]
   "file:src/components/brand/FirstVisitIntro.tsx"["src/components/brand/FirstVisitIntro.tsx"]
   "file:src/components/chat/LiveChat.tsx"["src/components/chat/LiveChat.tsx"]
@@ -127,6 +126,7 @@
   "file:src/pages/dashboard/VendedorWorkspace.tsx"["src/pages/dashboard/VendedorWorkspace.tsx"]
   "file:src/pages/dashboard/Vendedores.tsx"["src/pages/dashboard/Vendedores.tsx"]
   "file:src/pages/dashboard/Visitas.tsx"["src/pages/dashboard/Visitas.tsx"]
+  "file:src/pages/marketing/MarketingWorkspace.tsx"["src/pages/marketing/MarketingWorkspace.tsx"]
   "file:src/pages/public/AssinarDocumento.tsx"["src/pages/public/AssinarDocumento.tsx"]
   "file:src/pages/public/LandingPage.tsx"["src/pages/public/LandingPage.tsx"]
   "file:src/repositories/admin-audit-repository.ts"["src/repositories/admin-audit-repository.ts"]
@@ -155,11 +155,11 @@
   "file:src/services/dashboard-overview-service.ts"["src/services/dashboard-overview-service.ts"]
   "file:src/services/empresa-service.ts"["src/services/empresa-service.ts"]
   "file:src/services/file-storage.ts"["src/services/file-storage.ts"]
+  "file:src/services/marketing-service.ts"["src/services/marketing-service.ts"]
   "file:src/services/servico-catalogo-persistente.ts"["src/services/servico-catalogo-persistente.ts"]
   "file:src/services/servico-service.ts"["src/services/servico-service.ts"]
   "file:src/services/vendedor-service.ts"["src/services/vendedor-service.ts"]
   "file:src/services/vendor-chat-service.ts"["src/services/vendor-chat-service.ts"]
-  "file:src/services/vendor-expense-service.ts"["src/services/vendor-expense-service.ts"]
   "file:src/services/vendor-visit-service.ts"["src/services/vendor-visit-service.ts"]
   "file:src/test/InstallPwaButton.test.tsx"["src/test/InstallPwaButton.test.tsx"]
   "file:src/test/setup.ts"["src/test/setup.ts"]
@@ -167,6 +167,7 @@
   "file:supabase/README.md"["supabase/README.md"]
   "file:supabase/functions/admin-users/index.ts"["supabase/functions/admin-users/index.ts"]
   "file:supabase/functions/get-signature-attachment/index.ts"["supabase/functions/get-signature-attachment/index.ts"]
+  "file:supabase/functions/marketing-invite/index.ts"["supabase/functions/marketing-invite/index.ts"]
   "file:supabase/functions/smtp-mailer/index.ts"["supabase/functions/smtp-mailer/index.ts"]
   "file:supabase/functions/vendor-chat/index.ts"["supabase/functions/vendor-chat/index.ts"]
   "file:supabase/migrations/20261021000000_init_schema.sql"["supabase/migrations/20261021000000_init_schema.sql"]
@@ -194,20 +195,16 @@
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql"["supabase/migrations/20261023050243_vendedor_empresa_chat.sql"]
   "file:supabase/migrations/20261023054301_vendedor_visitas.sql"["supabase/migrations/20261023054301_vendedor_visitas.sql"]
   "file:supabase/migrations/20261023090501_admin_email_templates.sql"["supabase/migrations/20261023090501_admin_email_templates.sql"]
-  "file:supabase/migrations/20261023135923_vendor_expenses.sql"["supabase/migrations/20261023135923_vendor_expenses.sql"]
-  "file:supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql"["supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql"]
-  "file:supabase/migrations/20261023160000_company_contract_management.sql"["supabase/migrations/20261023160000_company_contract_management.sql"]
-  "file:supabase/migrations/20261024152503_audit_all_company_actions.sql"["supabase/migrations/20261024152503_audit_all_company_actions.sql"]
   "file:supabase/migrations/20261024160233_allow_pending_signature_contracts.sql"["supabase/migrations/20261024160233_allow_pending_signature_contracts.sql"]
   "file:supabase/migrations/20261024160535_add_company_id_to_signature_envelopes.sql"["supabase/migrations/20261024160535_add_company_id_to_signature_envelopes.sql"]
+  "file:supabase/migrations/20261024180000_marketing_operations.sql"["supabase/migrations/20261024180000_marketing_operations.sql"]
   "file:tailwind.config.ts"["tailwind.config.ts"]
   "file:vite.config.ts"["vite.config.ts"]
   "asset:public/.htaccess"["public/.htaccess"]
   "asset:public/api/.htaccess"["public/api/.htaccess"]
+  "asset:public/api/marketing-config.example.php"["public/api/marketing-config.example.php"]
+  "asset:public/api/marketing-files.php"["public/api/marketing-files.php"]
   "asset:public/api/smtp.php"["public/api/smtp.php"]
-  "asset:public/assets/agencia-africa-email.png"["public/assets/agencia-africa-email.png"]
-  "asset:public/assets/agencia-africa-mark.png"["public/assets/agencia-africa-mark.png"]
-  "asset:public/assets/agencia-africa.png"["public/assets/agencia-africa.png"]
   "asset:public/assets/canal360-logo.png"["public/assets/canal360-logo.png"]
   "asset:public/assets/grow-logo-black.png"["public/assets/grow-logo-black.png"]
   "asset:public/assets/logo.png"["public/assets/logo.png"]
@@ -217,6 +214,7 @@
   "table:empresa_members"["empresa_members"]
   "table:profiles"["profiles"]
   "table:empresas"["empresas"]
+  "rpc:is_marketing_member"["is_marketing_member"]
   "table:signature_envelopes"["signature_envelopes"]
   "rpc:get_signature_envelope_by_token"["get_signature_envelope_by_token"]
   "rpc:mark_signature_envelope_viewed"["mark_signature_envelope_viewed"]
@@ -237,12 +235,26 @@
   "table:comissoes"["comissoes"]
   "table:gm_files"["gm_files"]
   "rpc:admin_log_event"["admin_log_event"]
-  "table:vendedor_despesas"["vendedor_despesas"]
   "rpc:admin_restore_system_backup"["admin_restore_system_backup"]
   "rpc:admin_clear_operational_data"["admin_clear_operational_data"]
   "table:auditoria"["auditoria"]
   "table:contratos"["contratos"]
   "table:parcelas"["parcelas"]
+  "table:marketing_members"["marketing_members"]
+  "table:marketing_projects"["marketing_projects"]
+  "table:marketing_tasks"["marketing_tasks"]
+  "table:marketing_project_members"["marketing_project_members"]
+  "table:marketing_notifications"["marketing_notifications"]
+  "table:marketing_milestones"["marketing_milestones"]
+  "table:marketing_task_comments"["marketing_task_comments"]
+  "table:marketing_approvals"["marketing_approvals"]
+  "table:marketing_events"["marketing_events"]
+  "table:marketing_files"["marketing_files"]
+  "table:marketing_briefs"["marketing_briefs"]
+  "table:marketing_messages"["marketing_messages"]
+  "rpc:marketing_has_permission"["marketing_has_permission"]
+  "rpc:marketing_open_project_conversation"["marketing_open_project_conversation"]
+  "rpc:marketing_available_users"["marketing_available_users"]
   "table:platform_admins"["platform_admins"]
   "table:gm_vendor_activation_events"["gm_vendor_activation_events"]
   "table:gm_admin_audit"["gm_admin_audit"]
@@ -257,6 +269,10 @@
   "table:estornos"["estornos"]
   "table:signature_signers"["signature_signers"]
   "table:signature_events"["signature_events"]
+  "table:marketing_task_dependencies"["marketing_task_dependencies"]
+  "table:marketing_conversations"["marketing_conversations"]
+  "table:marketing_conversation_members"["marketing_conversation_members"]
+  "table:marketing_push_subscriptions"["marketing_push_subscriptions"]
   "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/admin/AdminLayout.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
@@ -269,7 +285,6 @@
   "file:src/components/auth/GoogleButton.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/auth/ProtectedRoute.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/components/auth/ProtectedRoute.tsx" -->|imports| "file:src/components/ui/index.ts"
-  "file:src/components/brand/AgencyAfricaLogo.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/brand/BrandLogo.tsx" -->|imports| "file:src/contexts/ThemeContext.tsx"
@@ -318,7 +333,6 @@
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/services/dashboard-activity-service.ts"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/config/nav.ts"
   "file:src/components/layout/AppLayout.tsx" -->|imports| "file:src/components/chat/LiveChat.tsx"
-  "file:src/components/layout/GlobalFooter.tsx" -->|imports| "file:src/components/brand/AgencyAfricaLogo.tsx"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/utils.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/components/layout/Header.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -360,6 +374,7 @@
   "file:src/contexts/AuthContext.tsx" -->|reads-or-writes| "table:profiles"
   "file:src/contexts/AuthContext.tsx" -->|reads-or-writes| "table:empresas"
   "file:src/contexts/AuthContext.tsx" -->|calls-rpc| "rpc:is_platform_admin"
+  "file:src/contexts/AuthContext.tsx" -->|calls-rpc| "rpc:is_marketing_member"
   "file:src/index.css" -->|imports| "file:src/design-system/tokens.css"
   "file:src/lib/assinatura-store.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/lib/assinatura-store.ts" -->|imports| "file:src/lib/assinatura-types.ts"
@@ -420,6 +435,7 @@
   "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/Assinaturas.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/dashboard/AssinaturaDetalhe.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/public/AssinarDocumento.tsx"
+  "file:src/main.tsx" -->|imports| "file:src/pages/marketing/MarketingWorkspace.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminLogin.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminDashboard.tsx"
   "file:src/main.tsx" -->|imports| "file:src/pages/admin/AdminEmpresas.tsx"
@@ -447,17 +463,6 @@
   "file:src/main.tsx" -->|route:assinaturas| "file:src/pages/admin/AdminRecursos.tsx"
   "file:src/main.tsx" -->|route:arquivos| "file:src/pages/admin/AdminArquivos.tsx"
   "file:src/main.tsx" -->|route:financeiro| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:contratos-empresa| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:assinaturas-empresa| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:servicos| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:vendedores| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:agenda| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:visitas| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:despesas| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:comissoes| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:parcelas| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:lancamentos| "file:src/pages/admin/AdminRecursos.tsx"
-  "file:src/main.tsx" -->|route:estornos| "file:src/pages/admin/AdminRecursos.tsx"
   "file:src/main.tsx" -->|route:sistema| "file:src/pages/admin/AdminSistema.tsx"
   "file:src/main.tsx" -->|route:auditoria| "file:src/pages/admin/AdminAuditoria.tsx"
   "file:src/main.tsx" -->|route:seguranca| "file:src/pages/admin/AdminSeguranca.tsx"
@@ -480,6 +485,7 @@
   "file:src/main.tsx" -->|route:/configuracoes| "file:src/pages/dashboard/Configuracoes.tsx"
   "file:src/main.tsx" -->|route:/perfil| "file:src/pages/dashboard/Perfil.tsx"
   "file:src/main.tsx" -->|route:/empresas| "file:src/pages/dashboard/Empresas.tsx"
+  "file:src/main.tsx" -->|route:/marketing| "file:src/pages/marketing/MarketingWorkspace.tsx"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/services/admin-file-service.ts"
   "file:src/pages/admin/AdminArquivos.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
@@ -566,7 +572,6 @@
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
   "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/lib/client-types.ts"
-  "file:src/pages/dashboard/Clientes.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Configuracoes.tsx" -->|imports| "file:src/lib/supabase/client.ts"
@@ -595,7 +600,6 @@
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/services/dashboard-overview-service.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/components/dashboard/DashboardShortcuts.tsx"
-  "file:src/pages/dashboard/Dashboard.tsx" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/DashboardExecutivo.tsx" -->|imports| "file:src/lib/export.ts"
   "file:src/pages/dashboard/Empresas.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -610,7 +614,6 @@
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
   "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/contexts/AdminAuthContext.tsx"
-  "file:src/pages/dashboard/Financeiro.tsx" -->|imports| "file:src/services/vendor-expense-service.ts"
   "file:src/pages/dashboard/Financeiro.tsx" -->|reads-or-writes| "table:gm_financial_entries"
   "file:src/pages/dashboard/Perfil.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/dashboard/Perfil.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
@@ -632,7 +635,6 @@
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/services/vendor-visit-service.ts"
-  "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|imports| "file:src/services/vendor-expense-service.ts"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/dashboard/VendedorWorkspace.tsx" -->|reads-or-writes| "table:agenda"
   "file:src/pages/dashboard/Vendedores.tsx" -->|imports| "file:src/components/ui/index.ts"
@@ -654,6 +656,9 @@
   "file:src/pages/dashboard/Visitas.tsx" -->|reads-or-writes| "table:clients"
   "file:src/pages/dashboard/Visitas.tsx" -->|reads-or-writes| "table:vendedores"
   "file:src/pages/dashboard/Visitas.tsx" -->|reads-or-writes| "table:vendedor_visitas"
+  "file:src/pages/marketing/MarketingWorkspace.tsx" -->|imports| "file:src/components/ui/index.ts"
+  "file:src/pages/marketing/MarketingWorkspace.tsx" -->|imports| "file:src/contexts/AuthContext.tsx"
+  "file:src/pages/marketing/MarketingWorkspace.tsx" -->|imports| "file:src/services/marketing-service.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/assinatura/SignaturePad.tsx"
   "file:src/pages/public/AssinarDocumento.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
@@ -662,7 +667,6 @@
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/ui/index.ts"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/lib/brand.ts"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/brand/BrandLogo.tsx"
-  "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/brand/AgencyAfricaLogo.tsx"
   "file:src/pages/public/LandingPage.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
   "file:src/repositories/admin-audit-repository.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/repositories/admin-audit-repository.ts" -->|calls-rpc| "rpc:admin_list_audit"
@@ -705,8 +709,6 @@
   "file:src/services/admin-hosting-migration-service.ts" -->|imports| "file:src/services/admin-system-backup-service.ts"
   "file:src/services/admin-resource-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:empresas"
-  "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:vendedor_despesas"
-  "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:gm_files"
   "file:src/services/admin-resource-service.ts" -->|reads-or-writes| "table:empresa_members"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:is_platform_admin"
   "file:src/services/admin-resource-service.ts" -->|calls-rpc| "rpc:admin_log_event"
@@ -745,6 +747,23 @@
   "file:src/services/empresa-service.ts" -->|reads-or-writes| "table:empresas"
   "file:src/services/file-storage.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/file-storage.ts" -->|reads-or-writes| "table:gm_files"
+  "file:src/services/marketing-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_members"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_projects"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_tasks"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_project_members"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_notifications"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_milestones"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_task_comments"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_approvals"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_events"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_files"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_briefs"
+  "file:src/services/marketing-service.ts" -->|reads-or-writes| "table:marketing_messages"
+  "file:src/services/marketing-service.ts" -->|calls-rpc| "rpc:is_marketing_member"
+  "file:src/services/marketing-service.ts" -->|calls-rpc| "rpc:marketing_has_permission"
+  "file:src/services/marketing-service.ts" -->|calls-rpc| "rpc:marketing_open_project_conversation"
+  "file:src/services/marketing-service.ts" -->|calls-rpc| "rpc:marketing_available_users"
   "file:src/services/servico-catalogo-persistente.ts" -->|imports| "file:src/lib/supabase/client.ts"
   "file:src/services/servico-catalogo-persistente.ts" -->|imports| "file:src/lib/contratos-store.ts"
   "file:src/services/servico-catalogo-persistente.ts" -->|reads-or-writes| "table:services"
@@ -755,9 +774,6 @@
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/servico-types.ts"
   "file:src/services/vendedor-service.ts" -->|imports| "file:src/lib/permissions.ts"
   "file:src/services/vendor-chat-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
-  "file:src/services/vendor-expense-service.ts" -->|imports| "file:src/lib/supabase/client.ts"
-  "file:src/services/vendor-expense-service.ts" -->|imports| "file:src/services/file-storage.ts"
-  "file:src/services/vendor-expense-service.ts" -->|reads-or-writes| "table:vendedor_despesas"
   "file:src/services/vendor-visit-service.ts" -->|imports| "file:src/repositories/vendor-visit-repository.ts"
   "file:src/services/vendor-visit-service.ts" -->|imports| "file:src/lib/vendor-visit-types.ts"
   "file:src/test/InstallPwaButton.test.tsx" -->|imports| "file:src/components/pwa/InstallPwaButton.tsx"
@@ -771,6 +787,8 @@
   "file:supabase/functions/admin-users/index.ts" -->|reads-or-writes| "table:empresas"
   "file:supabase/functions/get-signature-attachment/index.ts" -->|reads-or-writes| "table:gm_files"
   "file:supabase/functions/get-signature-attachment/index.ts" -->|calls-rpc| "rpc:get_signature_attachment_by_token"
+  "file:supabase/functions/marketing-invite/index.ts" -->|reads-or-writes| "table:marketing_members"
+  "file:supabase/functions/marketing-invite/index.ts" -->|calls-rpc| "rpc:marketing_has_permission"
   "file:supabase/functions/smtp-mailer/index.ts" -->|imports| "file:src/lib/email-templates.ts"
   "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_smtp_settings"
   "file:supabase/functions/smtp-mailer/index.ts" -->|reads-or-writes| "table:gm_email_templates"
@@ -822,4 +840,19 @@
   "file:supabase/migrations/20261023050243_vendedor_empresa_chat.sql" -->|defines-table| "table:gm_chat_messages"
   "file:supabase/migrations/20261023054301_vendedor_visitas.sql" -->|defines-table| "table:vendedor_visitas"
   "file:supabase/migrations/20261023090501_admin_email_templates.sql" -->|defines-table| "table:gm_email_templates"
-  "file:supabase/migrations/20261023135923_vendor_expenses.sql" -->|defines-table| "table:vendedor_despesas"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_members"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_projects"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_project_members"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_briefs"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_tasks"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_task_dependencies"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_task_comments"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_milestones"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_conversations"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_conversation_members"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_messages"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_files"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_approvals"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_events"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_notifications"
+  "file:supabase/migrations/20261024180000_marketing_operations.sql" -->|defines-table| "table:marketing_push_subscriptions"</pre><script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,securityLevel:'strict'});</script></body></html>

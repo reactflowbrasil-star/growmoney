@@ -117,6 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: isGlobalAdmin } = await supabase.rpc('is_platform_admin');
       if (isGlobalAdmin === true) return;
 
+      // Agency-only accounts should not receive an unrelated commercial tenant.
+      const { data: isMarketingMember, error: marketingMembershipError } = await supabase.rpc('is_marketing_member');
+      if (!marketingMembershipError && isMarketingMember === true) return;
+
       const { data: memberships } = await supabase
         .from('empresa_members')
         .select('id')
@@ -457,3 +461,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+

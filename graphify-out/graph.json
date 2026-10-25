@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "generator": "growmoney-project-graph",
-  "generated_at": "2026-10-24T16:10:14.182Z",
+  "generated_at": "2026-10-25T19:21:59.046Z",
   "scope": "src, supabase, docs, public source and static assets, project configuration",
   "nodes": [
     {
@@ -103,11 +103,6 @@
       "id": "file:src/components/auth/ProtectedRoute.tsx",
       "type": "file",
       "label": "src/components/auth/ProtectedRoute.tsx"
-    },
-    {
-      "id": "file:src/components/brand/AgencyAfricaLogo.tsx",
-      "type": "file",
-      "label": "src/components/brand/AgencyAfricaLogo.tsx"
     },
     {
       "id": "file:src/components/brand/BrandLogo.tsx",
@@ -645,6 +640,11 @@
       "label": "src/pages/dashboard/Visitas.tsx"
     },
     {
+      "id": "file:src/pages/marketing/MarketingWorkspace.tsx",
+      "type": "file",
+      "label": "src/pages/marketing/MarketingWorkspace.tsx"
+    },
+    {
       "id": "file:src/pages/public/AssinarDocumento.tsx",
       "type": "file",
       "label": "src/pages/public/AssinarDocumento.tsx"
@@ -785,6 +785,11 @@
       "label": "src/services/file-storage.ts"
     },
     {
+      "id": "file:src/services/marketing-service.ts",
+      "type": "file",
+      "label": "src/services/marketing-service.ts"
+    },
+    {
       "id": "file:src/services/servico-catalogo-persistente.ts",
       "type": "file",
       "label": "src/services/servico-catalogo-persistente.ts"
@@ -803,11 +808,6 @@
       "id": "file:src/services/vendor-chat-service.ts",
       "type": "file",
       "label": "src/services/vendor-chat-service.ts"
-    },
-    {
-      "id": "file:src/services/vendor-expense-service.ts",
-      "type": "file",
-      "label": "src/services/vendor-expense-service.ts"
     },
     {
       "id": "file:src/services/vendor-visit-service.ts",
@@ -843,6 +843,11 @@
       "id": "file:supabase/functions/get-signature-attachment/index.ts",
       "type": "file",
       "label": "supabase/functions/get-signature-attachment/index.ts"
+    },
+    {
+      "id": "file:supabase/functions/marketing-invite/index.ts",
+      "type": "file",
+      "label": "supabase/functions/marketing-invite/index.ts"
     },
     {
       "id": "file:supabase/functions/smtp-mailer/index.ts",
@@ -980,26 +985,6 @@
       "label": "supabase/migrations/20261023090501_admin_email_templates.sql"
     },
     {
-      "id": "file:supabase/migrations/20261023135923_vendor_expenses.sql",
-      "type": "migration",
-      "label": "supabase/migrations/20261023135923_vendor_expenses.sql"
-    },
-    {
-      "id": "file:supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql",
-      "type": "migration",
-      "label": "supabase/migrations/20261023144530_admin_allow_platform_admin_delete_vendor_expenses.sql"
-    },
-    {
-      "id": "file:supabase/migrations/20261023160000_company_contract_management.sql",
-      "type": "migration",
-      "label": "supabase/migrations/20261023160000_company_contract_management.sql"
-    },
-    {
-      "id": "file:supabase/migrations/20261024152503_audit_all_company_actions.sql",
-      "type": "migration",
-      "label": "supabase/migrations/20261024152503_audit_all_company_actions.sql"
-    },
-    {
       "id": "file:supabase/migrations/20261024160233_allow_pending_signature_contracts.sql",
       "type": "migration",
       "label": "supabase/migrations/20261024160233_allow_pending_signature_contracts.sql"
@@ -1008,6 +993,11 @@
       "id": "file:supabase/migrations/20261024160535_add_company_id_to_signature_envelopes.sql",
       "type": "migration",
       "label": "supabase/migrations/20261024160535_add_company_id_to_signature_envelopes.sql"
+    },
+    {
+      "id": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "type": "migration",
+      "label": "supabase/migrations/20261024180000_marketing_operations.sql"
     },
     {
       "id": "file:tailwind.config.ts",
@@ -1030,24 +1020,19 @@
       "label": "public/api/.htaccess"
     },
     {
+      "id": "asset:public/api/marketing-config.example.php",
+      "type": "static-asset",
+      "label": "public/api/marketing-config.example.php"
+    },
+    {
+      "id": "asset:public/api/marketing-files.php",
+      "type": "static-asset",
+      "label": "public/api/marketing-files.php"
+    },
+    {
       "id": "asset:public/api/smtp.php",
       "type": "static-asset",
       "label": "public/api/smtp.php"
-    },
-    {
-      "id": "asset:public/assets/agencia-africa-email.png",
-      "type": "static-asset",
-      "label": "public/assets/agencia-africa-email.png"
-    },
-    {
-      "id": "asset:public/assets/agencia-africa-mark.png",
-      "type": "static-asset",
-      "label": "public/assets/agencia-africa-mark.png"
-    },
-    {
-      "id": "asset:public/assets/agencia-africa.png",
-      "type": "static-asset",
-      "label": "public/assets/agencia-africa.png"
     },
     {
       "id": "asset:public/assets/canal360-logo.png",
@@ -1093,6 +1078,11 @@
       "id": "table:empresas",
       "type": "database-table",
       "label": "empresas"
+    },
+    {
+      "id": "rpc:is_marketing_member",
+      "type": "database-rpc",
+      "label": "is_marketing_member"
     },
     {
       "id": "table:signature_envelopes",
@@ -1195,11 +1185,6 @@
       "label": "admin_log_event"
     },
     {
-      "id": "table:vendedor_despesas",
-      "type": "database-table",
-      "label": "vendedor_despesas"
-    },
-    {
       "id": "rpc:admin_restore_system_backup",
       "type": "database-rpc",
       "label": "admin_restore_system_backup"
@@ -1223,6 +1208,81 @@
       "id": "table:parcelas",
       "type": "database-table",
       "label": "parcelas"
+    },
+    {
+      "id": "table:marketing_members",
+      "type": "database-table",
+      "label": "marketing_members"
+    },
+    {
+      "id": "table:marketing_projects",
+      "type": "database-table",
+      "label": "marketing_projects"
+    },
+    {
+      "id": "table:marketing_tasks",
+      "type": "database-table",
+      "label": "marketing_tasks"
+    },
+    {
+      "id": "table:marketing_project_members",
+      "type": "database-table",
+      "label": "marketing_project_members"
+    },
+    {
+      "id": "table:marketing_notifications",
+      "type": "database-table",
+      "label": "marketing_notifications"
+    },
+    {
+      "id": "table:marketing_milestones",
+      "type": "database-table",
+      "label": "marketing_milestones"
+    },
+    {
+      "id": "table:marketing_task_comments",
+      "type": "database-table",
+      "label": "marketing_task_comments"
+    },
+    {
+      "id": "table:marketing_approvals",
+      "type": "database-table",
+      "label": "marketing_approvals"
+    },
+    {
+      "id": "table:marketing_events",
+      "type": "database-table",
+      "label": "marketing_events"
+    },
+    {
+      "id": "table:marketing_files",
+      "type": "database-table",
+      "label": "marketing_files"
+    },
+    {
+      "id": "table:marketing_briefs",
+      "type": "database-table",
+      "label": "marketing_briefs"
+    },
+    {
+      "id": "table:marketing_messages",
+      "type": "database-table",
+      "label": "marketing_messages"
+    },
+    {
+      "id": "rpc:marketing_has_permission",
+      "type": "database-rpc",
+      "label": "marketing_has_permission"
+    },
+    {
+      "id": "rpc:marketing_open_project_conversation",
+      "type": "database-rpc",
+      "label": "marketing_open_project_conversation"
+    },
+    {
+      "id": "rpc:marketing_available_users",
+      "type": "database-rpc",
+      "label": "marketing_available_users"
     },
     {
       "id": "table:platform_admins",
@@ -1293,6 +1353,26 @@
       "id": "table:signature_events",
       "type": "database-table",
       "label": "signature_events"
+    },
+    {
+      "id": "table:marketing_task_dependencies",
+      "type": "database-table",
+      "label": "marketing_task_dependencies"
+    },
+    {
+      "id": "table:marketing_conversations",
+      "type": "database-table",
+      "label": "marketing_conversations"
+    },
+    {
+      "id": "table:marketing_conversation_members",
+      "type": "database-table",
+      "label": "marketing_conversation_members"
+    },
+    {
+      "id": "table:marketing_push_subscriptions",
+      "type": "database-table",
+      "label": "marketing_push_subscriptions"
     }
   ],
   "edges": [
@@ -1365,12 +1445,6 @@
     {
       "from": "file:src/components/auth/ProtectedRoute.tsx",
       "to": "file:src/components/ui/index.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/components/brand/AgencyAfricaLogo.tsx",
-      "to": "file:src/contexts/ThemeContext.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -1663,12 +1737,6 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:src/components/layout/GlobalFooter.tsx",
-      "to": "file:src/components/brand/AgencyAfricaLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
       "from": "file:src/components/layout/Header.tsx",
       "to": "file:src/lib/utils.ts",
       "type": "imports",
@@ -1911,6 +1979,12 @@
     {
       "from": "file:src/contexts/AuthContext.tsx",
       "to": "rpc:is_platform_admin",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/contexts/AuthContext.tsx",
+      "to": "rpc:is_marketing_member",
       "type": "calls-rpc",
       "confidence": "EXTRACTED"
     },
@@ -2276,6 +2350,12 @@
     },
     {
       "from": "file:src/main.tsx",
+      "to": "file:src/pages/marketing/MarketingWorkspace.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
       "to": "file:src/pages/admin/AdminLogin.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
@@ -2438,72 +2518,6 @@
     },
     {
       "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:contratos-empresa",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:assinaturas-empresa",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:servicos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:vendedores",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:agenda",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:visitas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:despesas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:comissoes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:parcelas",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:lancamentos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
-      "to": "file:src/pages/admin/AdminRecursos.tsx",
-      "type": "route:estornos",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/main.tsx",
       "to": "file:src/pages/admin/AdminSistema.tsx",
       "type": "route:sistema",
       "confidence": "EXTRACTED"
@@ -2632,6 +2646,12 @@
       "from": "file:src/main.tsx",
       "to": "file:src/pages/dashboard/Empresas.tsx",
       "type": "route:/empresas",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/main.tsx",
+      "to": "file:src/pages/marketing/MarketingWorkspace.tsx",
+      "type": "route:/marketing",
       "confidence": "EXTRACTED"
     },
     {
@@ -3151,12 +3171,6 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:src/pages/dashboard/Clientes.tsx",
-      "to": "file:src/lib/contratos-store.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
       "from": "file:src/pages/dashboard/Configuracoes.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3325,12 +3339,6 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:src/pages/dashboard/Dashboard.tsx",
-      "to": "file:src/lib/contratos-store.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
       "from": "file:src/pages/dashboard/DashboardExecutivo.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3411,12 +3419,6 @@
     {
       "from": "file:src/pages/dashboard/Financeiro.tsx",
       "to": "file:src/contexts/AdminAuthContext.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/Financeiro.tsx",
-      "to": "file:src/services/vendor-expense-service.ts",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3548,12 +3550,6 @@
     },
     {
       "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
-      "to": "file:src/services/vendor-expense-service.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/dashboard/VendedorWorkspace.tsx",
       "to": "table:vendedores",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
@@ -3679,6 +3675,24 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/pages/marketing/MarketingWorkspace.tsx",
+      "to": "file:src/components/ui/index.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/marketing/MarketingWorkspace.tsx",
+      "to": "file:src/contexts/AuthContext.tsx",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/pages/marketing/MarketingWorkspace.tsx",
+      "to": "file:src/services/marketing-service.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/pages/public/AssinarDocumento.tsx",
       "to": "file:src/components/ui/index.ts",
       "type": "imports",
@@ -3723,12 +3737,6 @@
     {
       "from": "file:src/pages/public/LandingPage.tsx",
       "to": "file:src/components/brand/BrandLogo.tsx",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/pages/public/LandingPage.tsx",
-      "to": "file:src/components/brand/AgencyAfricaLogo.tsx",
       "type": "imports",
       "confidence": "EXTRACTED"
     },
@@ -3986,18 +3994,6 @@
     },
     {
       "from": "file:src/services/admin-resource-service.ts",
-      "to": "table:vendedor_despesas",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/services/admin-resource-service.ts",
-      "to": "table:gm_files",
-      "type": "reads-or-writes",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/services/admin-resource-service.ts",
       "to": "table:empresa_members",
       "type": "reads-or-writes",
       "confidence": "EXTRACTED"
@@ -4225,6 +4221,108 @@
       "confidence": "EXTRACTED"
     },
     {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "file:src/lib/supabase/client.ts",
+      "type": "imports",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_projects",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_tasks",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_project_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_notifications",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_milestones",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_task_comments",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_approvals",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_events",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_files",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_briefs",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "table:marketing_messages",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "rpc:is_marketing_member",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "rpc:marketing_has_permission",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "rpc:marketing_open_project_conversation",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:src/services/marketing-service.ts",
+      "to": "rpc:marketing_available_users",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
       "from": "file:src/services/servico-catalogo-persistente.ts",
       "to": "file:src/lib/supabase/client.ts",
       "type": "imports",
@@ -4282,24 +4380,6 @@
       "from": "file:src/services/vendor-chat-service.ts",
       "to": "file:src/lib/supabase/client.ts",
       "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/services/vendor-expense-service.ts",
-      "to": "file:src/lib/supabase/client.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/services/vendor-expense-service.ts",
-      "to": "file:src/services/file-storage.ts",
-      "type": "imports",
-      "confidence": "EXTRACTED"
-    },
-    {
-      "from": "file:src/services/vendor-expense-service.ts",
-      "to": "table:vendedor_despesas",
-      "type": "reads-or-writes",
       "confidence": "EXTRACTED"
     },
     {
@@ -4377,6 +4457,18 @@
     {
       "from": "file:supabase/functions/get-signature-attachment/index.ts",
       "to": "rpc:get_signature_attachment_by_token",
+      "type": "calls-rpc",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/marketing-invite/index.ts",
+      "to": "table:marketing_members",
+      "type": "reads-or-writes",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/functions/marketing-invite/index.ts",
+      "to": "rpc:marketing_has_permission",
       "type": "calls-rpc",
       "confidence": "EXTRACTED"
     },
@@ -4687,10 +4779,101 @@
       "confidence": "EXTRACTED"
     },
     {
-      "from": "file:supabase/migrations/20261023135923_vendor_expenses.sql",
-      "to": "table:vendedor_despesas",
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_members",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_projects",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_project_members",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_briefs",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_tasks",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_task_dependencies",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_task_comments",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_milestones",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_conversations",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_conversation_members",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_messages",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_files",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_approvals",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_events",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_notifications",
+      "type": "defines-table",
+      "confidence": "EXTRACTED"
+    },
+    {
+      "from": "file:supabase/migrations/20261024180000_marketing_operations.sql",
+      "to": "table:marketing_push_subscriptions",
       "type": "defines-table",
       "confidence": "EXTRACTED"
     }
   ]
 }
+

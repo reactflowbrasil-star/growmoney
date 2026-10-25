@@ -7,6 +7,7 @@ import {
   FileText,
   LayoutDashboard,
   MapPin,
+  Megaphone,
   Settings,
   Shield,
   TrendingUp,
@@ -27,7 +28,9 @@ export const navItems = [
   { label: 'Visitas', href: '/visitas', icon: MapPin },
   { label: 'Financeiro', href: '/financeiro', icon: Wallet },
   { label: 'Relatórios', href: '/relatorios', icon: BarChart3 },
+  { label: 'Equipe de Marketing', href: '/marketing', icon: Megaphone },
   { label: 'Auditoria', href: '/auditoria', icon: Shield },
   { label: 'Configurações', href: '/configuracoes', icon: Settings },
   { label: 'Perfil', href: '/perfil', icon: Users },
 ];
+
